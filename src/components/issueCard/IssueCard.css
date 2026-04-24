@@ -1,0 +1,483 @@
+/* ═══════════════════════════════════════════════════════
+   ISSUE CARD — Light Theme (matches website)
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Card shell ── */
+.isc-card {
+  position: relative;
+  max-width: 820px;
+  width: calc(100% - 48px);
+  margin: 0 auto 20px;
+  border-radius: 20px;
+  background: #ffffff;
+  border: 1.5px solid #e8eef6;
+  overflow: hidden;
+  transition:
+    transform 0.38s cubic-bezier(0.03, 0.98, 0.52, 0.99),
+    box-shadow 0.38s ease,
+    border-color 0.32s ease,
+    background 0.32s ease;
+  animation: isc-enter 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--delay, 0s);
+  cursor: pointer;
+  will-change: transform;
+}
+
+.isc-card.isc-hovered {
+  border-color: transparent;
+}
+
+@keyframes isc-enter {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.96);
+    filter: blur(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* ── Top accent strip ── */
+.isc-neon-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 4;
+  opacity: 0.7;
+  border-radius: 0 0 2px 2px;
+  transition: opacity 0.3s ease, height 0.3s ease;
+}
+
+.isc-card.isc-hovered .isc-neon-bar {
+  opacity: 1;
+  height: 4px;
+}
+
+/* ── Cursor spotlight ── */
+.isc-spotlight {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.4s ease;
+  border-radius: inherit;
+}
+
+/* ── No grain on light theme ── */
+.isc-grain { display: none; }
+
+/* ── FX clip layer: clips shimmer + particles to card bounds ── */
+.isc-fx-clip {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Shimmer — light version ── */
+.isc-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    108deg,
+    transparent 22%,
+    rgba(255, 255, 255, 0.88) 50%,
+    transparent 78%
+  );
+  transform: translateX(-160%);
+  pointer-events: none;
+  z-index: 6;
+}
+
+.isc-card.isc-hovered .isc-shimmer {
+  transform: translateX(170%);
+  transition: transform 0.82s ease;
+}
+
+/* ── Floating particles ── */
+.isc-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.isc-pt {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.isc-pt-0 { width: 5px; height: 5px; left: 12%; bottom: 22%; }
+.isc-pt-1 { width: 3px; height: 3px; left: 30%; bottom: 16%; }
+.isc-pt-2 { width: 5px; height: 5px; left: 52%; bottom: 24%; }
+.isc-pt-3 { width: 3px; height: 3px; left: 70%; bottom: 18%; }
+.isc-pt-4 { width: 4px; height: 4px; left: 86%; bottom: 20%; }
+.isc-pt-5 { width: 3px; height: 3px; left: 40%; bottom: 30%; }
+
+.isc-pt--on { animation: isc-float 2.6s ease-in infinite; }
+.isc-pt-0.isc-pt--on { animation-delay: 0s; }
+.isc-pt-1.isc-pt--on { animation-delay: 0.55s; }
+.isc-pt-2.isc-pt--on { animation-delay: 1.05s; }
+.isc-pt-3.isc-pt--on { animation-delay: 1.55s; }
+.isc-pt-4.isc-pt--on { animation-delay: 0.8s; }
+.isc-pt-5.isc-pt--on { animation-delay: 0.3s; }
+
+@keyframes isc-float {
+  0%   { transform: translateY(0) scale(1);       opacity: 0;   }
+  10%  { opacity: 0.65;                                          }
+  80%  { opacity: 0.2;                                           }
+  100% { transform: translateY(-70px) scale(0.2); opacity: 0;   }
+}
+
+/* ── Card body ── */
+.isc-body {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: stretch;
+  padding: 20px 22px 18px 20px;
+  gap: 16px;
+  margin-top: 3px;
+}
+
+/* ── Icon column ── */
+.isc-icon-col {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  border: 1.5px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  align-self: flex-start;
+  margin-top: 2px;
+  transition:
+    transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.35s ease,
+    background 0.3s ease,
+    color 0.3s ease;
+}
+
+.isc-icon-svg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.isc-card.isc-hovered .isc-icon-col {
+  transform: scale(1.12) rotate(-8deg) translateY(-2px);
+  box-shadow: 0 8px 24px var(--neon, rgba(0,0,0,0.12));
+}
+
+/* ── Pulse dot (OPEN state) ── */
+.isc-pulse {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  animation: isc-pulse-beat 2.2s ease-in-out infinite;
+}
+
+.isc-pulse::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color);
+  animation: isc-pulse-ring 2.2s ease-out infinite;
+  opacity: 0;
+}
+
+@keyframes isc-pulse-beat {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  45%       { transform: scale(0.8); opacity: 0.7; }
+}
+
+@keyframes isc-pulse-ring {
+  0%   { transform: scale(0.35); opacity: 0.8; }
+  100% { transform: scale(2.6);  opacity: 0;   }
+}
+
+/* ── Main content ── */
+.isc-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+  text-align: left;
+}
+
+/* ── Top row ── */
+.isc-top-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ── Status badge ── */
+.isc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: "Google Sans Medium", "Segoe UI", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  transition: box-shadow 0.3s ease, transform 0.25s ease;
+}
+
+.isc-card.isc-hovered .isc-badge {
+  box-shadow: 0 4px 14px var(--neon, rgba(0,0,0,0.1));
+  transform: translateY(-1px);
+}
+
+/* Live dot inside badge */
+.isc-live-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: isc-live-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes isc-live-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(0.55); opacity: 0.5; }
+}
+
+/* ── Assigned chip ── */
+.isc-assigned-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: "Google Sans Regular", "Segoe UI", sans-serif;
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid;
+  transition: transform 0.25s ease;
+}
+
+.isc-card.isc-hovered .isc-assigned-chip {
+  transform: translateY(-1px);
+}
+
+/* ── External link icon ── */
+.isc-ext-icon {
+  margin-left: auto;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  opacity: 0;
+  transform: translate(-5px, 5px) scale(0.7);
+  transition:
+    opacity 0.25s ease,
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.isc-ext-icon--on {
+  opacity: 1;
+  transform: translate(0, 0) scale(1);
+}
+
+/* ── Title ── */
+.isc-title {
+  font-family: "Google Sans Bold", "Segoe UI Semibold", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.5;
+  letter-spacing: -0.15px;
+  color: #0A1628;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.isc-card.isc-hovered .isc-title {
+  color: var(--color);
+  transform: translateX(4px);
+}
+
+/* ── Meta row ── */
+.isc-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: "Google Sans Regular", "Segoe UI", sans-serif;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.isc-num {
+  font-family: "Google Sans Medium", "Segoe UI", sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.isc-sep {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  flex-shrink: 0;
+}
+
+.isc-date { color: #94a3b8; }
+
+/* ── Divider ── */
+.isc-divider {
+  height: 1px;
+  background: #e8eef6;
+  margin: 0;
+  border-radius: 2px;
+  transition: background 0.3s ease;
+}
+
+.isc-card.isc-hovered .isc-divider {
+  background: linear-gradient(90deg, transparent, var(--color, #e8eef6), transparent);
+  opacity: 0.5;
+}
+
+/* ── Bottom row ── */
+.isc-bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.isc-repo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: "Google Sans Medium", "Segoe UI", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  max-width: 62%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: opacity 0.22s ease;
+  position: relative;
+}
+
+.isc-repo-text {
+  position: relative;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.isc-repo-text::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 0;
+  height: 1px;
+  background: currentColor;
+  border-radius: 2px;
+  transition: width 0.32s ease;
+}
+
+.isc-card.isc-hovered .isc-repo-text::after { width: 100%; }
+
+/* ── Inline avatar tip (renders inside card, no overflow issues) ── */
+.isc-avatar-tip {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 6px);
+  color: #ffffff;
+  font-family: "Google Sans Medium", "Segoe UI", sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  padding: 4px 10px;
+  border-radius: 6px;
+  pointer-events: none;
+  animation: isc-tip-in 0.15s ease both;
+  z-index: 10;
+}
+
+.isc-avatar-tip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 14px;
+  border: 5px solid transparent;
+  border-top-color: inherit;
+}
+
+@keyframes isc-tip-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+/* ── Actor link (avatar + optional label) ── */
+.isc-actor {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  margin-left: -8px;
+}
+
+.isc-actor:first-child { margin-left: 0; }
+
+
+/* ── Avatars ── */
+.isc-avatars {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.isc-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid;
+  object-fit: cover;
+  flex-shrink: 0;
+  transition:
+    transform 0.32s cubic-bezier(0.34, 1.5, 0.64, 1),
+    box-shadow 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.isc-actor:hover .isc-avatar { z-index: 2; }
+
+.isc-card.isc-hovered .isc-avatar {
+  transform: translateY(-3px) scale(1.08);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .isc-card { width: calc(100% - 24px); }
+  .isc-body { padding: 16px 16px 14px 16px; gap: 12px; }
+  .isc-title { font-size: 13.5px; }
+  .isc-card.isc-hovered .isc-title { transform: none; }
+  .isc-ext-icon { opacity: 1; transform: translate(0, 0) scale(1); }
+}

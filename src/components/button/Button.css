@@ -1,0 +1,79 @@
+.main-button {
+  background: linear-gradient(135deg, #1565C0 0%, #1976D2 50%, #42A5F5 100%);
+  background-size: 200% auto;
+  border: none;
+  color: white;
+  font-weight: 600;
+  line-height: 1.1;
+  width: max-content;
+  padding: 14px 28px;
+  margin-right: 0px;
+  border-radius: 50px;
+  text-align: center;
+  text-decoration: none;
+  font-family: "Google Sans Regular";
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  font-size: 16px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 15px rgba(21, 101, 192, 0.35);
+  transition: background-position 0.4s ease, box-shadow 0.3s ease, transform 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.main-button-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Shine sweep on hover */
+.main-button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.25), transparent);
+  transition: left 0.5s ease;
+}
+
+.main-button:hover::after {
+  left: 160%;
+}
+
+.main-button:hover {
+  background-position: right center;
+  box-shadow: 0 8px 28px rgba(21, 101, 192, 0.5);
+  transform: translateY(-3px);
+}
+
+.main-button:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(21, 101, 192, 0.4);
+}
+
+.project-button {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+/* Media Query */
+@media (max-width: 768px) {
+  .main-button {
+    font-size: 14px;
+    padding: 12px 22px;
+    margin-right: 0px;
+  }
+}
+@media (max-width: 320px) {
+  .main-button {
+    font-size: 12px;
+  }
+}

@@ -1,0 +1,554 @@
+/* ═══════════════════════════════════════════════════════
+   GITHUB REPO CARD  — Premium redesign
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Card wrapper ── */
+.rc-wrap {
+  position: relative;
+  height: 100%;
+  min-height: var(--proj-card-h, 400px);
+  background: var(--card-bg, #ffffff);
+  border: 1.5px solid var(--card-border, #e8eef6);
+  border-radius: 20px;
+  overflow: hidden;
+  transition:
+    transform 0.38s cubic-bezier(0.03, 0.98, 0.52, 0.99),
+    box-shadow 0.38s ease,
+    border-color 0.32s ease,
+    background 0.32s ease;
+  animation: rc-entry 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--delay, 0s);
+  will-change: transform;
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+.rc-wrap.rc-hovered {
+  border-color: transparent;
+}
+
+@keyframes rc-entry {
+  from {
+    opacity: 0;
+    transform: perspective(1200px) translateY(32px) scale(0.95);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(1200px) translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* ── Top gradient strip (always visible) ── */
+.rc-top-strip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 4;
+  opacity: 0.6;
+  border-radius: 0 0 2px 2px;
+  transition:
+    opacity 0.3s ease,
+    height 0.3s ease;
+}
+
+.rc-wrap.rc-hovered .rc-top-strip {
+  opacity: 1;
+  height: 4px;
+}
+
+/* ── Watermark background letter ── */
+.rc-watermark {
+  position: absolute;
+  bottom: -8px;
+  right: 10px;
+  font-family: "Google Sans Bold", sans-serif;
+  font-size: 88px;
+  font-weight: 900;
+  line-height: 1;
+  opacity: 0.04;
+  pointer-events: none;
+  z-index: 0;
+  user-select: none;
+  letter-spacing: -6px;
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease;
+}
+
+.rc-wrap.rc-hovered .rc-watermark {
+  opacity: 0.065;
+  transform: scale(1.05) translateY(-4px);
+}
+
+/* ── Cursor spotlight ── */
+.rc-spotlight {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.4s ease;
+}
+
+/* ── Shimmer diagonal sweep ── */
+.rc-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    108deg,
+    transparent 22%,
+    var(--shimmer-color, rgba(255, 255, 255, 0.88)) 50%,
+    transparent 78%
+  );
+  transform: translateX(-160%);
+  pointer-events: none;
+  z-index: 6;
+  border-radius: inherit;
+}
+
+.rc-wrap.rc-hovered .rc-shimmer {
+  transform: translateX(170%);
+  transition: transform 0.82s ease;
+}
+
+/* ── Scan line descending ── */
+.rc-scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -60px;
+  height: 60px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 3;
+}
+
+.rc-wrap.rc-hovered .rc-scan {
+  animation: rc-scan-down 2.6s ease-in-out infinite;
+}
+
+@keyframes rc-scan-down {
+  0% {
+    top: -60px;
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    top: 110%;
+    opacity: 0;
+  }
+}
+
+/* ── Floating particles ── */
+.rc-p {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.rc-wrap.rc-hovered .rc-p {
+  animation: rc-float 2.6s ease-in infinite;
+}
+
+.rc-p1 {
+  width: 5px;
+  height: 5px;
+  left: 12%;
+  bottom: 22%;
+  animation-delay: 0s;
+}
+.rc-p2 {
+  width: 3px;
+  height: 3px;
+  left: 30%;
+  bottom: 16%;
+  animation-delay: 0.55s;
+}
+.rc-p3 {
+  width: 5px;
+  height: 5px;
+  left: 52%;
+  bottom: 24%;
+  animation-delay: 1.05s;
+}
+.rc-p4 {
+  width: 3px;
+  height: 3px;
+  left: 70%;
+  bottom: 18%;
+  animation-delay: 1.55s;
+}
+.rc-p5 {
+  width: 4px;
+  height: 4px;
+  left: 86%;
+  bottom: 20%;
+  animation-delay: 0.8s;
+}
+
+@keyframes rc-float {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.9;
+  }
+  80% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(-90px) scale(0.2);
+    opacity: 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   CONTENT
+   ═══════════════════════════════════════════════════════ */
+.rc-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  gap: 9px;
+  padding: 18px 18px 16px;
+}
+
+/* ── Header row ── */
+.rc-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.rc-header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+/* ── Number badge ── */
+.rc-badge {
+  font-family: "Google Sans Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--badge-color, rgba(15, 23, 42, 0.15));
+  letter-spacing: 1.5px;
+  user-select: none;
+  transition: color 0.3s ease;
+}
+
+.rc-wrap.rc-hovered .rc-badge {
+  color: var(--accent);
+  opacity: 0.7;
+}
+
+/* ── Language pill ── */
+.rc-lang-pill {
+  display: inline-flex;
+  align-items: center;
+  font-family: "Google Sans Medium", sans-serif;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1px solid;
+  letter-spacing: 0.2px;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.rc-wrap.rc-hovered .rc-lang-pill {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--accent, #1d4ed8) 22;
+}
+
+/* ── Icon area ── */
+.rc-icon-area {
+  position: relative;
+  width: 44px;
+  height: 44px;
+}
+
+.rc-icon-halo {
+  position: absolute;
+  inset: -12px;
+  border-radius: 22px;
+  opacity: 0;
+  filter: blur(18px);
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.rc-wrap.rc-hovered .rc-icon-halo {
+  opacity: 0.5;
+  transform: scale(1.12);
+}
+
+.rc-ring {
+  position: absolute;
+  inset: -7px;
+  border-radius: 18px;
+  border: 2px solid;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.rc-wrap.rc-hovered .rc-ring-a {
+  animation: rc-ring-pulse 2s ease-out infinite;
+}
+
+.rc-wrap.rc-hovered .rc-ring-b {
+  animation: rc-ring-pulse 2s ease-out 1s infinite;
+}
+
+@keyframes rc-ring-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+.rc-icon-box {
+  position: relative;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Google Sans Bold", sans-serif;
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 1;
+  user-select: none;
+  letter-spacing: -0.5px;
+  transition:
+    transform 0.42s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.35s ease,
+    background 0.35s ease,
+    color 0.35s ease;
+}
+
+.rc-wrap.rc-hovered .rc-icon-box {
+  transform: scale(1.12) rotate(8deg) translateY(-2px);
+}
+
+/* ── Title row ── */
+.rc-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.rc-name {
+  flex: 1;
+  font-family: "Google Sans Bold", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.3;
+  letter-spacing: -0.3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: transform 0.3s ease;
+}
+
+.rc-wrap.rc-hovered .rc-name {
+  transform: translateX(3px);
+}
+
+.rc-arrow {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  opacity: 0;
+  transform: translate(-6px, 6px) scale(0.7);
+  transition:
+    opacity 0.26s ease,
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.rc-arrow--on {
+  opacity: 1;
+  transform: translate(0, 0) scale(1);
+}
+
+/* ── Accent draw bar ── */
+.rc-accent-bar {
+  height: 2px;
+  border-radius: 2px;
+  margin-top: -2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.52s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rc-wrap.rc-hovered .rc-accent-bar {
+  transform: scaleX(1);
+}
+
+/* ── Description ── */
+.rc-desc {
+  font-family: "Google Sans Regular", sans-serif;
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 0;
+  flex-grow: 1;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  transition: transform 0.3s ease;
+}
+
+.rc-wrap.rc-hovered .rc-desc {
+  transform: translateX(2px);
+}
+
+/* ── Language chips ── */
+.rc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.rc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "Google Sans Medium", sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid;
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.3s ease;
+  transition-delay: calc(var(--ci, 0) * 0.055s);
+}
+
+.rc-wrap.rc-hovered .rc-chip {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px var(--glow, rgba(0, 0, 0, 0.08));
+}
+
+.rc-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: box-shadow 0.3s ease;
+}
+
+/* ── Footer ── */
+.rc-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 9px;
+  border-top: 1px solid var(--footer-border, rgba(0, 0, 0, 0.055));
+  margin-top: auto;
+}
+
+.rc-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: "Google Sans Regular", sans-serif;
+  font-size: 11px;
+}
+
+/* ── GitHub button ── */
+.rc-github-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "Google Sans Medium", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1.5px solid;
+  letter-spacing: 0.1px;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity 0.28s ease,
+    transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.28s ease,
+    color 0.28s ease,
+    box-shadow 0.28s ease,
+    border-color 0.28s ease;
+}
+
+.rc-github-btn--on {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .rc-content {
+    padding: 16px 16px 14px;
+    gap: 8px;
+  }
+
+  .rc-wrap.rc-hovered .rc-name {
+    transform: none;
+  }
+
+  .rc-arrow {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+
+  .rc-github-btn {
+    opacity: 1;
+    transform: none;
+  }
+
+  .rc-scan,
+  .rc-p4,
+  .rc-p5 {
+    display: none;
+  }
+
+  .rc-watermark {
+    font-size: 72px;
+  }
+}

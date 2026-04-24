@@ -1,0 +1,602 @@
+/* ═══════════════════════════════════════════════════════
+   PULL REQUEST CARD — Light Theme (matches website)
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Card shell ── */
+.prc-card {
+  position: relative;
+  max-width: 820px;
+  width: calc(100% - 48px);
+  margin: 0 auto 20px;
+  border-radius: 20px;
+  background: #ffffff;
+  border: 1.5px solid #e8eef6;
+  overflow: hidden;
+  transition:
+    transform 0.38s cubic-bezier(0.03, 0.98, 0.52, 0.99),
+    box-shadow 0.38s ease,
+    border-color 0.32s ease,
+    background 0.32s ease;
+  animation: prc-enter 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--delay, 0s);
+  cursor: pointer;
+  will-change: transform;
+}
+
+.prc-card.prc-hovered {
+  border-color: transparent;
+}
+
+@keyframes prc-enter {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.96);
+    filter: blur(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* ── Top accent strip ── */
+.prc-neon-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 4;
+  opacity: 0.7;
+  border-radius: 0 0 2px 2px;
+  transition: opacity 0.3s ease, height 0.3s ease;
+}
+
+.prc-card.prc-hovered .prc-neon-bar {
+  opacity: 1;
+  height: 4px;
+}
+
+/* ── Cursor spotlight ── */
+.prc-spotlight {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.4s ease;
+  border-radius: inherit;
+}
+
+/* ── No grain on light theme ── */
+.prc-grain { display: none; }
+
+/* ═══════════════════════════════════════════════════════
+   Dark Mode Overrides (portfolio theme)
+   ═══════════════════════════════════════════════════════ */
+
+[data-portfolio-theme="dark"] .prc-card {
+  background:
+    radial-gradient(900px 340px at var(--spot-x, 50%) var(--spot-y, 45%), rgba(96, 165, 250, 0.10), transparent 60%),
+    linear-gradient(160deg, rgba(15, 27, 45, 0.98), rgba(6, 17, 31, 0.98));
+  border-color: rgba(36, 54, 83, 0.92);
+}
+
+[data-portfolio-theme="dark"] .prc-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.06;
+  background-image:
+    radial-gradient(rgba(255,255,255,0.20) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mix-blend-mode: overlay;
+}
+
+[data-portfolio-theme="dark"] .prc-title {
+  color: #E8F1FF;
+}
+
+[data-portfolio-theme="dark"] .prc-card.prc-hovered .prc-title {
+  text-shadow: 0 0 22px rgba(96, 165, 250, 0.15);
+}
+
+[data-portfolio-theme="dark"] .prc-meta {
+  color: #A8B8D6;
+}
+
+[data-portfolio-theme="dark"] .prc-date {
+  color: rgba(168, 184, 214, 0.78);
+}
+
+[data-portfolio-theme="dark"] .prc-sep {
+  background: rgba(232, 241, 255, 0.22);
+}
+
+[data-portfolio-theme="dark"] .prc-divider {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+[data-portfolio-theme="dark"] .prc-file-chip {
+  color: rgba(232, 241, 255, 0.82);
+  background: rgba(232, 241, 255, 0.06);
+  border-color: rgba(232, 241, 255, 0.10);
+}
+
+[data-portfolio-theme="dark"] .prc-card.prc-hovered .prc-file-chip {
+  background: rgba(232, 241, 255, 0.09);
+}
+
+[data-portfolio-theme="dark"] .prc-diff-track {
+  background: rgba(232, 241, 255, 0.08);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+[data-portfolio-theme="dark"] .prc-icon-col {
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+}
+
+[data-portfolio-theme="dark"] .prc-shimmer {
+  background: linear-gradient(
+    108deg,
+    transparent 22%,
+    rgba(255, 255, 255, 0.12) 50%,
+    transparent 78%
+  );
+}
+
+/* ── FX clip layer: clips shimmer + particles to card bounds ── */
+.prc-fx-clip {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Shimmer — light version ── */
+.prc-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    108deg,
+    transparent 22%,
+    rgba(255, 255, 255, 0.88) 50%,
+    transparent 78%
+  );
+  transform: translateX(-160%);
+  pointer-events: none;
+  z-index: 6;
+}
+
+.prc-card.prc-hovered .prc-shimmer {
+  transform: translateX(170%);
+  transition: transform 0.82s ease;
+}
+
+/* ── Floating particles ── */
+.prc-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.prc-pt {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.prc-pt-0 { width: 5px; height: 5px; left: 12%; bottom: 22%; }
+.prc-pt-1 { width: 3px; height: 3px; left: 30%; bottom: 16%; }
+.prc-pt-2 { width: 5px; height: 5px; left: 52%; bottom: 24%; }
+.prc-pt-3 { width: 3px; height: 3px; left: 70%; bottom: 18%; }
+.prc-pt-4 { width: 4px; height: 4px; left: 86%; bottom: 20%; }
+.prc-pt-5 { width: 3px; height: 3px; left: 40%; bottom: 30%; }
+
+.prc-pt--on { animation: prc-float 2.6s ease-in infinite; }
+.prc-pt-0.prc-pt--on { animation-delay: 0s; }
+.prc-pt-1.prc-pt--on { animation-delay: 0.55s; }
+.prc-pt-2.prc-pt--on { animation-delay: 1.05s; }
+.prc-pt-3.prc-pt--on { animation-delay: 1.55s; }
+.prc-pt-4.prc-pt--on { animation-delay: 0.8s; }
+.prc-pt-5.prc-pt--on { animation-delay: 0.3s; }
+
+@keyframes prc-float {
+  0%   { transform: translateY(0) scale(1);       opacity: 0;   }
+  10%  { opacity: 0.65;                                          }
+  80%  { opacity: 0.2;                                           }
+  100% { transform: translateY(-70px) scale(0.2); opacity: 0;   }
+}
+
+/* ── Card body ── */
+.prc-body {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: stretch;
+  padding: 20px 22px 18px 20px;
+  gap: 16px;
+  margin-top: 3px;
+}
+
+/* ── Icon column ── */
+.prc-icon-col {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  border: 1.5px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  align-self: flex-start;
+  margin-top: 2px;
+  transition:
+    transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.35s ease,
+    background 0.3s ease,
+    color 0.3s ease;
+}
+
+.prc-icon-svg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.prc-card.prc-hovered .prc-icon-col {
+  transform: scale(1.12) rotate(8deg) translateY(-2px);
+  box-shadow: 0 8px 24px var(--neon, rgba(0,0,0,0.12));
+}
+
+/* ── Pulse dot (OPEN state) ── */
+.prc-pulse {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  animation: prc-pulse-beat 2.2s ease-in-out infinite;
+}
+
+.prc-pulse::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color);
+  animation: prc-pulse-ring 2.2s ease-out infinite;
+  opacity: 0;
+}
+
+@keyframes prc-pulse-beat {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  45%       { transform: scale(0.8); opacity: 0.7; }
+}
+
+@keyframes prc-pulse-ring {
+  0%   { transform: scale(0.35); opacity: 0.8; }
+  100% { transform: scale(2.6);  opacity: 0;   }
+}
+
+/* ── Main content ── */
+.prc-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+  text-align: left;
+}
+
+/* ── Top row ── */
+.prc-top-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ── Status badge ── */
+.prc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: "Google Sans Medium", "Segoe UI", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  transition: box-shadow 0.3s ease, transform 0.25s ease;
+}
+
+.prc-card.prc-hovered .prc-badge {
+  box-shadow: 0 4px 14px var(--neon, rgba(0,0,0,0.1));
+  transform: translateY(-1px);
+}
+
+.prc-badge-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: prc-dot-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes prc-dot-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(0.6); opacity: 0.55; }
+}
+
+/* ── File chip ── */
+.prc-file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: "Google Sans Regular", "Segoe UI", sans-serif;
+  font-size: 11px;
+  color: #64748b;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.04);
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+
+.prc-card.prc-hovered .prc-file-chip {
+  transform: translateY(-1px);
+  background: rgba(15, 23, 42, 0.07);
+}
+
+/* ── External link icon ── */
+.prc-ext-icon {
+  margin-left: auto;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  opacity: 0;
+  transform: translate(-5px, 5px) scale(0.7);
+  transition:
+    opacity 0.25s ease,
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.prc-ext-icon--on {
+  opacity: 1;
+  transform: translate(0, 0) scale(1);
+}
+
+/* ── Title ── */
+.prc-title {
+  font-family: "Google Sans Bold", "Segoe UI Semibold", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.5;
+  letter-spacing: -0.15px;
+  color: #0A1628;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.prc-card.prc-hovered .prc-title {
+  color: var(--color);
+  transform: translateX(4px);
+}
+
+/* ── Meta row ── */
+.prc-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: "Google Sans Regular", "Segoe UI", sans-serif;
+  font-size: 12px;
+  color: #64748b;
+  flex-wrap: wrap;
+}
+
+.prc-num {
+  font-family: "Google Sans Medium", "Segoe UI", sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.prc-sep {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  flex-shrink: 0;
+}
+
+.prc-date { color: #94a3b8; }
+
+.prc-repo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: "Google Sans Medium", "Segoe UI", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: opacity 0.22s ease;
+  position: relative;
+}
+
+.prc-repo-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 0;
+  height: 1px;
+  background: currentColor;
+  border-radius: 2px;
+  transition: width 0.32s ease;
+}
+
+.prc-card.prc-hovered .prc-repo-link::after { width: 100%; }
+
+/* ── Divider ── */
+.prc-divider {
+  height: 1px;
+  background: #e8eef6;
+  margin: 0;
+  border-radius: 2px;
+  transition: background 0.3s ease;
+}
+
+.prc-card.prc-hovered .prc-divider {
+  background: linear-gradient(90deg, transparent, var(--color, #e8eef6), transparent);
+  opacity: 0.5;
+}
+
+/* ── Bottom: diff + avatars ── */
+.prc-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.prc-diff {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.prc-diff-track {
+  display: flex;
+  width: 100px;
+  height: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #f1f5f9;
+  flex-shrink: 0;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s ease;
+}
+
+.prc-card.prc-hovered .prc-diff-track { transform: translateY(-1px); }
+
+.prc-diff-add {
+  background: linear-gradient(90deg, #059669, #34d399);
+  border-radius: 999px 0 0 999px;
+  transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.prc-diff-del {
+  background: linear-gradient(90deg, #f87171, #ef4444);
+  border-radius: 0 999px 999px 0;
+  transition: width 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.prc-add {
+  font-family: "Google Sans Medium", "Segoe UI", sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #059669;
+  letter-spacing: 0.2px;
+}
+
+.prc-del {
+  font-family: "Google Sans Medium", "Segoe UI", sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #dc2626;
+  letter-spacing: 0.2px;
+}
+
+/* ── Inline avatar tip (renders inside card, no overflow issues) ── */
+.prc-avatar-tip {
+  position: absolute;
+  right: 22px;
+  bottom: calc(100% + 6px);
+  color: #ffffff;
+  font-family: "Google Sans Medium", "Segoe UI", sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  padding: 4px 10px;
+  border-radius: 6px;
+  pointer-events: none;
+  animation: prc-tip-in 0.15s ease both;
+  z-index: 10;
+}
+
+.prc-avatar-tip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 14px;
+  border: 5px solid transparent;
+  border-top-color: inherit;
+}
+
+@keyframes prc-tip-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+/* ── Actor link (avatar + optional label) ── */
+.prc-actor {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  margin-left: -8px;
+}
+
+.prc-actor:first-child { margin-left: 0; }
+
+
+/* ── Avatars ── */
+.prc-avatars {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.prc-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid;
+  object-fit: cover;
+  flex-shrink: 0;
+  transition:
+    transform 0.32s cubic-bezier(0.34, 1.5, 0.64, 1),
+    box-shadow 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.prc-actor:hover .prc-avatar { z-index: 2; }
+
+.prc-card.prc-hovered .prc-avatar {
+  transform: translateY(-5px) scale(1.12);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .prc-card { width: calc(100% - 24px); }
+  .prc-body { padding: 16px 16px 14px 16px; gap: 12px; }
+  .prc-title { font-size: 13.5px; }
+  .prc-card.prc-hovered .prc-title { transform: none; }
+  .prc-ext-icon { opacity: 1; transform: translate(0, 0) scale(1); }
+  .prc-diff-track { width: 64px; }
+}

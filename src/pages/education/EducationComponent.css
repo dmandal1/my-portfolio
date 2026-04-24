@@ -1,0 +1,93 @@
+.education-main {
+  width: 100%;
+}
+
+.basic-education {
+  margin-left: clamp(12px, 2.2vw, 28px);
+  margin-right: clamp(12px, 2.2vw, 28px);
+}
+
+.heading-div {
+  display: flex;
+  align-items: center;
+}
+
+.heading-div > * {
+  flex: 1;
+}
+
+.heading-img-div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heading-text-div {
+  text-align: center;
+}
+
+.heading-img-div > * {
+  max-width: 100%;
+  height: auto;
+}
+
+.heading-text {
+  font-size: clamp(28px, 4vw, 56px);
+  font-weight: 400;
+  font-family: "Google Sans Medium";
+  line-height: 1.1;
+  text-align: center;
+  margin-top: clamp(30px, 6vw, 100px);
+}
+
+.heading-sub-text {
+  font-size: clamp(18px, 2.2vw, 30px);
+  font-family: "Google Sans Regular";
+  text-align: center;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .heading-text {
+    font-size: clamp(28px, 4vw, 44px);
+    margin-top: clamp(30px, 5vw, 70px);
+  }
+  .heading-sub-text {
+    font-size: clamp(18px, 2vw, 24px);
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .heading-text {
+    font-size: clamp(24px, 6vw, 32px);
+    margin-top: 20px;
+  }
+
+  .heading-sub-text {
+    font-size: clamp(16px, 4vw, 20px);
+  }
+
+  .heading-div {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .heading-img-div > * {
+    max-width: 60%;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .heading-text {
+    font-size: clamp(20px, 7vw, 26px);
+    margin-top: 16px;
+  }
+  .heading-sub-text {
+    font-size: 16px;
+  }
+  .heading-img-div > * {
+    max-width: 75%;
+  }
+}

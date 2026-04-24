@@ -1,0 +1,189 @@
+.dev-icons-orgs {
+  padding-left: 0;
+  list-style: none;
+  margin-bottom: 0;
+  margin-top: clamp(24px, 4vw, 50px);
+  margin-left: clamp(16px, 4vw, 50px);
+  margin-right: clamp(16px, 4vw, 50px);
+  text-align: center;
+}
+
+.organizations-inline {
+  display: inline-block;
+  margin-right: clamp(12px, 2.2vw, 26px);
+  margin-bottom: clamp(12px, 2.2vw, 26px);
+  font-family: "Google Sans Regular";
+  vertical-align: top;
+  transition: transform 0.25s ease;
+}
+
+.organizations-inline:hover {
+  transform: translateY(-5px);
+}
+
+.organizations-link {
+  display: inline-block;
+  text-decoration: none;
+  line-height: 0;
+}
+
+.organizations-img-wrap {
+  /* Consistent square tile so all brand marks feel same size */
+  width: clamp(86px, 9vw, 120px);
+  aspect-ratio: 1 / 1;
+  height: auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(10px, 1.2vw, 16px);
+  border-radius: 14px;
+  /* Light mode: clean surface (not glossy) */
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  box-shadow:
+    0 12px 30px rgba(15, 23, 42, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.85) inset;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease;
+}
+
+.organizations-img-wrap::before {
+  /* Subtle border glow ring (no harsh box) */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    140deg,
+    rgba(21, 101, 192, 0.14),
+    rgba(66, 165, 245, 0.06),
+    rgba(21, 101, 192, 0.12)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.35;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.organizations-img-wrap::after {
+  /* Top-left shine */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(140% 90% at 30% 18%, rgba(255, 255, 255, 0.45), transparent 60%);
+  opacity: 0.18;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.organizations-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  /* Keep logos crisp inside the glass tile */
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.06));
+}
+
+.organizations-inline:hover .organizations-img-wrap {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    0 24px 58px rgba(15, 23, 42, 0.14),
+    0 0 0 1px rgba(21, 101, 192, 0.10);
+  border-color: rgba(21, 101, 192, 0.18);
+  background: rgba(255, 255, 255, 0.98);
+}
+
+.organizations-inline:hover .organizations-img-wrap::before { opacity: 0.95; }
+.organizations-inline:hover .organizations-img-wrap::after { opacity: 0.24; }
+
+.organizations-inline:hover .organizations-img {
+  filter:
+    drop-shadow(0 14px 22px rgba(0, 0, 0, 0.10));
+}
+
+[data-portfolio-theme="dark"] .organizations-img-wrap {
+  background:
+    radial-gradient(120% 120% at 20% 10%, rgba(96, 165, 250, 0.18), transparent 55%),
+    linear-gradient(180deg, rgba(15, 27, 45, 0.9), rgba(8, 17, 31, 0.9));
+  border-color: rgba(232, 241, 255, 0.10);
+  box-shadow:
+    0 26px 70px rgba(0, 0, 0, 0.46),
+    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  backdrop-filter: blur(10px);
+}
+
+[data-portfolio-theme="dark"] .organizations-inline:hover .organizations-img-wrap {
+  border-color: rgba(96, 165, 250, 0.28);
+  box-shadow:
+    0 34px 86px rgba(0, 0, 0, 0.58),
+    0 0 0 1px rgba(96, 165, 250, 0.16);
+}
+
+[data-portfolio-theme="dark"] .organizations-img-wrap::before {
+  background: linear-gradient(140deg, rgba(96,165,250,0.30), rgba(34,211,238,0.10), rgba(96,165,250,0.22));
+  opacity: 0.42;
+}
+
+[data-portfolio-theme="dark"] .organizations-img-wrap::after {
+  background: radial-gradient(140% 90% at 30% 18%, rgba(232,241,255,0.26), transparent 55%);
+  opacity: 0.28;
+}
+
+[data-portfolio-theme="dark"] .organizations-inline:hover .organizations-img-wrap::before { opacity: 0.82; }
+[data-portfolio-theme="dark"] .organizations-inline:hover .organizations-img-wrap::after { opacity: 0.42; }
+
+[data-portfolio-theme="dark"] .organizations-img {
+  filter: drop-shadow(0 16px 28px rgba(0, 0, 0, 0.32));
+}
+
+@media (max-width: 768px) {
+  .dev-icons-orgs {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
+  .organizations-inline {
+    margin-right: 12px;
+    margin-bottom: 12px;
+  }
+
+  .organizations-img-wrap {
+    width: 92px;
+    padding: 12px;
+  }
+
+  .organizations-img {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .organizations-inline {
+    margin-right: 10px;
+    margin-bottom: 10px;
+  }
+
+  .organizations-img-wrap {
+    width: 78px;
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .organizations-img {
+    width: 100%;
+    height: 100%;
+  }
+}

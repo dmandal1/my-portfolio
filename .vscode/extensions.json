@@ -1,0 +1,4 @@
+{
+  "recommendations": ["vitest.explorer", "esbenp.prettier-vscode"],
+  "unwantedRecommendations": ["orta.vscode-jest", "firsttris.vscode-jest-runner"]
+}

@@ -1,0 +1,125 @@
+.qc-section {
+  max-width: 900px;
+  margin: 0 auto 70px;
+  padding: 0 5%;
+}
+
+.qc-availability {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-family: "Google Sans Medium";
+  margin-bottom: 28px;
+}
+
+.qc-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2e7d32;
+  animation: pulse-dot 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.qc-cards-row {
+  display: flex;
+  gap: 20px;
+}
+
+.qc-card {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 16px;
+  border-radius: 14px;
+  border: 1.5px solid #BBDEFB;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  position: relative;
+}
+
+.qc-card:hover {
+  box-shadow: 0 6px 24px rgba(21, 101, 192, 0.13);
+  transform: translateY(-2px);
+}
+
+.qc-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.qc-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.qc-label {
+  font-size: 11px;
+  font-family: "Google Sans Medium";
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.qc-value {
+  font-size: 14px;
+  font-family: "Google Sans Regular";
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.qc-value:hover {
+  text-decoration: underline;
+}
+
+.qc-copy-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  color: #90a4ae;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s, background 0.2s;
+}
+
+.qc-copy-btn:hover {
+  color: #1565C0;
+  background: rgba(21, 101, 192, 0.08);
+}
+
+.qc-copy-btn.copied {
+  color: #2e7d32;
+}
+
+@media (max-width: 768px) {
+  .qc-cards-row {
+    flex-direction: column;
+  }
+
+  .qc-value {
+    white-space: normal;
+    word-break: break-all;
+  }
+}

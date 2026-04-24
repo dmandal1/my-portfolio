@@ -1,0 +1,181 @@
+.main {
+  width: 90%;
+  padding: 20px 10px;
+  margin: 0px auto;
+  margin-top: 4rem;
+}
+
+.greet-main {
+  width: 90%;
+  padding: 40px 10px 60px;
+  margin: 0px auto;
+  margin-top: 1rem;
+}
+
+.gretting-main {
+  width: 90%;
+  padding: 20px 10px;
+  margin: 0px auto;
+}
+
+.greeting-main {
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 4vw, 40px);
+}
+
+.greeting-main > * {
+  flex: 1;
+  margin-bottom: 30px;
+}
+
+.button-greeting-div {
+  display: flex;
+  margin-top: 20px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Gradient animated name */
+.greeting-text {
+  margin-top: clamp(20px, 4vw, 60px);
+  font-size: clamp(32px, 5vw, 70px);
+  line-height: 1.1;
+  font-family: "Google Sans Bold";
+  background: linear-gradient(135deg, #0A1628 0%, #1565C0 50%, #42A5F5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% auto;
+  animation: gradientShift 4s ease-in-out infinite alternate;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% center; }
+  100% { background-position: 100% center; }
+}
+
+.greeting-job_profile {
+  font-size: clamp(13px, 1.2vw, 15px);
+  line-height: 1.4;
+  font-family: "Google Sans Bold Italic";
+  margin-top: 10px;
+  opacity: 0.75;
+  letter-spacing: 0.5px;
+}
+
+.greeting-text-p {
+  font-size: clamp(15px, 1.6vw, 22px);
+  line-height: 1.65;
+  margin-right: clamp(0px, 3vw, 40px);
+  margin-top: 18px;
+  font-family: "Google Sans Medium";
+  position: relative;
+  padding-left: 16px;
+}
+
+/* Accent bar left of subtitle */
+.greeting-text-p::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  background: linear-gradient(180deg, #1565C0, #42A5F5);
+  border-radius: 3px;
+}
+
+.greeting-image-div > * {
+  max-width: 100%;
+  height: auto;
+  filter: drop-shadow(0 12px 32px rgba(21, 101, 192, 0.18));
+  animation: floatImg 5s ease-in-out infinite;
+}
+
+@keyframes floatImg {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+.portfolio-resume {
+  margin-top: 8px;
+}
+
+/* Typing effect */
+.typing-text {
+  display: inline;
+}
+
+.typing-cursor {
+  display: inline-block;
+  margin-left: 1px;
+  animation: blink 0.7s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .greeting-main {
+    gap: clamp(16px, 3vw, 28px);
+  }
+  .greeting-text {
+    font-size: clamp(32px, 4.5vw, 52px);
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .button-greeting-div {
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+  }
+  .greeting-text {
+    font-size: clamp(28px, 7vw, 36px);
+    margin-top: 0px;
+    text-align: center;
+  }
+  .greeting-nickname {
+    font-size: 25px;
+    text-align: center;
+  }
+  .greeting-text-p {
+    font-size: clamp(14px, 3.5vw, 17px);
+    margin-right: 0px;
+    line-height: 1.6;
+    text-align: center;
+    padding-left: 0;
+  }
+  .greeting-text-p::before {
+    display: none;
+  }
+  .greeting-main {
+    display: block;
+  }
+  .portfolio-repo-btn-div {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  .greeting-job_profile {
+    text-align: center;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .greet-main {
+    padding: 20px 10px 40px;
+  }
+  .greeting-text {
+    font-size: clamp(24px, 8vw, 32px);
+  }
+  .button-greeting-div {
+    gap: 10px;
+  }
+}

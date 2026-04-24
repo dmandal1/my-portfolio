@@ -1,0 +1,385 @@
+/* header */
+
+.header {
+  display: block;
+  max-width: 90%;
+  padding: 14px 10px;
+  margin: 0px auto;
+}
+
+/* Sticky header with glass effect — background/border/shadow set via inline style in Header.js */
+.header-outer {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.header ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+  transition: background-color 0.3s ease;
+}
+
+.grey-color {
+  color: #868e96;
+}
+
+/* Nav links */
+.header li a {
+  display: block;
+  padding: 18px 16px;
+  text-decoration: none;
+  font-family: "Google Sans Regular";
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  position: relative;
+  border-radius: 10px;
+  background-color: transparent;
+  transition: color 0.3s ease, background-color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Only apply hover backgrounds on devices that actually support hover.
+   Prevents "sticky hover" rectangles during theme toggle on touch devices. */
+@media (hover: hover) and (pointer: fine) {
+  .header li a:hover {
+    background-color: var(--nav-hover-bg, transparent);
+  }
+}
+
+.header li a:focus-visible {
+  background-color: transparent;
+  outline: 2px solid rgba(21, 101, 192, 0.35);
+  outline-offset: 2px;
+}
+
+.header li a:active {
+  background-color: transparent;
+}
+
+[data-portfolio-theme="dark"] .header li a:focus-visible {
+  outline-color: rgba(96, 165, 250, 0.42);
+}
+
+/* Sliding underline on hover */
+.header li a::after {
+  content: "";
+  position: absolute;
+  bottom: 10px;
+  left: 16px;
+  right: 16px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #1565c0, #42a5f5);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header li a:hover::after {
+  transform: scaleX(1);
+}
+
+/* Active page — bold + permanent underline */
+.header li a.active::after,
+.header li a[aria-current="page"]::after {
+  transform: scaleX(1);
+}
+
+.theme-toggle-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 0 10px 8px;
+}
+
+.portfolio-theme-toggle {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--toggle-border, currentColor);
+  border-radius: 50%;
+  background-color: var(--toggle-bg, transparent);
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.3s ease,
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.theme-toggle-label {
+  display: none;
+}
+
+.portfolio-theme-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(21, 101, 192, 0.16);
+}
+
+/* Logo */
+.header .logo {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  float: left;
+  font-size: 1.5em;
+  text-decoration: none;
+  margin-top: 8px;
+  line-height: normal;
+  flex-shrink: 0;
+  transition:
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 0.25s ease;
+}
+
+.header .logo:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+/* < and /> in accent blue */
+.logo-bracket {
+  font-family: "Google Sans Bold";
+  font-size: 0.9em;
+  font-weight: 700;
+  color: #1565c0;
+  letter-spacing: -1px;
+  transition: color 0.25s ease;
+}
+
+.header .logo:hover .logo-bracket {
+  color: #42a5f5;
+}
+
+/* Deepak Mandal in gradient */
+.header .logo-name {
+  font-family: "Agustina Regular";
+  font-weight: bold;
+  padding: 0 8px;
+  background: linear-gradient(135deg, #0a1628 0%, #1565c0 60%, #42a5f5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% auto;
+  transition: background-position 0.4s ease;
+}
+
+.header .logo:hover .logo-name {
+  background-position: right center;
+}
+
+/* menu */
+
+.menu {
+  font-family: "Google Sans Regular";
+}
+
+.header .menu {
+  clear: both;
+  max-height: 0;
+  transition: max-height 0.25s ease-out, background-color 0.3s ease;
+  background-color: transparent;
+}
+
+/* menu icon */
+
+.header .menu-icon {
+  cursor: pointer;
+  display: inline-block;
+  float: right;
+  padding: 26px 20px;
+  position: relative;
+  user-select: none;
+}
+
+.header .menu-icon .navicon {
+  background: #333;
+  display: block;
+  height: 2px;
+  position: relative;
+  transition: background 0.2s ease-out;
+  width: 20px;
+  border-radius: 2px;
+}
+
+.header .menu-icon .navicon:before,
+.header .menu-icon .navicon:after {
+  background: #333;
+  content: "";
+  display: block;
+  height: 100%;
+  position: absolute;
+  transition: all 0.25s ease-out;
+  width: 100%;
+  border-radius: 2px;
+}
+
+.header .menu-icon .navicon:before {
+  top: 6px;
+}
+
+.header .menu-icon .navicon:after {
+  top: -6px;
+}
+
+/* menu btn */
+
+.header .menu-btn {
+  display: none;
+}
+
+.header .menu-btn:checked ~ .menu {
+  max-height: 420px;
+}
+
+.header .menu-btn:checked ~ .menu-icon .navicon {
+  background: transparent;
+}
+
+.header .menu-btn:checked ~ .menu-icon .navicon:before {
+  transform: rotate(-45deg);
+}
+
+.header .menu-btn:checked ~ .menu-icon .navicon:after {
+  transform: rotate(45deg);
+}
+
+.header .menu-btn:checked ~ .menu-icon:not(.steps) .navicon:before,
+.header .menu-btn:checked ~ .menu-icon:not(.steps) .navicon:after {
+  top: 0;
+}
+
+@media (max-width: 767px) {
+  .portfolio-theme-toggle:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .header {
+    max-width: 100%;
+    padding: 10px clamp(10px, 4vw, 16px);
+  }
+
+  .header .logo {
+    font-size: 1.28em;
+    margin-top: 2px;
+  }
+
+  .header .menu-icon {
+    padding: 20px 8px;
+  }
+
+  .header .menu {
+    margin-top: 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(74, 111, 165, 0.18);
+    background-color: var(--nav-menu-bg, transparent);
+  }
+
+  .theme-toggle-item {
+    padding: 0;
+    position: relative;
+  }
+
+  .portfolio-theme-toggle {
+    width: 100%;
+    height: auto;
+    padding: 14px 14px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    font-size: 0.95rem;
+    gap: 8px;
+    justify-content: flex-start;
+    font-family: "Google Sans Regular";
+    font-weight: 500;
+    letter-spacing: 0.2px;
+  }
+
+  .portfolio-theme-toggle::after {
+    content: "";
+    position: absolute;
+    bottom: 10px;
+    left: 14px;
+    right: 14px;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #1565c0, #42a5f5);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .portfolio-theme-toggle:hover::after {
+    transform: scaleX(1);
+  }
+
+  .theme-toggle-label {
+    display: inline;
+    font-family: "Google Sans Regular";
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+
+  .header li a {
+    padding: 14px 14px;
+  }
+
+  .header li a::after {
+    left: 14px;
+    right: 14px;
+  }
+
+  /* Hide full-width underline on active item in mobile menu — use left accent instead */
+  .header li a.active::after,
+  .header li a[aria-current="page"]::after {
+    display: none;
+  }
+
+  .header li a.active,
+  .header li a[aria-current="page"] {
+    border-left: 3px solid #1565c0;
+    padding-left: 11px;
+  }
+}
+
+/* Desktop */
+
+@media (min-width: 48em) {
+  .header li {
+    float: left;
+  }
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header .menu {
+    max-height: none;
+  }
+  .header .menu-icon {
+    display: none;
+  }
+}
+
+@media (max-width: 960px) and (min-width: 768px) {
+  .header {
+    font-size: 12px;
+  }
+  .header li a {
+    padding: 18px 10px;
+  }
+  .header li a::after {
+    left: 10px;
+    right: 10px;
+  }
+}

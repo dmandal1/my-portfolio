@@ -1,0 +1,82 @@
+.dev-icons {
+  padding-left: 0;
+  list-style: none;
+  font-size: 3rem;
+  margin-bottom: 0px;
+  margin-top: 0px;
+  text-align: center;
+}
+
+.competitive-sites-inline {
+  display: inline-block;
+  margin-right: 20px;
+  margin-bottom: 20px;
+  font-family: "Google Sans Regular";
+}
+
+.competitive-sites-inline a {
+  display: inline-flex;
+  width: 1em;
+  height: 1em;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+}
+
+.competitive-sites-inline > i {
+  color: #868e96;
+}
+
+.competitive-sites-inline > i:hover {
+  color: #645beb;
+}
+
+.competitive-sites-inline svg {
+  width: 1em;
+  height: 1em;
+  vertical-align: middle;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.competitive-sites-inline:hover svg {
+  transform: translateY(-2px);
+}
+
+[data-portfolio-theme="dark"] .competitive-sites-inline svg {
+  filter:
+    drop-shadow(0 0 8px rgba(96, 165, 250, 0.18))
+    drop-shadow(0 8px 14px rgba(0, 0, 0, 0.22));
+}
+
+[data-portfolio-theme="dark"] .competitive-sites-inline:hover svg {
+  filter:
+    drop-shadow(0 0 12px rgba(96, 165, 250, 0.36))
+    drop-shadow(0 10px 18px rgba(0, 0, 0, 0.28));
+}
+
+[data-portfolio-theme="dark"] .competitive-sites-inline a {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+[data-portfolio-theme="dark"] .competitive-sites-inline a:hover {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .competitive-sites-inline {
+    margin-right: 12px;
+    margin-bottom: 12px;
+  }
+
+  .competitive-sites-inline a {
+    width: 1em;
+    height: 1em;
+  }
+}
