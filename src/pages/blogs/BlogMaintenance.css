@@ -355,6 +355,11 @@
 
 [data-portfolio-theme="dark"] .bm-beam { opacity: 0.14; }
 
+[data-portfolio-theme="dark"] .bm-beam--one {
+  top: -18vw;
+  left: -16vw;
+}
+
 [data-portfolio-theme="dark"] .bm-kicker {
   background: rgba(232, 241, 255, 0.06);
   border-color: rgba(232, 241, 255, 0.10);
