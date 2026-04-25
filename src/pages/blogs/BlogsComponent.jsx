@@ -10,7 +10,7 @@ import ErrorBoundary from "../../components/ErrorBoundary";
 function BlogsComponent({ theme, onToggle }) {
   const { enabled, settings } = useBlogMaintenanceSettings();
   return (
-    <div>
+    <div style={{ backgroundColor: theme.body, transition: "background-color 0.25s linear" }}>
       <Header theme={theme} />
       <ErrorBoundary>
         {enabled ? (

@@ -7,6 +7,7 @@
   padding: 0 20px 0;
   background: var(--bm-bg);
   color: var(--bm-text);
+  transition: background 0.25s linear;
 }
 
 .bm-grid {
@@ -27,7 +28,7 @@
   height: 46vw;
   border-radius: 50%;
   filter: blur(34px);
-  opacity: 0.16;
+  opacity: 0;
   pointer-events: none;
 }
 
@@ -344,8 +345,16 @@
 }
 
 /* ─────────────────────────────────────────────
-   Dark mode polish (avoid "white glass" mixes)
+   Explicit page background per theme — matches body/header/footer exactly
    ───────────────────────────────────────────── */
+[data-portfolio-theme="light"] .bm-page {
+  background: #F0F8FF;
+}
+
+[data-portfolio-theme="dark"] .bm-page {
+  background: var(--pf-bg, #08111f);
+}
+
 [data-portfolio-theme="dark"] .bm-grid {
   opacity: 0.34;
   background-image:
@@ -353,7 +362,7 @@
     linear-gradient(90deg, rgba(96, 165, 250, 0.10) 1px, transparent 1px);
 }
 
-[data-portfolio-theme="dark"] .bm-beam { opacity: 0.14; }
+[data-portfolio-theme="dark"] .bm-beam { opacity: 0; }
 
 [data-portfolio-theme="dark"] .bm-beam--one {
   top: -18vw;

@@ -25,7 +25,7 @@ export default function Footer(props) {
   };
 
   return (
-    <footer className="ft-root" style={{ ...cssVars, backgroundColor: theme.body }}>
+    <footer className="ft-root" style={{ ...cssVars, backgroundColor: theme.body, transition: "background-color 0.25s linear" }}>
 
       {/* Decorative wave — accent color at low opacity on body bg */}
       <div className="ft-wave-box" aria-hidden="true">
