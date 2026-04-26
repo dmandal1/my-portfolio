@@ -17,7 +17,7 @@ import { createBlog, createCategory, createTag, getCategories, getTags, getBlogB
 import AdminSidebar from "./components/AdminSidebar";
 import AdminDatePicker from "./components/AdminDatePicker";
 import { useToast } from "./components/AdminToast";
-import { useAdminSettings } from "./components/AdminSettingsContext";
+import { useAdminSettings } from "./components/useAdminSettings";
 import { sanitizeRichHtml } from "../../shared/htmlSanitizer";
 import "./Admin.css";
 import "../blogs/BlogPost.css";

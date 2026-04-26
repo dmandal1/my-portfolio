@@ -30,15 +30,14 @@ import {
   getMetadata,
 } from "firebase/storage";
 import { auth, db, storage } from "./config";
+import { cacheAdminSettings, normalizeAdminSettings } from "../pages/admin/components/adminSettingsConfig";
 
 const BLOGS_COLLECTION = "blogs";
+const ADMIN_PANEL_SETTINGS_COLLECTION = "adminPanelSettings";
+const ADMIN_PANEL_SETTINGS_DOC = "settings";
 const SITE_SETTINGS_COLLECTION = "siteSettings";
 const ADMIN_SETTINGS_DOC = "adminPanel";
-const SETTINGS_FALLBACK_COLLECTION = "categories";
 const AUTHOR_FOLLOWERS_COLLECTION = "blogAuthorFollowers";
-// Firestore reserves document ids that start and end with "__".
-// Keep this fallback id public-safe.
-const SETTINGS_FALLBACK_DOC = "admin_panel_settings";
 
 const TECHNICAL_BLOG_DEFAULTS = {
   excerpt: "",
@@ -108,25 +107,29 @@ function normalizeBlogPayload(data, { includeDefaults = true } = {}) {
 }
 
 export async function saveAdminPanelSettings(settings) {
-  const payload = { ...settings, systemDoc: true, updatedAt: serverTimestamp() };
-  try {
-    await setDoc(
-      doc(db, SITE_SETTINGS_COLLECTION, ADMIN_SETTINGS_DOC),
-      payload,
-      { merge: true },
-    );
-  } catch (error) {
-    await setDoc(
-      doc(db, SETTINGS_FALLBACK_COLLECTION, SETTINGS_FALLBACK_DOC),
-      {
-        ...payload,
-        name: "__Admin Panel Settings__",
-        slug: SETTINGS_FALLBACK_DOC,
-        description: "Internal settings document. Hidden from category lists.",
-      },
-      { merge: true },
-    );
+  const normalized = normalizeAdminSettings(settings);
+  const payload = { ...normalized, systemDoc: true, updatedAt: serverTimestamp() };
+
+  const dedicatedResult = await Promise.allSettled([
+    setDoc(doc(db, ADMIN_PANEL_SETTINGS_COLLECTION, ADMIN_PANEL_SETTINGS_DOC), payload, { merge: true }),
+  ]).then((results) => results[0]);
+
+  const writeReport = {
+    adminPanelSettings:
+      dedicatedResult.status === "fulfilled"
+        ? "ok"
+        : dedicatedResult.reason?.code || dedicatedResult.reason?.message || "failed",
+  };
+
+  if (dedicatedResult.status === "rejected") {
+    const error = dedicatedResult.reason || new Error("Settings sync failed");
+    error.writeReport = writeReport;
+    throw error;
   }
+
+  console.info("[saveAdminPanelSettings] write report", writeReport);
+  cacheAdminSettings(normalized);
+  return writeReport;
 }
 
 export function subscribeToAdminPanelSettings(callback, onError) {
@@ -134,41 +137,45 @@ export function subscribeToAdminPanelSettings(callback, onError) {
   // crashing the public site (and to keep console clean when rules deny reads).
   // We do a one-time server fetch, and (only for signed-in admin) poll occasionally.
   const isAuthed = Boolean(auth?.currentUser);
+  const dedicatedRef = doc(db, ADMIN_PANEL_SETTINGS_COLLECTION, ADMIN_PANEL_SETTINGS_DOC);
   const primaryRef = doc(db, SITE_SETTINGS_COLLECTION, ADMIN_SETTINGS_DOC);
-  const fallbackRef = doc(db, SETTINGS_FALLBACK_COLLECTION, SETTINGS_FALLBACK_DOC);
 
   let cancelled = false;
 
   async function fetchOnce() {
     try {
-      const snap = await getDocFromServer(primaryRef);
+      const dedicated = await getDocFromServer(dedicatedRef);
       if (cancelled) return;
-      if (snap.exists()) {
-        callback(snap.data());
+      if (dedicated.exists()) {
+        const normalized = cacheAdminSettings(dedicated.data());
+        callback(normalized);
         return;
       }
     } catch (err) {
       if (cancelled) return;
-      // permission-denied is expected on the public site; fall back silently.
       if (err?.code !== "permission-denied") {
-        console.error("subscribeToAdminPanelSettings fetch error:", err);
+        console.error("subscribeToAdminPanelSettings dedicated fetch error:", err);
       }
-      callback({});
-      if (onError) onError(err);
-      return;
     }
 
     try {
-      const fb = await getDocFromServer(fallbackRef);
-      if (!cancelled) callback(fb.exists() ? fb.data() : {});
+      const snap = await getDocFromServer(primaryRef);
+      if (cancelled) return;
+      if (snap.exists()) {
+        const normalized = cacheAdminSettings(snap.data());
+        callback(normalized);
+        return;
+      }
     } catch (err) {
       if (cancelled) return;
+      // Fall through to legacy path for backward compatibility with older deployments.
       if (err?.code !== "permission-denied") {
-        console.error("subscribeToAdminPanelSettings fallback fetch error:", err);
+        console.error("subscribeToAdminPanelSettings fetch error:", err);
       }
-      callback({});
-      if (onError) onError(err);
     }
+
+    callback({});
+    if (onError) onError(new Error("Admin panel settings document not found."));
   }
 
   fetchOnce();

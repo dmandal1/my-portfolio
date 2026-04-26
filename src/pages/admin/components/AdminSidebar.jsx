@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
-import { getAllBlogsAdmin } from "../../../firebase/blogService";
-import { useAdminSettings } from "./AdminSettingsContext";
+import { getAllBlogsAdmin, saveAdminPanelSettings } from "../../../firebase/blogService";
+import { useAdminSettings } from "./useAdminSettings";
 import {
+  ADMIN_SETTINGS_UPDATED_EVENT,
   applyAdminTheme,
+  cacheAdminSettings,
   loadAdminSettings,
   normalizeAdminSettings,
-  SETTINGS_KEY,
 } from "./adminSettingsConfig";
 
 /* Top-bar primary nav tabs */
@@ -108,8 +109,8 @@ export default function AdminSidebar() {
       setCollapsed(localStorage.getItem("adminSidebarCollapsed") === "true");
       setDarkMode(isDarkThemeSetting(loadAdminSettings().theme));
     }
-    window.addEventListener("adminSettingsUpdated", onSettingsUpdated);
-    return () => window.removeEventListener("adminSettingsUpdated", onSettingsUpdated);
+    window.addEventListener(ADMIN_SETTINGS_UPDATED_EVENT, onSettingsUpdated);
+    return () => window.removeEventListener(ADMIN_SETTINGS_UPDATED_EVENT, onSettingsUpdated);
   }, []);
   const userMenuRef = useRef(null);
   const notifRef    = useRef(null);
@@ -274,14 +275,17 @@ export default function AdminSidebar() {
     navigate("/admin/login");
   }
 
-  function handleDarkModeToggle() {
+  async function handleDarkModeToggle() {
     const next = !darkMode;
     const theme = next ? "dark" : "light";
-    const normalized = normalizeAdminSettings({ ...loadAdminSettings(), theme });
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(normalized));
+    const normalized = cacheAdminSettings({ ...loadAdminSettings(), theme });
     applyAdminTheme(theme);
     setDarkMode(next);
-    window.dispatchEvent(new Event("adminSettingsUpdated"));
+    try {
+      await saveAdminPanelSettings(normalized);
+    } catch (error) {
+      console.error("[AdminSidebar] Theme sync failed:", error);
+    }
   }
 
   const query = searchQuery.trim().toLowerCase();

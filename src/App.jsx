@@ -4,8 +4,13 @@ import Main from "./containers/Main";
 import { ThemeProvider } from "styled-components";
 import { chosenTheme, darkTheme } from "./theme";
 import { GlobalStyles } from "./global";
+import { subscribeToAdminPanelSettings } from "./firebase/blogService";
+import {
+  ADMIN_SETTINGS_UPDATED_EVENT,
+  SETTINGS_KEY as ADMIN_SETTINGS_KEY,
+} from "./pages/admin/components/adminSettingsConfig";
 
-const ADMIN_SETTINGS_KEY = "adminPanelSettings";
+const PORTFOLIO_THEME_PREVIEW_EVENT = "portfolioThemePreviewUpdated";
 
 function resolvePublicTheme() {
   if (typeof window === "undefined") return chosenTheme;
@@ -31,6 +36,11 @@ function resolvePublicTheme() {
   return savedTheme === "dark" ? darkTheme : chosenTheme;
 }
 
+function resolveThemeByName(themeName) {
+  if (themeName === "dark") return darkTheme;
+  return chosenTheme;
+}
+
 function App() {
   const [theme, setTheme] = useState(resolvePublicTheme);
 
@@ -46,16 +56,25 @@ function App() {
 
   useEffect(() => {
     const refreshTheme = () => setTheme(resolvePublicTheme());
+    const onPreviewTheme = (event) => {
+      const nextTheme = event?.detail?.theme;
+      if (!nextTheme) return;
+      setTheme(resolveThemeByName(nextTheme));
+    };
     const media = window.matchMedia?.("(prefers-color-scheme: dark)");
 
     window.addEventListener("storage", refreshTheme);
-    window.addEventListener("adminSettingsUpdated", refreshTheme);
+    window.addEventListener(ADMIN_SETTINGS_UPDATED_EVENT, refreshTheme);
+    window.addEventListener(PORTFOLIO_THEME_PREVIEW_EVENT, onPreviewTheme);
     media?.addEventListener?.("change", refreshTheme);
+    const unsubscribe = subscribeToAdminPanelSettings(refreshTheme);
 
     return () => {
       window.removeEventListener("storage", refreshTheme);
-      window.removeEventListener("adminSettingsUpdated", refreshTheme);
+      window.removeEventListener(ADMIN_SETTINGS_UPDATED_EVENT, refreshTheme);
+      window.removeEventListener(PORTFOLIO_THEME_PREVIEW_EVENT, onPreviewTheme);
       media?.removeEventListener?.("change", refreshTheme);
+      unsubscribe?.();
     };
   }, []);
 

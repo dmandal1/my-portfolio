@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { subscribeToBlogs, deleteBlog, publishScheduledPosts, updateBlog, getCategories, getTags, subscribeToRecentComments, deleteComment, addComment } from "../../firebase/blogService";
 import { greeting } from "../../portfolio";
 import AdminSidebar from "./components/AdminSidebar";
-import { useAdminSettings } from "./components/AdminSettingsContext";
+import { useAdminSettings } from "./components/useAdminSettings";
 import { useToast } from "./components/AdminToast";
 import "./Admin.css";
 

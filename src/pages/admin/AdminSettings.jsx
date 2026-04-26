@@ -6,12 +6,13 @@ import { saveAdminPanelSettings } from "../../firebase/blogService";
 import AdminSidebar from "./components/AdminSidebar";
 import {
   applyAdminTheme,
+  cacheAdminSettings,
   DEFAULT_SETTINGS,
   loadAdminSettings,
   normalizeAdminSettings,
-  SETTINGS_KEY,
   TIMEZONES,
 } from "./components/adminSettingsConfig";
+import { useAdminSettings } from "./components/useAdminSettings";
 import { useToast } from "./components/AdminToast";
 import "./Admin.css";
 
@@ -84,6 +85,7 @@ function formatDateTimePreview(value) {
 export default function AdminSettings() {
   const toast                       = useToast();
   const { currentUser }             = useAuth();
+  const sharedSettings              = useAdminSettings();
   const [settings, setSettings]     = useState(loadAdminSettings);
   const [activeTab, setActiveTab]   = useState("general");
   const [dirty, setDirty]           = useState(false);
@@ -96,6 +98,12 @@ export default function AdminSettings() {
 
   /* Apply theme on load */
   useEffect(() => { applyAdminTheme(settings.theme); }, []); // eslint-disable-line
+
+  useEffect(() => {
+    if (!dirty) {
+      setSettings(normalizeAdminSettings(sharedSettings));
+    }
+  }, [dirty, sharedSettings]);
 
   const tabs = useMemo(() => [
     { id: "general",       label: "General",       icon: "fas fa-user-circle" },
@@ -122,34 +130,54 @@ export default function AdminSettings() {
   }
 
   function updateTheme(value) {
-    const normalized = normalizeAdminSettings({ ...settings, theme: value });
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(normalized));
+    const normalized = cacheAdminSettings({ ...settings, theme: value });
     setSettings(normalized);
     setDirty(true);
     applyAdminTheme(value);
-    window.dispatchEvent(new Event("adminSettingsUpdated"));
   }
 
   async function persistSettings(normalized) {
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(normalized));
+    cacheAdminSettings(normalized);
     applyAdminTheme(normalized.theme);
-    localStorage.setItem("adminSidebarCollapsed", String(normalized.sidebarCollapsed));
-    window.dispatchEvent(new Event("adminSettingsUpdated"));
-    try {
-      await saveAdminPanelSettings(normalized);
-    } catch (error) {
-      console.error("[AdminSettings] Firestore settings save failed:", error);
-    }
+    await saveAdminPanelSettings(normalized);
   }
 
   async function saveSettings() {
     const normalized = normalizeAdminSettings(settings);
     setSettings(normalized);
-    await persistSettings(normalized);
-    const time = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
-    setSavedAt(time);
-    setDirty(false);
-    toast?.addToast("Settings saved.", "success");
+    try {
+      const writeReport = await saveAdminPanelSettings(normalized);
+      cacheAdminSettings(normalized);
+      applyAdminTheme(normalized.theme);
+      const time = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+      setSavedAt(time);
+      setDirty(false);
+      const cloudTargets = Object.entries(writeReport || {})
+        .filter(([, status]) => status === "ok")
+        .map(([name]) => name)
+        .join(", ");
+      toast?.addToast(
+        cloudTargets
+          ? `Settings saved to Firestore: ${cloudTargets}.`
+          : "Settings saved and synced to cloud.",
+        "success",
+      );
+    } catch (error) {
+      console.error("[AdminSettings] Firestore save failed:", error);
+      const time = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+      setSavedAt(time);
+      setDirty(false);
+      const details =
+        error?.writeReport
+          ? Object.entries(error.writeReport)
+              .map(([name, status]) => `${name}: ${status}`)
+              .join(" | ")
+          : error?.code || error?.message || "unknown error";
+      toast?.addToast(
+        `Settings saved locally but Firestore sync failed. ${details}`,
+        "error",
+      );
+    }
   }
 
   async function resetSettings() {

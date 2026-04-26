@@ -3408,7 +3408,8 @@
   position: absolute;
   top: calc(100% + 5px);
   left: 0;
-  min-width: 160px;
+  min-width: 190px;
+  max-height: min(340px, 55vh);
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
@@ -3416,9 +3417,19 @@
     0 4px 6px -1px rgba(0, 0, 0, 0.06),
     0 12px 28px -4px rgba(0, 0, 0, 0.12);
   z-index: 500;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   animation: adrop-in 0.14s ease;
   padding: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+.awp-block-menu::-webkit-scrollbar {
+  width: 6px;
+}
+.awp-block-menu::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
 }
 .awp-block-option {
   display: flex;
@@ -5708,12 +5719,14 @@
 [data-admin-theme="dark"] .awp-editor-area .awp-checklist-wrap,
 [data-admin-theme="dark"] .awp-editor-area .awp-changelog,
 [data-admin-theme="dark"] .awp-editor-area .awp-glossary {
-  background: #111827;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(17, 24, 39, 0.98) 100%);
   border-color: #334155;
+  box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.06);
 }
 [data-admin-theme="dark"] .awp-editor-area .awp-proscons > div {
-  background: #111827;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(17, 24, 39, 0.98) 100%);
   border-color: #334155;
+  box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.06);
 }
 [data-admin-theme="dark"] .awp-editor-area .awp-summary strong,
 [data-admin-theme="dark"] .awp-editor-area .awp-prerequisites strong,
@@ -5730,6 +5743,39 @@
 [data-admin-theme="dark"] .awp-editor-area .awp-testing strong,
 [data-admin-theme="dark"] .awp-editor-area .awp-adr strong {
   color: #e2e8f0;
+}
+[data-admin-theme="dark"] .awp-editor-area .awp-api-block p,
+[data-admin-theme="dark"] .awp-editor-area .awp-summary p,
+[data-admin-theme="dark"] .awp-editor-area .awp-prerequisites p,
+[data-admin-theme="dark"] .awp-editor-area .awp-environment p,
+[data-admin-theme="dark"] .awp-editor-area .awp-filetree p,
+[data-admin-theme="dark"] .awp-editor-area .awp-steps p,
+[data-admin-theme="dark"] .awp-editor-area .awp-references p,
+[data-admin-theme="dark"] .awp-editor-area .awp-details p,
+[data-admin-theme="dark"] .awp-editor-area .awp-faq-block p,
+[data-admin-theme="dark"] .awp-editor-area .awp-troubleshooting p,
+[data-admin-theme="dark"] .awp-editor-area .awp-proscons p,
+[data-admin-theme="dark"] .awp-editor-area .awp-changelog p,
+[data-admin-theme="dark"] .awp-editor-area .awp-glossary p,
+[data-admin-theme="dark"] .awp-editor-area .awp-benchmark p,
+[data-admin-theme="dark"] .awp-editor-area .awp-testing p,
+[data-admin-theme="dark"] .awp-editor-area .awp-adr p,
+[data-admin-theme="dark"] .awp-editor-area .awp-api-block li,
+[data-admin-theme="dark"] .awp-editor-area .awp-summary li,
+[data-admin-theme="dark"] .awp-editor-area .awp-prerequisites li,
+[data-admin-theme="dark"] .awp-editor-area .awp-environment li,
+[data-admin-theme="dark"] .awp-editor-area .awp-steps li,
+[data-admin-theme="dark"] .awp-editor-area .awp-references li,
+[data-admin-theme="dark"] .awp-editor-area .awp-faq-block li,
+[data-admin-theme="dark"] .awp-editor-area .awp-troubleshooting li,
+[data-admin-theme="dark"] .awp-editor-area .awp-proscons li,
+[data-admin-theme="dark"] .awp-editor-area .awp-changelog li,
+[data-admin-theme="dark"] .awp-editor-area .awp-glossary li,
+[data-admin-theme="dark"] .awp-editor-area .awp-benchmark li,
+[data-admin-theme="dark"] .awp-editor-area .awp-testing li,
+[data-admin-theme="dark"] .awp-editor-area .awp-adr li,
+[data-admin-theme="dark"] .awp-editor-area .awp-table td {
+  color: #cbd5e1;
 }
 [data-admin-theme="dark"] .awp-editor-area .awp-summary,
 [data-admin-theme="dark"] .awp-editor-area .awp-prerequisites,
@@ -5748,6 +5794,23 @@
 [data-admin-theme="dark"] .awp-editor-area .awp-adr {
   color: #cbd5e1;
 }
+[data-admin-theme="dark"] .awp-editor-area .awp-api-head code,
+[data-admin-theme="dark"] .awp-editor-area .awp-environment code,
+[data-admin-theme="dark"] .awp-editor-area .awp-testing code,
+[data-admin-theme="dark"] .awp-editor-area .awp-references code,
+[data-admin-theme="dark"] .awp-editor-area .awp-adr code {
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  color: #bfdbfe;
+}
+[data-admin-theme="dark"] .awp-editor-area .awp-references a,
+[data-admin-theme="dark"] .awp-editor-area .awp-toc-item a {
+  color: #7dd3fc;
+}
+[data-admin-theme="dark"] .awp-editor-area .awp-references a:hover,
+[data-admin-theme="dark"] .awp-editor-area .awp-toc-item a:hover {
+  color: #bae6fd;
+}
 [data-admin-theme="dark"] .awp-editor-area .awp-summary ul,
 [data-admin-theme="dark"] .awp-editor-area .awp-prerequisites ul,
 [data-admin-theme="dark"] .awp-editor-area .awp-steps ol,
@@ -5758,8 +5821,16 @@
 [data-admin-theme="dark"] .awp-editor-area .awp-faq-block details {
   border-top-color: #334155;
 }
+[data-admin-theme="dark"] .awp-editor-area .awp-faq-block details[open],
+[data-admin-theme="dark"] .awp-editor-area .awp-details[open] {
+  background: rgba(148, 163, 184, 0.04);
+}
 [data-admin-theme="dark"] .awp-editor-area .awp-faq-block summary {
   color: #e2e8f0;
+}
+[data-admin-theme="dark"] .awp-editor-area .awp-faq-block summary:hover,
+[data-admin-theme="dark"] .awp-editor-area .awp-details summary:hover {
+  color: #bfdbfe;
 }
 [data-admin-theme="dark"] .awp-editor-area .awp-checklist {
   color: #cbd5e1;
@@ -5816,8 +5887,14 @@
   background: #1e293b;
   color: #e2e8f0;
 }
+[data-admin-theme="dark"] .awp-editor-area .awp-table td {
+  background: transparent;
+}
 [data-admin-theme="dark"] .awp-editor-area .awp-table tr:nth-child(even) td {
-  background: rgba(255,255,255,0.02);
+  background: rgba(148, 163, 184, 0.04);
+}
+[data-admin-theme="dark"] .awp-editor-area .awp-table tr:hover td {
+  background: rgba(59, 130, 246, 0.06);
 }
 [data-admin-theme="dark"] .awp-editor-area .awp-hr {
   border-top-color: #334155;
@@ -10113,19 +10190,23 @@
   color: #93c5fd;
 }
 [data-admin-theme="dark"] .awp-block-menu {
-  background: #1e293b;
-  border-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
+  background: #111827;
+  border-color: #334155;
+  box-shadow: 0 16px 36px rgba(2, 6, 23, 0.55);
+  scrollbar-color: #334155 transparent;
+}
+[data-admin-theme="dark"] .awp-block-menu::-webkit-scrollbar-thumb {
+  background: #334155;
 }
 [data-admin-theme="dark"] .awp-block-option {
   color: #cbd5e1;
 }
 [data-admin-theme="dark"] .awp-block-option:hover {
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(148, 163, 184, 0.12);
   color: #93c5fd;
 }
 [data-admin-theme="dark"] .awp-block-option--active {
-  background: rgba(29, 78, 216, 0.2);
+  background: rgba(37, 99, 235, 0.22);
   color: #93c5fd;
 }
 [data-admin-theme="dark"] .awp-editor-area {

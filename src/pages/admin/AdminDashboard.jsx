@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { subscribeToBlogs, deleteBlog, updateBlog, getCategories, getTags, approvePendingPost, rejectPendingPost, publishScheduledPosts } from "../../firebase/blogService";
 import AdminSidebar from "./components/AdminSidebar";
 import { useToast } from "./components/AdminToast";
-import { useAdminSettings } from "./components/AdminSettingsContext";
+import { useAdminSettings } from "./components/useAdminSettings";
 import "./Admin.css";
 
 function slugify(str) {

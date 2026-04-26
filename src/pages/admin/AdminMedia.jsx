@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import AdminSidebar from "./components/AdminSidebar";
-import { useAdminSettings } from "./components/AdminSettingsContext";
+import { useAdminSettings } from "./components/useAdminSettings";
 import { useToast } from "./components/AdminToast";
 import {
   deleteMediaItem,

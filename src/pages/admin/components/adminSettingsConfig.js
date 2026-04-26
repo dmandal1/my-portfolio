@@ -1,4 +1,5 @@
 export const SETTINGS_KEY = "adminPanelSettings";
+export const ADMIN_SETTINGS_UPDATED_EVENT = "adminSettingsUpdated";
 
 export const DEFAULT_SETTINGS = {
   /* General */
@@ -123,6 +124,29 @@ export function loadAdminSettings() {
   } catch {
     return { ...DEFAULT_SETTINGS };
   }
+}
+
+export function emitAdminSettingsUpdated(settings) {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(
+    new CustomEvent(ADMIN_SETTINGS_UPDATED_EVENT, {
+      detail: normalizeAdminSettings(settings),
+    }),
+  );
+}
+
+export function cacheAdminSettings(settings, { notify = true } = {}) {
+  if (typeof window === "undefined") {
+    return normalizeAdminSettings(settings);
+  }
+
+  const normalized = normalizeAdminSettings(settings);
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(normalized));
+  localStorage.setItem("adminSidebarCollapsed", String(normalized.sidebarCollapsed));
+  localStorage.setItem("adminDarkMode", String(normalized.theme === "dark"));
+
+  if (notify) emitAdminSettingsUpdated(normalized);
+  return normalized;
 }
 
 export function applyAdminTheme(theme) {

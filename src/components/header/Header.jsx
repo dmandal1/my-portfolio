@@ -6,29 +6,21 @@ import { greeting, settings } from "../../portfolio.js";
 import SeoHeader from "../seoHeader/SeoHeader";
 import { darkTheme } from "../../theme";
 
-const ADMIN_SETTINGS_KEY = "adminPanelSettings";
+const PORTFOLIO_THEME_PREVIEW_EVENT = "portfolioThemePreviewUpdated";
 
 class Header extends Component {
   handleThemeToggle = () => {
     const nextTheme = this.props.theme === darkTheme ? "light" : "dark";
 
-    try {
-      const saved = JSON.parse(localStorage.getItem(ADMIN_SETTINGS_KEY) || "{}");
-      localStorage.setItem(
-        ADMIN_SETTINGS_KEY,
-        JSON.stringify({ ...saved, theme: nextTheme }),
-      );
-      localStorage.setItem("adminDarkMode", String(nextTheme === "dark"));
-    } catch {
-      localStorage.setItem(ADMIN_SETTINGS_KEY, JSON.stringify({ theme: nextTheme }));
-      localStorage.setItem("adminDarkMode", String(nextTheme === "dark"));
-    }
-
     // Set data-portfolio-theme synchronously so CSS transitions start immediately,
     // before React re-renders and updates inline styles on the next frame.
     document.documentElement.setAttribute("data-portfolio-theme", nextTheme);
     document.documentElement.setAttribute("data-admin-theme", nextTheme);
-    window.dispatchEvent(new Event("adminSettingsUpdated"));
+    window.dispatchEvent(
+      new CustomEvent(PORTFOLIO_THEME_PREVIEW_EVENT, {
+        detail: { theme: nextTheme },
+      }),
+    );
   };
 
   render() {

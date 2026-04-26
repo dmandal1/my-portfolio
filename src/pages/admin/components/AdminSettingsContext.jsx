@@ -1,10 +1,15 @@
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { DEFAULT_SETTINGS, loadAdminSettings } from "./adminSettingsConfig";
-
-const AdminSettingsContext = createContext(DEFAULT_SETTINGS);
+import { useCallback, useEffect, useState } from "react";
+import { subscribeToAdminPanelSettings } from "../../../firebase/blogService";
+import {
+  ADMIN_SETTINGS_UPDATED_EVENT,
+  loadAdminSettings,
+  normalizeAdminSettings,
+} from "./adminSettingsConfig";
+import { AdminSettingsContext, AdminSettingsMetaContext } from "./AdminSettingsShared";
 
 export function AdminSettingsProvider({ children }) {
   const [settings, setSettings] = useState(loadAdminSettings);
+  const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(() => {
     setSettings(loadAdminSettings());
@@ -12,20 +17,31 @@ export function AdminSettingsProvider({ children }) {
 
   useEffect(() => {
     window.addEventListener("storage", refresh);
-    window.addEventListener("adminSettingsUpdated", refresh);
+    window.addEventListener(ADMIN_SETTINGS_UPDATED_EVENT, refresh);
+
+    const unsubscribe = subscribeToAdminPanelSettings(
+      (incoming) => {
+        setSettings(normalizeAdminSettings(incoming));
+        setLoading(false);
+      },
+      () => {
+        refresh();
+        setLoading(false);
+      },
+    );
+
     return () => {
       window.removeEventListener("storage", refresh);
-      window.removeEventListener("adminSettingsUpdated", refresh);
+      window.removeEventListener(ADMIN_SETTINGS_UPDATED_EVENT, refresh);
+      unsubscribe?.();
     };
   }, [refresh]);
 
   return (
-    <AdminSettingsContext.Provider value={settings}>
-      {children}
-    </AdminSettingsContext.Provider>
+    <AdminSettingsMetaContext.Provider value={{ loading }}>
+      <AdminSettingsContext.Provider value={settings}>
+        {children}
+      </AdminSettingsContext.Provider>
+    </AdminSettingsMetaContext.Provider>
   );
-}
-
-export function useAdminSettings() {
-  return useContext(AdminSettingsContext);
 }
