@@ -38,7 +38,19 @@ const ADMIN_PANEL_SETTINGS_DOC = "settings";
 const SITE_SETTINGS_COLLECTION = "siteSettings";
 const ADMIN_SETTINGS_DOC = "adminPanel";
 const SETTINGS_FALLBACK_DOC = "adminPanel";
-const AUTHOR_FOLLOWERS_COLLECTION = "blogAuthorFollowers";
+const AUTHOR_FOLLOWERS_COLLECTION = "authorFollowers";
+
+function getDeviceInfo() {
+  const ua = (typeof navigator !== "undefined" && navigator.userAgent) || "";
+  const lang = (typeof navigator !== "undefined" && navigator.language) || "";
+  const screen_w = (typeof window !== "undefined" && window.screen?.width) || null;
+  const screen_h = (typeof window !== "undefined" && window.screen?.height) || null;
+  const platform = (typeof navigator !== "undefined" && (navigator.userAgentData?.platform || navigator.platform)) || "";
+  const isMobile = typeof navigator !== "undefined" && /Mobi|Android|iPhone|iPad/i.test(ua);
+  const timezone = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return ""; } })();
+  const deviceId = (typeof window !== "undefined" && window.localStorage?.getItem("bp_device_fp")) || "";
+  return { deviceId, ua, lang, screen_w, screen_h, platform, isMobile, timezone };
+}
 
 const TECHNICAL_BLOG_DEFAULTS = {
   excerpt: "",
@@ -237,7 +249,8 @@ export async function getBlogBySlug(slug) {
   try {
     const q = query(
       collection(db, BLOGS_COLLECTION),
-      where("slug", "==", normalizedSlug)
+      where("slug", "==", normalizedSlug),
+      where("published", "==", true)
     );
     const snapshot = await getDocsFromServer(q);
     if (!snapshot.empty) {
@@ -452,7 +465,6 @@ export function uploadCoverImage(file, onProgress, oldUrl) {
 
 /* ── Comments ─────────────────────────────────────────── */
 const COMMENTS_SUBCOLLECTION = "comments";
-const RATINGS_SUBCOLLECTION = "ratings";
 
 export async function getComments(blogId) {
   const q = query(
@@ -528,6 +540,7 @@ export async function setAuthorFollowStatus(clientId, shouldFollow) {
     await setDoc(followerRef, {
       following: true,
       updatedAt: serverTimestamp(),
+      device: getDeviceInfo(),
     }, { merge: true });
   } else {
     await deleteDoc(followerRef);
@@ -536,58 +549,40 @@ export async function setAuthorFollowStatus(clientId, shouldFollow) {
   return getAuthorFollowerStats(clientId);
 }
 
-export async function getBlogRatingsSummary(blogIds = [], clientId = "") {
-  const normalizedBlogIds = Array.from(new Set((blogIds || []).filter(Boolean)));
-  const summaries = new Map();
+const AUTHOR_RATINGS_COLLECTION = "authorRatings";
 
-  await Promise.all(
-    normalizedBlogIds.map(async (blogId) => {
-      try {
-        const snapshot = await getDocsFromServer(
-          collection(db, BLOGS_COLLECTION, blogId, RATINGS_SUBCOLLECTION)
-        );
-
-        const ratings = snapshot.docs
-          .map((entry) => Number(entry.data()?.value))
-          .filter((value) => value >= 1 && value <= 5);
-
-        const userRating = clientId
-          ? Number(snapshot.docs.find((entry) => entry.id === clientId)?.data()?.value) || 0
-          : 0;
-
-        summaries.set(blogId, {
-          count: ratings.length,
-          total: ratings.reduce((sum, value) => sum + value, 0),
-          userRating,
-        });
-      } catch (err) {
-        if (err?.code !== "permission-denied") {
-          console.error("[blogService] getBlogRatingsSummary failed:", err);
-        }
-        summaries.set(blogId, { count: 0, total: 0, userRating: 0 });
-      }
-    })
-  );
-
-  return summaries;
+export async function getAuthorRatingSummary(clientId = "") {
+  try {
+    const snapshot = await getDocsFromServer(collection(db, AUTHOR_RATINGS_COLLECTION));
+    const ratings = snapshot.docs
+      .map((d) => Number(d.data()?.value))
+      .filter((v) => v >= 1 && v <= 5);
+    const userRating = clientId
+      ? Number(snapshot.docs.find((d) => d.id === clientId)?.data()?.value) || 0
+      : 0;
+    return {
+      count: ratings.length,
+      total: ratings.reduce((sum, v) => sum + v, 0),
+      userRating,
+    };
+  } catch (err) {
+    if (err?.code !== "permission-denied") {
+      console.error("[blogService] getAuthorRatingSummary failed:", err);
+    }
+    return { count: 0, total: 0, userRating: 0 };
+  }
 }
 
-export async function setBlogRating(blogId, clientId, value) {
-  if (!blogId || !clientId) throw new Error("Missing blog rating identifiers.");
+export async function setAuthorRating(clientId, value) {
+  if (!clientId) throw new Error("Missing client id.");
   const rating = Math.max(1, Math.min(5, Number(value) || 0));
   if (!rating) throw new Error("Invalid rating value.");
-
   await setDoc(
-    doc(db, BLOGS_COLLECTION, blogId, RATINGS_SUBCOLLECTION, clientId),
-    {
-      value: rating,
-      updatedAt: serverTimestamp(),
-    },
+    doc(db, AUTHOR_RATINGS_COLLECTION, clientId),
+    { value: rating, updatedAt: serverTimestamp(), device: getDeviceInfo() },
     { merge: true }
   );
-
-  const summary = await getBlogRatingsSummary([blogId], clientId);
-  return summary.get(blogId) || { count: 0, total: 0, userRating: 0 };
+  return getAuthorRatingSummary(clientId);
 }
 
 export async function deleteComment(blogId, commentId) {

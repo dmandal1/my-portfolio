@@ -27,8 +27,8 @@ import {
   getCategoryList,
   getAuthorFollowerStats,
   setAuthorFollowStatus,
-  getBlogRatingsSummary,
-  setBlogRating,
+  getAuthorRatingSummary,
+  setAuthorRating,
 
 } from "../../firebase/blogService";
 import { greeting, socialMediaLinks } from "../../portfolio";
@@ -438,17 +438,50 @@ function avatarColor(name) {
   return palette[Math.abs(hash) % palette.length];
 }
 
-function getBlogViewerClientId() {
+function hashString(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = (h * 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, "0");
+}
+
+function getDeviceFingerprint() {
   if (typeof window === "undefined") return "";
-  const storageKey = "bp_public_client_id";
+  const storageKey = "bp_device_fp";
   try {
-    const existing = window.localStorage.getItem(storageKey);
-    if (existing) return existing;
-    const next =
-      window.crypto?.randomUUID?.()
-      || `bp_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-    window.localStorage.setItem(storageKey, next);
-    return next;
+    const cached = window.localStorage.getItem(storageKey);
+    if (cached && /^[0-9a-f]{32}$/.test(cached)) return cached;
+  } catch { /* ignore */ }
+
+  try {
+    const nav = window.navigator || {};
+    const scr = window.screen || {};
+    const signals = [
+      nav.userAgent || "",
+      nav.language || "",
+      (nav.languages || []).join(","),
+      String(scr.width || 0),
+      String(scr.height || 0),
+      String(scr.colorDepth || 0),
+      String(window.devicePixelRatio || 1),
+      String(nav.hardwareConcurrency || 0),
+      String(nav.deviceMemory || 0),
+      nav.platform || nav.userAgentData?.platform || "",
+      (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return ""; } })(),
+      (() => { try { return Intl.DateTimeFormat().resolvedOptions().locale; } catch { return ""; } })(),
+    ];
+    const raw = signals.join("|");
+    // four independent hashes over rotated strings for 128-bit spread
+    const fp = [
+      hashString(raw),
+      hashString(raw.split("").reverse().join("")),
+      hashString(raw.slice(Math.floor(raw.length / 3))),
+      hashString(raw.slice(0, Math.ceil((raw.length * 2) / 3))),
+    ].join("");
+    try { window.localStorage.setItem("bp_device_fp", fp); } catch { /* ignore */ }
+    return fp;
   } catch {
     return "";
   }
@@ -489,11 +522,11 @@ function StarRating({ rating = 0, count = 0, interactive = false, userRating = 0
             <button
               key={s}
               type="button"
-              className={`bp-star-btn${s <= (userRating || roundedRating) ? " is-active" : ""}`}
+              className={`bp-star-btn${s <= userRating ? " is-active" : ""}`}
               onClick={() => onRate?.(s)}
               aria-label={`Rate ${s} star${s === 1 ? "" : "s"}`}
             >
-              <i className={s <= (userRating || roundedRating) ? "fas fa-star" : "far fa-star"} />
+              <i className={s <= userRating ? "fas fa-star" : "far fa-star"} />
             </button>
           ) : (
             <i
@@ -666,8 +699,8 @@ function CommentItem({ comment, replies = [] }) {
 }
 
 /* ── Sidebar: About Author ────────────── */
-function AboutAuthor({ totalPosts = 0, currentPostId = "", allPostIds = [], authorName = "", authorRole = "", authorBio = "" }) {
-  const clientId = useMemo(() => getBlogViewerClientId(), []);
+function AboutAuthor({ totalPosts = 0, authorName = "", authorRole = "", authorBio = "" }) {
+  const clientId = useMemo(() => getDeviceFingerprint(), []);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followAnim, setFollowAnim] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
@@ -679,52 +712,22 @@ function AboutAuthor({ totalPosts = 0, currentPostId = "", allPostIds = [], auth
     let cancelled = false;
 
     async function loadAuthorCardData() {
-      const [followStats, ratingsSummary] = await Promise.all([
+      const [followStats, ratingSummary] = await Promise.all([
         getAuthorFollowerStats(clientId),
-        getBlogRatingsSummary(allPostIds, clientId),
+        getAuthorRatingSummary(clientId),
       ]);
       if (cancelled) return;
 
       setFollowersCount(Number(followStats?.totalFollowers) || 0);
       setIsFollowing(Boolean(followStats?.isFollowing));
-
-      const totals = Array.from(ratingsSummary.values()).reduce((acc, entry) => ({
-        count: acc.count + (Number(entry?.count) || 0),
-        total: acc.total + (Number(entry?.total) || 0),
-      }), { count: 0, total: 0 });
-
-      const currentPostSummary = ratingsSummary.get(currentPostId) || { userRating: 0 };
-      setUserRating(Number(currentPostSummary.userRating) || 0);
-      setRatingCount(totals.count);
-      setRatingAverage(totals.count > 0 ? totals.total / totals.count : 0);
+      setUserRating(Number(ratingSummary?.userRating) || 0);
+      setRatingCount(Number(ratingSummary?.count) || 0);
+      setRatingAverage(ratingSummary?.count > 0 ? ratingSummary.total / ratingSummary.count : 0);
     }
 
     loadAuthorCardData();
-    return () => {
-      cancelled = true;
-    };
-  }, [allPostIds, clientId, currentPostId]);
-
-  useEffect(() => {
-    const githubLink = greeting.githubProfile || socialMediaLinks.find((item) => /github\.com/i.test(item.link || ""))?.link || "";
-    const match = githubLink.match(/github\.com\/([^/?#]+)/i);
-    const githubUser = match?.[1];
-    if (!githubUser) {
-      return undefined;
-    }
-
-    const controller = new AbortController();
-    fetch(`https://api.github.com/users/${githubUser}`, { signal: controller.signal })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        const githubFollowers = Number(data?.followers);
-        if (Number.isFinite(githubFollowers)) {
-          setFollowersCount((current) => Math.max(current, githubFollowers));
-        }
-      })
-      .catch(() => {});
-    return () => controller.abort();
-  }, []);
+    return () => { cancelled = true; };
+  }, [clientId]);
 
   async function handleFollow() {
     const next = !isFollowing;
@@ -743,26 +746,13 @@ function AboutAuthor({ totalPosts = 0, currentPostId = "", allPostIds = [], auth
   }
 
   async function handleRate(nextRating) {
-    if (!currentPostId) return;
     try {
-      const summary = await setBlogRating(currentPostId, clientId, nextRating);
+      const summary = await setAuthorRating(clientId, nextRating);
       setUserRating(nextRating);
-      const otherPosts = await getBlogRatingsSummary(
-        allPostIds.filter((postId) => postId !== currentPostId),
-        clientId
-      );
-      const totals = Array.from(otherPosts.values()).reduce((acc, entry) => ({
-        count: acc.count + (Number(entry?.count) || 0),
-        total: acc.total + (Number(entry?.total) || 0),
-      }), {
-        count: Number(summary?.count) || 0,
-        total: Number(summary?.total) || 0,
-      });
-
-      setRatingCount(totals.count);
-      setRatingAverage(totals.count > 0 ? totals.total / totals.count : 0);
-    } catch {
-      // ignore failed rating writes to keep the page usable
+      setRatingCount(Number(summary?.count) || 0);
+      setRatingAverage(summary?.count > 0 ? summary.total / summary.count : 0);
+    } catch (err) {
+      console.error("[rating] setAuthorRating failed:", err?.code, err?.message);
     }
   }
 
@@ -1310,7 +1300,7 @@ export default function BlogPost({ theme }) {
   const postRecentLimit = Number(maintenance.settings.publicBlogPostRecentCount) || 6;
   const categoryLimit = Number(maintenance.settings.publicBlogCategoryCount) || 6;
   const recentPosts = allBlogs.filter((b) => b.id !== blog.id).slice(0, postRecentLimit);
-  const authorName  = blog.author || greeting.logo_name || "Deepak Mandal";
+const authorName  = blog.author || greeting.logo_name || "Deepak Mandal";
   const metaTitle = blog.metaTitle || blog.title;
   const metaDescription = blog.metaDescription || blog.excerpt || blog.subtitle || `${blog.title} by ${authorName}`;
 	  const leadText = blog.subtitle || blog.excerpt || blog.metaDescription || "";
@@ -1675,8 +1665,6 @@ export default function BlogPost({ theme }) {
           <aside className="bp-sidebar">
             <AboutAuthor
               totalPosts={allBlogs.length}
-              currentPostId={blog.id}
-              allPostIds={allBlogs.map((post) => post.id).filter(Boolean)}
               authorName={authorName}
               authorRole={greeting.job_profile}
               authorBio={greeting.subTitle}

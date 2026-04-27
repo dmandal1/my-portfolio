@@ -1188,8 +1188,6 @@ a.bp-tech-pill:hover {
   margin-top: 10px;
   margin-left: 6px;
   padding-left: 18px;
-  border-left: 2px solid linear-gradient(180deg, var(--bp-accent) 0%, var(--bp-border) 100%);
-  border-left: 2px solid var(--bp-accent);
   display: flex;
   flex-direction: column;
   gap: 0;
