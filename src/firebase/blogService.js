@@ -37,6 +37,7 @@ const ADMIN_PANEL_SETTINGS_COLLECTION = "adminPanelSettings";
 const ADMIN_PANEL_SETTINGS_DOC = "settings";
 const SITE_SETTINGS_COLLECTION = "siteSettings";
 const ADMIN_SETTINGS_DOC = "adminPanel";
+const SETTINGS_FALLBACK_DOC = "adminPanel";
 const AUTHOR_FOLLOWERS_COLLECTION = "blogAuthorFollowers";
 
 const TECHNICAL_BLOG_DEFAULTS = {

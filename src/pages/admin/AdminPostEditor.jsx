@@ -2330,6 +2330,48 @@ export default function AdminPostEditor() {
         checklistInput.setAttribute("contenteditable", "false");
         return;
       }
+      // ── Table toolbar actions ──
+      const tableAction = targetEl.closest("[data-table-action]");
+      if (tableAction && editorEl.contains(tableAction)) {
+        event.preventDefault();
+        event.stopPropagation();
+        const action = tableAction.getAttribute("data-table-action");
+        const wrapper = tableAction.closest(".awp-table-block");
+        const tbl = wrapper?.querySelector("table.awp-table");
+        if (!wrapper || !tbl) return;
+        pushEditorHistorySnapshot();
+
+        if (action === "remove-table") {
+          const after = wrapper.nextElementSibling;
+          wrapper.remove();
+          if (after?.tagName === "P" && !after.textContent.trim()) after.remove();
+
+        } else if (action === "add-row") {
+          const tbody = tbl.querySelector("tbody") || tbl;
+          const colCount = tbl.querySelector("tr")?.children.length || 1;
+          const tr = document.createElement("tr");
+          for (let c = 0; c < colCount; c++) {
+            const td = document.createElement("td");
+            td.innerHTML = "<br>";
+            tr.appendChild(td);
+          }
+          tbody.appendChild(tr);
+          const firstCell = tr.querySelector("td");
+          if (firstCell) setCaretPosition(firstCell, 0);
+
+        } else if (action === "add-col") {
+          const rows = tbl.querySelectorAll("tr");
+          rows.forEach((tr, idx) => {
+            const cell = document.createElement(idx === 0 ? "th" : "td");
+            cell.innerHTML = "<br>";
+            tr.appendChild(cell);
+          });
+        }
+
+        setForm((p) => ({ ...p, content: editorEl.innerHTML || "" }));
+        return;
+      }
+
       const technicalRemoveBtn = targetEl.closest(".awp-technical-remove");
       if (technicalRemoveBtn && editorEl.contains(technicalRemoveBtn)) {
         event.preventDefault();
@@ -3114,7 +3156,7 @@ export default function AdminPostEditor() {
     restoreSelection();
     pushEditorHistorySnapshot();
 
-    // Build table DOM
+    // Build table
     const table = document.createElement("table");
     table.className = "awp-table";
     const tbody = document.createElement("tbody");
@@ -3128,15 +3170,38 @@ export default function AdminPostEditor() {
       tbody.appendChild(tr);
     }
     table.appendChild(tbody);
+
+    // Toolbar with Add Row / Add Col / Remove
+    const toolbar = document.createElement("div");
+    toolbar.className = "awp-table-toolbar";
+    toolbar.setAttribute("contenteditable", "false");
+    toolbar.innerHTML = `
+      <button type="button" class="awp-table-tb-btn awp-table-add-row" data-table-action="add-row">
+        <i class="fas fa-plus"></i> Add Row
+      </button>
+      <button type="button" class="awp-table-tb-btn awp-table-add-col" data-table-action="add-col">
+        <i class="fas fa-plus"></i> Add Column
+      </button>
+      <button type="button" class="awp-table-tb-btn awp-table-remove-btn" data-table-action="remove-table" aria-label="Remove table">
+        <i class="fas fa-trash-alt"></i> Remove
+      </button>
+    `;
+
+    // Wrapper
+    const wrapper = document.createElement("div");
+    wrapper.className = "awp-table-block";
+    wrapper.appendChild(toolbar);
+    wrapper.appendChild(table);
+
     const after = document.createElement("p");
     after.innerHTML = "<br>";
 
     const block = getCaretBlock(editorEl);
     if (block) {
-      block.after(table);
-      table.after(after);
+      block.after(wrapper);
+      wrapper.after(after);
     } else {
-      editorEl.appendChild(table);
+      editorEl.appendChild(wrapper);
       editorEl.appendChild(after);
     }
 

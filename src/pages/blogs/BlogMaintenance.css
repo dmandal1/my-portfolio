@@ -448,13 +448,17 @@
   50% { transform: translate3d(-7vw, -4vw, 0); }
 }
 
+/* ── Tablet: single column, visual height = orbit diameter ── */
 @media (max-width: 920px) {
   .bm-shell {
     grid-template-columns: 1fr;
+    gap: 0;
+    padding: 20px clamp(16px, 4vw, 32px) 24px;
   }
 
   .bm-visual {
-    min-height: 150px;
+    min-height: 0;
+    height: 250px; /* matches outer orbit 230px + breathing room */
   }
 
   .bm-content {
@@ -478,31 +482,128 @@
   }
 }
 
+/* ── Large mobile ── */
 @media (max-width: 640px) {
   .bm-page {
     min-height: calc(100vh - 84px);
-    padding: 0 12px;
+    padding: 12px 16px 0;
+    align-items: flex-start;
   }
 
   .bm-shell {
-    padding: 0 10px 16px;
+    padding: 0 0 20px;
+    gap: 0;
+  }
+
+  /* Shrink orbit so visual fits without overflow */
+  .bm-visual {
+    height: 180px;
+  }
+
+  .bm-orbit--outer { width: 160px; }
+  .bm-orbit--inner { width: 108px; }
+
+  .bm-core {
+    width: 68px;
+    font-size: 1.6rem;
+  }
+
+  .bm-node--one  { top: 20px; right: 38px; width: 13px; height: 13px; }
+  .bm-node--two  { bottom: 22px; left: 34px; width: 13px; height: 13px; }
+  .bm-node--three { right: 24px; bottom: 52px; width: 9px; height: 9px; }
+
+  .bm-content h1 {
+    font-size: clamp(1.55rem, 6.5vw, 2.2rem);
+    margin: 8px 0 8px;
+  }
+
+  .bm-kicker {
+    font-size: 0.7rem;
+    padding: 7px 12px;
+  }
+
+  .bm-message {
+    font-size: 0.95rem;
   }
 
   .bm-countdown {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .bm-count-card {
+    min-height: 74px;
+    gap: 4px;
+  }
+
+  .bm-count-card strong {
+    font-size: clamp(1.5rem, 7vw, 1.9rem);
+  }
+
+  .bm-count-card span {
+    font-size: 0.68rem;
+  }
+
+  .bm-eta {
+    margin-top: 12px;
+    padding: 10px 14px;
   }
 
   .bm-status {
     grid-template-columns: 1fr;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .bm-status-line {
+    max-width: 180px;
+    margin-inline: auto;
+  }
+
+  .bm-status-text {
+    text-align: center;
   }
 
   .bm-actions {
     align-items: stretch;
     flex-direction: column;
+    margin-top: 16px;
+    gap: 10px;
   }
 
   .bm-btn {
     width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ── Small mobile ── */
+@media (max-width: 400px) {
+  .bm-visual {
+    height: 150px;
+  }
+
+  .bm-orbit--outer { width: 130px; }
+  .bm-orbit--inner { width: 88px; }
+
+  .bm-core {
+    width: 56px;
+    font-size: 1.3rem;
+  }
+
+  .bm-node--one  { top: 14px; right: 28px; width: 11px; height: 11px; }
+  .bm-node--two  { bottom: 16px; left: 24px; width: 11px; height: 11px; }
+  .bm-node--three { right: 18px; bottom: 42px; width: 8px; height: 8px; }
+
+  .bm-kicker {
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    padding: 6px 10px;
+  }
+
+  .bm-content h1 {
+    font-size: clamp(1.35rem, 7vw, 1.8rem);
   }
 }
 

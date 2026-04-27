@@ -11,11 +11,7 @@ const PORTFOLIO_THEME_PREVIEW_EVENT = "portfolioThemePreviewUpdated";
 class Header extends Component {
   handleThemeToggle = () => {
     const nextTheme = this.props.theme === darkTheme ? "light" : "dark";
-
-    // Set data-portfolio-theme synchronously so CSS transitions start immediately,
-    // before React re-renders and updates inline styles on the next frame.
     document.documentElement.setAttribute("data-portfolio-theme", nextTheme);
-    document.documentElement.setAttribute("data-admin-theme", nextTheme);
     window.dispatchEvent(
       new CustomEvent(PORTFOLIO_THEME_PREVIEW_EVENT, {
         detail: { theme: nextTheme },

@@ -66,20 +66,302 @@ function Field({ label, hint, children, span }) {
   );
 }
 
-function formatDateTimePreview(value) {
-  if (!value) return "";
-  const date = new Date(value);
-  if (!Number.isFinite(date.getTime())) return "";
+// ── Custom DateTimePicker ────────────────────────────────────────────────────
+const DTP_MONTHS   = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DTP_DOW      = ["Su","Mo","Tu","We","Th","Fr","Sa"];
+const DTP_HOURS    = [1,2,3,4,5,6,7,8,9,10,11,12];
+const DTP_MINUTES  = Array.from({ length: 60 }, (_, i) => i);
+const DTP_PRESETS  = [
+  { label: "+1h", mins: 60 },
+  { label: "+6h", mins: 360 },
+  { label: "+1d", mins: 1440 },
+  { label: "+3d", mins: 4320 },
+  { label: "+1w", mins: 10080 },
+];
+const DTP_ITEM_H = 44;
 
-  return date.toLocaleString("en-IN", {
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+function dtpToISO(d) {
+  const p = n => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
 }
+
+function dtpCalGrid(year, month) {
+  const first = new Date(year, month, 1).getDay();
+  const days  = new Date(year, month + 1, 0).getDate();
+  const cells = Array(first).fill(null);
+  for (let d = 1; d <= days; d++) cells.push(d);
+  return cells;
+}
+
+function DateTimePicker({ value, onChange }) {
+  const pad = n => String(n).padStart(2, "0");
+  const [open, setOpen] = useState(false);
+  const [view, setView] = useState("date");
+
+  const today = useMemo(() => new Date(), []);
+  const sel   = useMemo(() => value ? new Date(value) : null, [value]);
+
+  const [nav, setNav] = useState(() => {
+    const d = sel || today;
+    return { year: d.getFullYear(), month: d.getMonth() };
+  });
+
+  const rootRef = useRef(null);
+  const hrRef   = useRef(null);
+  const minRef  = useRef(null);
+
+  const selH    = sel ? (sel.getHours() % 12 || 12) : 12;
+  const selMin  = sel ? sel.getMinutes() : 0;
+  const selAmpm = sel ? (sel.getHours() >= 12 ? "PM" : "AM") : "AM";
+
+  const relative = useMemo(() => {
+    if (!sel) return null;
+    const diff = sel.getTime() - Date.now();
+    const abs  = Math.abs(diff);
+    const tm   = Math.floor(abs / 60000);
+    const hrs  = Math.floor(tm / 60);
+    const days = Math.floor(hrs / 24);
+    const text = days > 0 ? `${days}d ${hrs % 24}h` : hrs > 0 ? `${hrs}h ${tm % 60}m` : `${tm}m`;
+    return { text, past: diff < 0 };
+  }, [sel]);
+
+  const displayText = sel
+    ? sel.toLocaleString("en-IN", { weekday:"short", day:"2-digit", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" })
+    : null;
+
+  // Sync calendar nav to selected date whenever picker opens
+  useEffect(() => {
+    if (!open) return;
+    if (sel) setNav({ year: sel.getFullYear(), month: sel.getMonth() });
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return;
+    const h = e => { if (rootRef.current && !rootRef.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, [open]);
+
+  // Scroll time columns to selected position when time view opens
+  useEffect(() => {
+    if (!open || view !== "time") return;
+    const scrollTo = (ref, idx) => {
+      if (ref.current) ref.current.scrollTop = idx * DTP_ITEM_H;
+    };
+    // small delay so the DOM is rendered
+    const t = setTimeout(() => {
+      scrollTo(hrRef,  DTP_HOURS.indexOf(selH));
+      scrollTo(minRef, selMin);
+    }, 30);
+    return () => clearTimeout(t);
+  }, [open, view]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const pickDay = (day) => {
+    const ds = `${nav.year}-${pad(nav.month+1)}-${pad(day)}`;
+    const ts = sel ? `${pad(sel.getHours())}:${pad(sel.getMinutes())}` : "12:00";
+    onChange(`${ds}T${ts}`);
+    setView("time");
+  };
+
+  const pickHour = (h) => {
+    if (!sel) return;
+    const d = new Date(sel);
+    d.setHours(selAmpm === "AM" ? (h === 12 ? 0 : h) : (h === 12 ? 12 : h + 12));
+    onChange(dtpToISO(d));
+    setTimeout(() => { if (hrRef.current) hrRef.current.scrollTop = DTP_HOURS.indexOf(h) * DTP_ITEM_H; }, 0);
+  };
+
+  const pickMin = (m) => {
+    if (!sel) return;
+    const d = new Date(sel);
+    d.setMinutes(m);
+    onChange(dtpToISO(d));
+    setTimeout(() => { if (minRef.current) minRef.current.scrollTop = m * DTP_ITEM_H; }, 0);
+  };
+
+  const pickAmpm = (ap) => {
+    if (!sel) return;
+    const d = new Date(sel), h = d.getHours();
+    if (ap === "AM" && h >= 12) d.setHours(h - 12);
+    if (ap === "PM" && h < 12)  d.setHours(h + 12);
+    onChange(dtpToISO(d));
+  };
+
+  const applyPreset = (mins) => {
+    const d = new Date(Date.now() + mins * 60000);
+    onChange(dtpToISO(d));
+    setNav({ year: d.getFullYear(), month: d.getMonth() });
+  };
+
+  const cells = useMemo(() => dtpCalGrid(nav.year, nav.month), [nav.year, nav.month]);
+
+  return (
+    <div className="adtp-root" ref={rootRef}>
+
+      {/* ── Trigger ── */}
+      <div
+        role="button"
+        tabIndex={0}
+        className={`adtp-trigger${open ? " adtp-trigger--open" : ""}`}
+        onMouseDown={e => { e.preventDefault(); setOpen(o => !o); if (!open) setView("date"); }}
+        onKeyDown={e => e.key === "Enter" && setOpen(o => !o)}
+      >
+        <span className="adtp-trigger-icon"><i className="far fa-calendar-alt" /></span>
+        <span className={`adtp-trigger-text${!displayText ? " adtp-trigger-text--empty" : ""}`}>
+          {displayText || "Pick date & time…"}
+        </span>
+        <span className="adtp-trigger-chevron">
+          <i className={`fas fa-chevron-${open ? "up" : "down"}`} />
+        </span>
+      </div>
+
+      {/* ── Relative preview (always visible when date is set) ── */}
+      {relative && (
+        <div className={`adtp-preview adtp-preview--${relative.past ? "past" : "future"}`}>
+          <span className="adtp-preview-icon">
+            <i className={relative.past ? "fas fa-exclamation-triangle" : "fas fa-hourglass-half"} />
+          </span>
+          <span className="adtp-preview-status">{relative.past ? "Overdue by" : "Goes live in"}</span>
+          <strong className="adtp-preview-time">{relative.text}</strong>
+          <span className="adtp-preview-divider" />
+          <span className="adtp-preview-date">{displayText}</span>
+        </div>
+      )}
+
+      {/* ── Popup ── */}
+      {open && (
+        <div className="adtp-popup">
+
+          {/* Tab bar */}
+          <div className="adtp-tabs">
+            <button type="button"
+              className={`adtp-tab${view === "date" ? " adtp-tab--active" : ""}`}
+              onClick={() => setView("date")}>
+              <i className="far fa-calendar-alt" />
+              {sel ? `${pad(sel.getDate())} ${DTP_MONTHS[sel.getMonth()].slice(0,3)} ${sel.getFullYear()}` : "Date"}
+            </button>
+            <button type="button"
+              className={`adtp-tab${view === "time" ? " adtp-tab--active" : ""}${!sel ? " adtp-tab--disabled" : ""}`}
+              onClick={() => sel && setView("time")}>
+              <i className="far fa-clock" />
+              {sel ? `${selH}:${pad(selMin)} ${selAmpm}` : "Time"}
+            </button>
+          </div>
+
+          {/* ── Calendar ── */}
+          {view === "date" && (
+            <div className="adtp-cal">
+              <div className="adtp-cal-hd">
+                <button type="button" className="adtp-cal-nav" onClick={() => setNav(n => {
+                  let m = n.month - 1, y = n.year;
+                  if (m < 0) { m = 11; y--; }
+                  return { year: y, month: m };
+                })}><i className="fas fa-chevron-left" /></button>
+                <span className="adtp-cal-title">{DTP_MONTHS[nav.month]} {nav.year}</span>
+                <button type="button" className="adtp-cal-nav" onClick={() => setNav(n => {
+                  let m = n.month + 1, y = n.year;
+                  if (m > 11) { m = 0; y++; }
+                  return { year: y, month: m };
+                })}><i className="fas fa-chevron-right" /></button>
+              </div>
+              <div className="adtp-cal-grid">
+                {DTP_DOW.map(d => <span key={d} className="adtp-cal-dow">{d}</span>)}
+                {cells.map((day, i) => {
+                  if (!day) return <span key={`_${i}`} />;
+                  const isToday = day === today.getDate() && nav.month === today.getMonth() && nav.year === today.getFullYear();
+                  const isSel   = sel && day === sel.getDate() && nav.month === sel.getMonth() && nav.year === sel.getFullYear();
+                  return (
+                    <button key={i} type="button"
+                      className={`adtp-cal-day${isToday ? " adtp-cal-day--today" : ""}${isSel ? " adtp-cal-day--sel" : ""}`}
+                      onClick={() => pickDay(day)}>
+                      {day}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="adtp-cal-ft">
+                <button type="button" className="adtp-cal-ft-btn" onClick={() => { onChange(""); setOpen(false); }}>Clear</button>
+                <button type="button" className="adtp-cal-ft-btn adtp-cal-ft-today" onClick={() => {
+                  const d = new Date();
+                  const ds = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+                  const ts = sel ? `${pad(sel.getHours())}:${pad(sel.getMinutes())}` : "12:00";
+                  onChange(`${ds}T${ts}`);
+                  setNav({ year: d.getFullYear(), month: d.getMonth() });
+                  setView("time");
+                }}>Today</button>
+              </div>
+            </div>
+          )}
+
+          {/* ── Time picker ── */}
+          {view === "time" && (
+            <div className="adtp-time">
+              <div className="adtp-time-cols">
+                {/* Hours */}
+                <div className="adtp-time-col-wrap">
+                  <span className="adtp-time-col-lbl">Hour</span>
+                  <div className="adtp-time-col" ref={hrRef}>
+                    <div className="adtp-time-spacer" />
+                    {DTP_HOURS.map(h => (
+                      <button key={h} type="button"
+                        className={`adtp-time-item${selH === h ? " adtp-time-item--sel" : ""}`}
+                        onClick={() => pickHour(h)}>
+                        {pad(h)}
+                      </button>
+                    ))}
+                    <div className="adtp-time-spacer" />
+                  </div>
+                </div>
+                <span className="adtp-time-colon">:</span>
+                {/* Minutes */}
+                <div className="adtp-time-col-wrap adtp-time-col-wrap--min">
+                  <span className="adtp-time-col-lbl">Min</span>
+                  <div className="adtp-time-col" ref={minRef}>
+                    <div className="adtp-time-spacer" />
+                    {DTP_MINUTES.map(m => (
+                      <button key={m} type="button"
+                        className={`adtp-time-item${selMin === m ? " adtp-time-item--sel" : ""}`}
+                        onClick={() => pickMin(m)}>
+                        {pad(m)}
+                      </button>
+                    ))}
+                    <div className="adtp-time-spacer" />
+                  </div>
+                </div>
+                {/* AM / PM */}
+                <div className="adtp-time-ampm">
+                  {["AM", "PM"].map(ap => (
+                    <button key={ap} type="button"
+                      className={`adtp-time-ampm-btn${selAmpm === ap ? " adtp-time-ampm-btn--sel" : ""}`}
+                      onClick={() => pickAmpm(ap)}>
+                      {ap}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <button type="button" className="adtp-time-done" onClick={() => setOpen(false)}>
+                <i className="fas fa-check-circle" /> Confirm &amp; Close
+              </button>
+            </div>
+          )}
+
+          {/* Quick presets — at bottom so they can't be accidentally triggered on open */}
+          <div className="adtp-presets">
+            <span className="adtp-presets-label">Quick set:</span>
+            {DTP_PRESETS.map(p => (
+              <button key={p.label} type="button" className="adtp-preset-btn" onClick={() => applyPreset(p.mins)}>
+                {p.label}
+              </button>
+            ))}
+          </div>
+
+        </div>
+      )}
+    </div>
+  );
+}
+// ── End DateTimePicker ────────────────────────────────────────────────────────
 
 /* ── Main component ── */
 export default function AdminSettings() {
@@ -218,8 +500,6 @@ export default function AdminSettings() {
     name: currentUser?.displayName || settings.defaultAuthor || settings.siteName,
     email: currentUser?.email || "Signed in administrator",
   };
-  const maintenanceBackOnlineLabel = formatDateTimePreview(settings.blogMaintenanceEndsAt);
-  const portfolioBackOnlineLabel   = formatDateTimePreview(settings.portfolioMaintenanceEndsAt);
 
   return (
     <div className="alayout">
@@ -897,21 +1177,10 @@ export default function AdminSettings() {
                         onChange={e => update("portfolioMaintenanceTitle", e.target.value)} />
                     </Field>
                     <Field label="Expected Back Online" hint="Used for the live countdown on the maintenance page.">
-                      <span className="ast-datetime-control">
-                        <span className="ast-datetime-icon"><i className="far fa-calendar-alt" /></span>
-                        <input
-                          className="ast-datetime-input"
-                          type="datetime-local"
-                          value={settings.portfolioMaintenanceEndsAt}
-                          onChange={e => update("portfolioMaintenanceEndsAt", e.target.value)}
-                        />
-                      </span>
-                      {portfolioBackOnlineLabel && (
-                        <span className="ast-datetime-preview">
-                          <i className="fas fa-bolt" />
-                          Countdown target <strong>{portfolioBackOnlineLabel}</strong>
-                        </span>
-                      )}
+                      <DateTimePicker
+                        value={settings.portfolioMaintenanceEndsAt}
+                        onChange={v => update("portfolioMaintenanceEndsAt", v)}
+                      />
                     </Field>
                     <Field label="Contact URL" hint="Optional link for urgent visitors. Use /#/contact or a full URL.">
                       <input className="ainput" value={settings.portfolioMaintenanceContactUrl}
@@ -967,21 +1236,10 @@ export default function AdminSettings() {
                         onChange={e => update("blogMaintenanceTitle", e.target.value)} />
                     </Field>
                     <Field label="Expected Back Online" hint="Used for the live countdown on the maintenance page.">
-                      <span className="ast-datetime-control">
-                        <span className="ast-datetime-icon"><i className="far fa-calendar-alt" /></span>
-                        <input
-                          className="ast-datetime-input"
-                          type="datetime-local"
-                          value={settings.blogMaintenanceEndsAt}
-                          onChange={e => update("blogMaintenanceEndsAt", e.target.value)}
-                        />
-                      </span>
-                      {maintenanceBackOnlineLabel && (
-                        <span className="ast-datetime-preview">
-                          <i className="fas fa-bolt" />
-                          Countdown target <strong>{maintenanceBackOnlineLabel}</strong>
-                        </span>
-                      )}
+                      <DateTimePicker
+                        value={settings.blogMaintenanceEndsAt}
+                        onChange={v => update("blogMaintenanceEndsAt", v)}
+                      />
                     </Field>
                     <Field label="Contact URL" hint="Optional link for urgent visitors. Use /#/contact or a full URL.">
                       <input className="ainput" value={settings.blogMaintenanceContactUrl}
