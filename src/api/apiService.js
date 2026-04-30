@@ -1,6 +1,6 @@
 /**
- * apiService.js — MySQL/PHP backend replacement for Firebase blogService.
- * Drop-in replacement: same exported function names and signatures.
+ * apiService.js — PHP/MySQL backend API service.
+ * Provides the same exported function names used across the app.
  */
 import { apiFetch, apiUpload, API_BASE, authHeaders } from './config';
 
