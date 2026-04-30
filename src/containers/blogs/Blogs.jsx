@@ -2,8 +2,9 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import "./Blog.css";
 import BlogCard from "../../components/blogCard/BlogCard";
-import { blogSection } from "../../portfolio";
-import { getAllPublishedBlogs, getCategoryList } from "../../firebase/blogService";
+import { blogSection, greeting as defaultGreeting } from "../../portfolio";
+import { getAllPublishedBlogs, getCategoryList } from "../../api/apiService";
+import { usePortfolioData } from "../../contexts/PortfolioDataContext";
 
 function SkeletonCard() {
   return (
@@ -23,7 +24,7 @@ function SkeletonCard() {
   );
 }
 
-function normalizeStaticBlog(blog, index) {
+function normalizeStaticBlog(blog, index, authorName) {
   return {
     id: blog.url || `static-blog-${index}`,
     title: blog.title,
@@ -31,7 +32,7 @@ function normalizeStaticBlog(blog, index) {
     description: blog.description,
     image: blog.image,
     externalUrl: blog.url,
-    author: "Deepak",
+    author: authorName || defaultGreeting.logo_name || "Author",
     tags: blog.tags || "Blog",
   };
 }
@@ -104,6 +105,8 @@ function getPaginationItems(currentPage, totalPages) {
 }
 
 export default function Blogs({ theme, publicSettings = {} }) {
+  const portfolioData = usePortfolioData();
+  const authorName = portfolioData?.profile?.logo_name || defaultGreeting.logo_name;
   const [blogs, setBlogs] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -141,12 +144,12 @@ export default function Blogs({ theme, publicSettings = {} }) {
         if (data.length > 0) {
           setBlogs(data);
         } else {
-          setBlogs(blogSection.blogs.map((blog, index) => normalizeStaticBlog(blog, index)));
+          setBlogs(blogSection.blogs.map((blog, index) => normalizeStaticBlog(blog, index, authorName)));
         }
       })
       .catch((err) => {
         console.error("[Blogs] Failed to load published posts:", err);
-        setBlogs(blogSection.blogs.map((blog, index) => normalizeStaticBlog(blog, index)));
+        setBlogs(blogSection.blogs.map((blog, index) => normalizeStaticBlog(blog, index, authorName)));
       })
       .finally(() => setLoading(false));
   }, []);

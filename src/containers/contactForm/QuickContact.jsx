@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import "./QuickContact.css";
 import { Fade } from "../../components/animations/Reveal";
-import { contactInfo, contactPageData } from "../../portfolio";
-
-const addressSection = contactPageData.addressSection;
+import { contactInfo as defaultContactInfo, contactPageData as defaultContactPageData } from "../../portfolio";
+import { usePortfolioData } from "../../contexts/PortfolioDataContext";
 
 function ContactCard({ icon, label, value, href, copyValue, theme }) {
   const [copied, setCopied] = useState(false);
@@ -22,12 +21,8 @@ function ContactCard({ icon, label, value, href, copyValue, theme }) {
         {icon}
       </div>
       <div className="qc-info">
-        <span className="qc-label" style={{ color: theme.secondaryText }}>
-          {label}
-        </span>
-        <a className="qc-value" href={href} style={{ color: theme.text }}>
-          {value}
-        </a>
+        <span className="qc-label" style={{ color: theme.secondaryText }}>{label}</span>
+        <a className="qc-value" href={href} style={{ color: theme.text }}>{value}</a>
       </div>
       <button
         className={`qc-copy-btn ${copied ? "copied" : ""}`}
@@ -51,11 +46,15 @@ function ContactCard({ icon, label, value, href, copyValue, theme }) {
 }
 
 export default function QuickContact({ theme }) {
+  const data = usePortfolioData();
+  const contactInfo    = data?.contactInfo    ?? defaultContactInfo;
+  const addressSection = (data?.contactPageData ?? defaultContactPageData).addressSection
+                         ?? defaultContactPageData.addressSection;
+
   return (
     <Fade direction="up" duration={1000}>
       <div className="qc-section">
-        <br />
-        <br />
+        <br /><br />
         <div className="qc-availability" style={{ color: "#2e7d32", background: "rgba(46,125,50,0.08)" }}>
           <span className="qc-dot" />
           Available for opportunities · replies within 24 hours

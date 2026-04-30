@@ -81,3 +81,31 @@
     padding-top: 12px;
   }
 }
+
+@media (max-width: 480px) {
+  .faq-section {
+    padding: 0 4%;
+    margin-bottom: 56px;
+  }
+
+  .faq-title {
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  .faq-list {
+    gap: 8px;
+  }
+
+  .faq-question {
+    font-size: 13.5px;
+    padding: 14px 14px;
+    gap: 10px;
+  }
+
+  .faq-answer {
+    font-size: 13.5px;
+    padding: 0 14px 14px;
+    padding-top: 10px;
+  }
+}

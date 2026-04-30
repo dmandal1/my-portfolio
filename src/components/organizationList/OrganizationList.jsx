@@ -7,8 +7,10 @@ const imageModules = import.meta.glob(
   "../../assests/images/**/*.{png,jpg,jpeg,svg,webp}",
   { eager: true }
 );
-function getLocalImage(filename) {
-  const key = `../../assests/images/${filename}`;
+function resolveLogoSrc(logoPath) {
+  if (!logoPath) return "";
+  if (/^(https?:\/\/|\/\/|data:)/i.test(logoPath)) return logoPath;
+  const key = `../../assests/images/${logoPath}`;
   return imageModules[key]?.default ?? "";
 }
 
@@ -20,7 +22,7 @@ class OrganizationList extends Component {
           {this.props.logos.map((logo) => {
             const name = logo.company || logo.login;
             const imgSrc = logo.logo_path
-              ? getLocalImage(logo.logo_path)
+              ? resolveLogoSrc(logo.logo_path)
               : logo.avatarUrl;
             const href = logo.company_url || null;
             return (

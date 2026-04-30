@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import "./Greeting.css";
 import SocialMedia from "../../components/socialMedia/SocialMedia";
 import Button from "../../components/button/Button";
-import { greeting } from "../../portfolio";
+import { greeting as defaultGreeting } from "../../portfolio";
+import { usePortfolioData } from "../../contexts/PortfolioDataContext";
 import { Fade } from "../../components/animations/Reveal";
 import FeelingProud from "./FeelingProud";
 
-const roles = [
+const DEFAULT_ROLES = [
   "Full Stack Developer",
   "React.js Engineer",
   "Node.js Developer",
@@ -43,6 +44,18 @@ function useTypingEffect(words, typingSpeed = 100, deletingSpeed = 60, pauseMs =
 
 export default function Greeting(props) {
   const theme = props.theme;
+  const data = usePortfolioData();
+  const greeting = data?.profile || defaultGreeting;
+
+  /* roles: admin-configured (comma or newline separated) or hardcoded defaults */
+  const roles = (() => {
+    const raw = greeting.roles;
+    if (typeof raw === "string" && raw.trim())
+      return raw.split(/[\n,]/).map((r) => r.trim()).filter(Boolean);
+    if (Array.isArray(raw) && raw.length > 0) return raw;
+    return DEFAULT_ROLES;
+  })();
+
   const typedRole = useTypingEffect(roles);
 
   return (
@@ -82,10 +95,6 @@ export default function Greeting(props) {
                   }
                 />
               </div>
-              {/* <div className="button-greeting-div">
-              <Button text="Contact me" href="#contact" />
-              <Button text="See my resume" newTab={true} href={greeting.resumeLink} />
-            </div> */}
             </div>
           </div>
           <div className="greeting-image-div">

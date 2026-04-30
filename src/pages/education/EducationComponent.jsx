@@ -6,24 +6,21 @@ import Educations from "../../containers/education/Educations";
 import Certifications from "../../containers/certifications/Certifications";
 import CompetitiveSites from "../../components/competitiveSites/CompetitiveSites";
 import EducationImg from "./EducationImg";
-import { competitiveSites } from "../../portfolio";
+import { competitiveSites as defaultCompetitiveSites } from "../../portfolio";
 import "./EducationComponent.css";
 import { Fade } from "../../components/animations/Reveal";
+import { usePortfolioData } from "../../contexts/PortfolioDataContext";
 
-class Education extends Component {
+class EducationInner extends Component {
   render() {
-    const theme = this.props.theme;
+    const { theme, competitiveSites } = this.props;
     return (
       <div className="education-main">
-        <Header theme={this.props.theme} />
+        <Header theme={theme} />
         <div className="basic-education">
           <Fade direction="up" duration={2000}>
             <div className="heading-div">
               <div className="heading-img-div">
-                {/* <img
-									src={require("../../assests/images/education.svg")}
-									alt=""
-								/> */}
                 <EducationImg theme={theme} />
               </div>
               <div className="heading-text-div">
@@ -33,21 +30,22 @@ class Education extends Component {
                 <h3 className="heading-sub-text" style={{ color: theme.text }}>
                   Basic Qualification and Certifcations
                 </h3>
-                <CompetitiveSites
-                  logos={competitiveSites.competitiveSites}
-                  theme={theme}
-                />
+                <CompetitiveSites logos={competitiveSites} theme={theme} />
               </div>
             </div>
           </Fade>
-          <Educations theme={this.props.theme} />
-          <Certifications theme={this.props.theme} />
+          <Educations theme={theme} />
+          <Certifications theme={theme} />
         </div>
-        <Footer theme={this.props.theme} />
-        <TopButton theme={this.props.theme} />
+        <Footer theme={theme} />
+        <TopButton theme={theme} />
       </div>
     );
   }
 }
 
-export default Education;
+export default function Education(props) {
+  const data = usePortfolioData();
+  const competitiveSites = data?.competitiveSites || defaultCompetitiveSites.competitiveSites;
+  return <EducationInner {...props} competitiveSites={competitiveSites} />;
+}

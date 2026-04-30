@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { subscribeToBlogs, deleteBlog, publishScheduledPosts, updateBlog, getCategories, getTags, subscribeToRecentComments, deleteComment, addComment } from "../../firebase/blogService";
+import { subscribeToBlogs, deleteBlog, publishScheduledPosts, updateBlog, getCategories, getTags, subscribeToRecentComments, deleteComment, addComment } from "../../api/apiService";
 import { greeting } from "../../portfolio";
 import AdminSidebar from "./components/AdminSidebar";
 import { useAdminSettings } from "./components/useAdminSettings";

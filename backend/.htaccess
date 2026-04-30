@@ -1,0 +1,19 @@
+# Prevent directory listing
+Options -Indexes
+
+# Block access to config files
+<FilesMatch "^(config|jwt_helper)\.php$">
+    Order deny,allow
+    Deny from all
+</FilesMatch>
+
+# Allow CORS preflight and set headers
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+</IfModule>
+
+# PHP settings for uploads
+php_value upload_max_filesize 10M
+php_value post_max_size 12M
+php_value max_execution_time 60

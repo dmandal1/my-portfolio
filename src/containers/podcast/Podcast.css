@@ -31,3 +31,22 @@
     text-align: center;
   }
 }
+
+@media (max-width: 480px) {
+  .podcast-header-title {
+    font-size: 24px;
+  }
+
+  .podcast-header-subtitle {
+    font-size: 14px;
+  }
+
+  .podcast {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .podcast-main-div {
+    grid-template-columns: 1fr;
+  }
+}

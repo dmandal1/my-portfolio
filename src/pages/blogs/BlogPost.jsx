@@ -30,8 +30,9 @@ import {
   getAuthorRatingSummary,
   setAuthorRating,
 
-} from "../../firebase/blogService";
-import { greeting, socialMediaLinks } from "../../portfolio";
+} from "../../api/apiService";
+import { greeting as defaultGreeting, socialMediaLinks as defaultSocialLinks } from "../../portfolio";
+import { usePortfolioData } from "../../contexts/PortfolioDataContext";
 import authorPhoto from "../../assests/images/deepak_mandal.jpeg";
 import BlogMaintenancePage from "./BlogMaintenancePage";
 import useBlogMaintenanceSettings from "./useBlogMaintenanceSettings";
@@ -756,7 +757,9 @@ function AboutAuthor({ totalPosts = 0, authorName = "", authorRole = "", authorB
     }
   }
 
-  const sharePlatforms = (socialMediaLinks || []).slice(0, 5);
+  const portfolioData = usePortfolioData();
+  const profile = portfolioData?.profile || defaultGreeting;
+  const sharePlatforms = (portfolioData?.socialLinks || defaultSocialLinks).slice(0, 5);
 
   return (
     <div className="bp-author-card-v2">
@@ -767,19 +770,19 @@ function AboutAuthor({ totalPosts = 0, authorName = "", authorRole = "", authorB
       <div className="bp-author-avatar-ring">
         <img
           src={authorPhoto}
-          alt={greeting.logo_name}
+          alt={profile.logo_name}
           className="bp-author-avatar-photo"
         />
       </div>
 
         <div className="bp-author-body-v2">
-        <div className="bp-author-name-lg">{authorName || greeting.logo_name}</div>
+        <div className="bp-author-name-lg">{authorName || profile.logo_name}</div>
         <div className="bp-author-role-badge">
-          <i className="fas fa-code" /> {authorRole || greeting.job_profile || "Developer"}
+          <i className="fas fa-code" /> {authorRole || profile.job_profile || "Developer"}
         </div>
 
-        {(authorBio || greeting.subTitle) && (
-          <p className="bp-author-bio">{authorBio || greeting.subTitle}</p>
+        {(authorBio || profile.subTitle) && (
+          <p className="bp-author-bio">{authorBio || profile.subTitle}</p>
         )}
 
         {/* stats row */}
@@ -1237,9 +1240,6 @@ export default function BlogPost({ theme }) {
   if (loading) return (
     <div style={themeVars}>
       <Helmet>
-        {/* Best-effort perf hint: many blog cover images come from Firebase Storage */}
-        <link rel="preconnect" href="https://firebasestorage.googleapis.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://storage.googleapis.com" crossOrigin="anonymous" />
         {navPrefetchImage && (
           <link
             rel="preload"
@@ -1300,7 +1300,9 @@ export default function BlogPost({ theme }) {
   const postRecentLimit = Number(maintenance.settings.publicBlogPostRecentCount) || 6;
   const categoryLimit = Number(maintenance.settings.publicBlogCategoryCount) || 6;
   const recentPosts = allBlogs.filter((b) => b.id !== blog.id).slice(0, postRecentLimit);
-const authorName  = blog.author || greeting.logo_name || "Deepak Mandal";
+const portfolioCtx = usePortfolioData();
+  const profileData = portfolioCtx?.profile || defaultGreeting;
+  const authorName  = blog.author || profileData.logo_name || "Deepak Mandal";
   const metaTitle = blog.metaTitle || blog.title;
   const metaDescription = blog.metaDescription || blog.excerpt || blog.subtitle || `${blog.title} by ${authorName}`;
 	  const leadText = blog.subtitle || blog.excerpt || blog.metaDescription || "";
@@ -1324,9 +1326,6 @@ const authorName  = blog.author || greeting.logo_name || "Deepak Mandal";
 	        <meta name="twitter:title" content={metaTitle} />
 	        <meta name="twitter:description" content={metaDescription} />
 	        {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
-        {/* Best-effort perf hint: many blog cover images come from Firebase Storage */}
-        <link rel="preconnect" href="https://firebasestorage.googleapis.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://storage.googleapis.com" crossOrigin="anonymous" />
 		        {coverUrl && (
 		          <link
 		            rel="preload"
@@ -1666,8 +1665,8 @@ const authorName  = blog.author || greeting.logo_name || "Deepak Mandal";
             <AboutAuthor
               totalPosts={allBlogs.length}
               authorName={authorName}
-              authorRole={greeting.job_profile}
-              authorBio={greeting.subTitle}
+              authorRole={profileData.job_profile}
+              authorBio={profileData.subTitle}
             />
             {maintenance.settings.publicBlogShowCategoryWidget !== false && (
               <SidebarCategories blogs={allBlogs} allCategories={allCategories} limit={categoryLimit} />

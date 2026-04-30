@@ -42,3 +42,27 @@
     text-align: center;
   }
 }
+
+@media (max-width: 480px) {
+  .startup-projects-main {
+    flex-direction: column;
+  }
+
+  .startup-project-text {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .startup-project-text img {
+    width: 100%;
+    height: auto;
+  }
+
+  .project-card-head {
+    font-size: 20px;
+  }
+
+  .project-subtitle {
+    font-size: 14px;
+  }
+}

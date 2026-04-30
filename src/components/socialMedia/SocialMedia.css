@@ -50,3 +50,18 @@
     justify-content: center;
   }
 }
+
+@media (max-width: 480px) {
+  .social-media-div {
+    font-size: 1.7em;
+    gap: 2px;
+  }
+
+  .icon-button i {
+    height: 2.2rem;
+    width: 2.2rem;
+    line-height: 2.2rem;
+    font-size: 1.1rem;
+    margin: 0 3px;
+  }
+}

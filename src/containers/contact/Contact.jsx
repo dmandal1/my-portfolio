@@ -2,9 +2,12 @@ import { useState, useRef } from "react";
 import emailjs from "@emailjs/browser";
 import "./Contact.css";
 import SocialMedia from "../../components/socialMedia/SocialMedia";
-import { contactInfo } from "../../portfolio";
+import { contactInfo as defaultContactInfo } from "../../portfolio";
+import { usePortfolioData } from "../../contexts/PortfolioDataContext";
 
 export default function Contact() {
+  const data = usePortfolioData();
+  const contactInfo = data?.contactInfo || defaultContactInfo;
   const formRef = useRef();
   const [formData, setFormData] = useState({
     name: "",

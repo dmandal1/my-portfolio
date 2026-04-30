@@ -1,0 +1,123 @@
+import { createContext, useContext, useEffect, useState } from "react";
+import {
+  greeting as defaultProfile,
+  seo as defaultSeo,
+  socialMediaLinks as defaultSocialLinks,
+  contactInfo as defaultContactInfo,
+  contactPageData as defaultContactPageData,
+  degrees as defaultDegrees,
+  competitiveSites as defaultCompetitiveSites,
+  bigProjects as defaultBigProjects,
+  skills as defaultSkills,
+  certifications as defaultCertifications,
+  experience as defaultExperience,
+  projectsHeader as defaultProjectsHeader,
+} from "../portfolio";
+import {
+  getPortfolioProfile,
+  getPortfolioSeo,
+  getPortfolioContact,
+  getSocialLinks,
+  getEducation,
+  getCompetitiveSites,
+  getPortfolioProjects,
+  getSkillGroups,
+  getCertifications,
+  getExperiences,
+  getExperienceHeader,
+  getContactPageData,
+  getProjectsHeader,
+} from "../api/apiService";
+
+const PortfolioDataContext = createContext(null);
+
+export function PortfolioDataProvider({ children }) {
+  const [data, setData] = useState({
+    profile:          defaultProfile,
+    seo:              defaultSeo,
+    socialLinks:      defaultSocialLinks,
+    contactInfo:      defaultContactInfo,
+    contactPageData:  defaultContactPageData,
+    degrees:          defaultDegrees.degrees,
+    competitiveSites: defaultCompetitiveSites.competitiveSites,
+    projects:         defaultBigProjects,
+    skills:           defaultSkills.data,
+    certifications:   defaultCertifications.certifications,
+    experiences:      defaultExperience.sections,
+    experienceHeader: {
+      title:       defaultExperience.title,
+      subtitle:    defaultExperience.subtitle,
+      description: defaultExperience.description,
+    },
+    projectsHeader:   defaultProjectsHeader,
+  });
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const [
+          profile, seo, contactInfo, socialLinks,
+          degrees, competitive, projects, skills,
+          certifications, experiences, experienceHeader,
+          contactPageData, projectsHeader,
+        ] = await Promise.all([
+          getPortfolioProfile(),
+          getPortfolioSeo(),
+          getPortfolioContact(),
+          getSocialLinks(),
+          getEducation(),
+          getCompetitiveSites(),
+          getPortfolioProjects(),
+          getSkillGroups(),
+          getCertifications(),
+          getExperiences(),
+          getExperienceHeader(),
+          getContactPageData(),
+          getProjectsHeader(),
+        ]);
+
+        // Build experience sections from flat array
+        const EXP_ORDER = ["Work", "Internships", "Volunteerships"];
+        let expSections = defaultExperience.sections;
+        if (experiences?.length > 0) {
+          const map = {};
+          experiences.forEach((e) => {
+            const sec = e.section || "Work";
+            if (!map[sec]) map[sec] = [];
+            map[sec].push(e);
+          });
+          expSections = EXP_ORDER.filter((s) => map[s]?.length > 0).map((s) => ({ title: s, experiences: map[s] }));
+        }
+
+        setData({
+          profile:         profile         || defaultProfile,
+          seo:             seo             || defaultSeo,
+          contactInfo:     contactInfo     || defaultContactInfo,
+          socialLinks:     socialLinks?.length  > 0 ? socialLinks  : defaultSocialLinks,
+          degrees:         degrees?.length       > 0 ? degrees       : defaultDegrees.degrees,
+          competitiveSites:competitive?.length   > 0 ? competitive   : defaultCompetitiveSites.competitiveSites,
+          projects:        projects?.length      > 0 ? { ...defaultBigProjects, projects } : defaultBigProjects,
+          skills:          skills?.length        > 0 ? skills        : defaultSkills.data,
+          certifications:  certifications?.length > 0 ? certifications : defaultCertifications.certifications,
+          experiences:     expSections,
+          experienceHeader: experienceHeader || {
+            title:       defaultExperience.title,
+            subtitle:    defaultExperience.subtitle,
+            description: defaultExperience.description,
+          },
+          contactPageData:  contactPageData  || defaultContactPageData,
+          projectsHeader:   projectsHeader   || defaultProjectsHeader,
+        });
+      } catch { /* keep portfolio.js defaults on any error */ }
+    }
+    load();
+  }, []);
+
+  return (
+    <PortfolioDataContext.Provider value={data}>
+      {children}
+    </PortfolioDataContext.Provider>
+  );
+}
+
+export const usePortfolioData = () => useContext(PortfolioDataContext);

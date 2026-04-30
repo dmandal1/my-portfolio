@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { getAllBlogsAdmin, publishScheduledPosts } from "../../firebase/blogService";
+import { getAllBlogsAdmin, publishScheduledPosts } from "../../api/apiService";
 import AdminSidebar from "./components/AdminSidebar";
 import "./Admin.css";
 

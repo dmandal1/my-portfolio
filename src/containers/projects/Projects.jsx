@@ -4,10 +4,12 @@ import { setContext } from "@apollo/client/link/context";
 import "./Project.css";
 import GithubRepoCard from "../../components/githubRepoCard/GithubRepoCard";
 import Button from "../../components/button/Button";
-import { openSource } from "../../portfolio";
-import { greeting } from "../../portfolio.js";
+import { openSource, greeting as defaultGreeting } from "../../portfolio";
+import { usePortfolioData } from "../../contexts/PortfolioDataContext";
 
 export default function Projects() {
+  const portfolioData = usePortfolioData();
+  const githubProfile = portfolioData?.profile?.githubProfile || defaultGreeting.githubProfile;
   const [repo, setrepo] = useState([]);
 
   useEffect(() => {
@@ -82,7 +84,7 @@ export default function Projects() {
       <Button
         text={"More Projects"}
         className="project-button"
-        href={greeting.githubProfile}
+        href={githubProfile}
         newTab={true}
       />
     </div>

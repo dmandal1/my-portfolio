@@ -1,68 +1,66 @@
-import React, { Component } from "react";
+import React from "react";
 import Header from "../../components/header/Header";
 import Footer from "../../components/footer/Footer";
 import TopButton from "../../components/topButton/TopButton";
 import ExperienceAccordion from "../../containers/experienceAccordion/ExperienceAccordion";
 import "./Experience.css";
-import { experience } from "../../portfolio.js";
+import { experience as defaultExperience } from "../../portfolio.js";
 import { Fade } from "../../components/animations/Reveal";
 import ExperienceImg from "./ExperienceImg";
+import { usePortfolioData } from "../../contexts/PortfolioDataContext";
 
-class Experience extends Component {
-  render() {
-    const theme = this.props.theme;
-    return (
-      <div className="experience-main">
-        <Header theme={theme} />
+export default function Experience({ theme, onToggle }) {
+  const data = usePortfolioData();
 
-        <div className="exp-hero">
-          {/* ── Text side ── */}
-          <Fade direction="right" duration={1000}>
-            <div className="exp-hero-text">
+  const header = data?.experienceHeader || {
+    title:       defaultExperience.title,
+    subtitle:    defaultExperience.subtitle,
+    description: defaultExperience.description,
+  };
+  const sections = data?.experiences ?? defaultExperience.sections;
 
-              {/* Badge */}
-              <span
-                className="exp-badge"
-                style={{
-                  color: theme.imageHighlight,
-                  background: `${theme.imageHighlight}18`,
-                  border: `1px solid ${theme.imageHighlight}40`,
-                }}
-              >
-                {experience.subtitle}
-              </span>
+  return (
+    <div className="experience-main">
+      <Header theme={theme} />
 
-              {/* Title */}
-              <h1 className="exp-title" style={{ color: theme.text }}>
-                {experience.title}
-              </h1>
+      <div className="exp-hero">
+        <Fade direction="right" duration={1000}>
+          <div className="exp-hero-text">
+            <span
+              className="exp-badge"
+              style={{
+                color: theme.imageHighlight,
+                background: `${theme.imageHighlight}18`,
+                border: `1px solid ${theme.imageHighlight}40`,
+              }}
+            >
+              {header.subtitle}
+            </span>
 
-              {/* Accent underline */}
-              <div
-                className="exp-title-bar"
-                style={{
-                  background: `linear-gradient(90deg, ${theme.imageHighlight}, ${theme.gradientEnd || theme.highlight})`,
-                }}
-              />
+            <h1 className="exp-title" style={{ color: theme.text }}>
+              {header.title}
+            </h1>
 
-              {/* Description */}
-              <p
-                className="exp-description"
-                style={{
-                  color: theme.secondaryText,
-                  borderLeft: `3px solid ${theme.imageHighlight}`,
-                }}
-              >
-                {experience.description}
-              </p>
+            <div
+              className="exp-title-bar"
+              style={{
+                background: `linear-gradient(90deg, ${theme.imageHighlight}, ${theme.gradientEnd || theme.highlight})`,
+              }}
+            />
 
-              {/* Stats row */}
+            <p
+              className="exp-description"
+              style={{
+                color: theme.secondaryText,
+                borderLeft: `3px solid ${theme.imageHighlight}`,
+              }}
+            >
+              {header.description}
+            </p>
+
+            {header.stats?.length > 0 && (
               <div className="exp-stats">
-                {[
-                  { value: "4+", label: "Years Experience" },
-                  { value: "3+", label: "Companies" },
-                  { value: "10+", label: "Projects Built" },
-                ].map((stat, i) => (
+                {header.stats.map((stat, i) => (
                   <div
                     key={i}
                     className="exp-stat"
@@ -80,24 +78,20 @@ class Experience extends Component {
                   </div>
                 ))}
               </div>
+            )}
+          </div>
+        </Fade>
 
-            </div>
-          </Fade>
-
-          {/* ── Image side ── */}
-          <Fade direction="left" duration={1000}>
-            <div className="exp-hero-img">
-              <ExperienceImg theme={theme} />
-            </div>
-          </Fade>
-        </div>
-
-        <ExperienceAccordion sections={experience["sections"]} theme={theme} />
-        <Footer theme={this.props.theme} onToggle={this.props.onToggle} />
-        <TopButton theme={this.props.theme} />
+        <Fade direction="left" duration={1000}>
+          <div className="exp-hero-img">
+            <ExperienceImg theme={theme} />
+          </div>
+        </Fade>
       </div>
-    );
-  }
-}
 
-export default Experience;
+      <ExperienceAccordion sections={sections} theme={theme} />
+      <Footer theme={theme} onToggle={onToggle} />
+      <TopButton theme={theme} />
+    </div>
+  );
+}

@@ -21,6 +21,9 @@ import AdminCategories from "../pages/admin/AdminCategories";
 import AdminTags from "../pages/admin/AdminTags";
 import AdminSettings from "../pages/admin/AdminSettings";
 import AdminAnalytics from "../pages/admin/AdminAnalytics";
+import AdminPortfolio from "../pages/admin/AdminPortfolio";
+import Install from "../pages/install/Install";
+import { PortfolioDataProvider } from "../contexts/PortfolioDataContext";
 import AdminContentAudit from "../pages/admin/AdminContentAudit";
 import AdminEditorialPlanner from "../pages/admin/AdminEditorialPlanner";
 import ProtectedRoute from "../components/protectedRoute/ProtectedRoute";
@@ -228,6 +231,18 @@ const commonRoutes = (theme, onToggle) => (
       }
     />
 
+    <Route
+      path="/admin/portfolio"
+      element={
+        <ProtectedRoute>
+          <ToastProvider>
+            <AdminPortfolio />
+          </ToastProvider>
+        </ProtectedRoute>
+      }
+    />
+
+    <Route path="/install" element={<Install />} />
     <Route path="*" element={<Error404 theme={theme} />} />
   </>
 );
@@ -237,6 +252,7 @@ export default class Main extends Component {
     const { theme, onToggle } = this.props;
     return (
       <AuthProvider>
+        <PortfolioDataProvider>
         <AdminSettingsProvider>
         <HashRouter>
           <Routes>
@@ -252,6 +268,7 @@ export default class Main extends Component {
           </Routes>
         </HashRouter>
         </AdminSettingsProvider>
+        </PortfolioDataProvider>
       </AuthProvider>
     );
   }

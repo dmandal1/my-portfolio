@@ -9,6 +9,14 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    proxy: {
+      // Forward /api/* to the local PHP server during development
+      // Run: php -S localhost:8080 -t public_html
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+    },
   },
   test: {
     environment: "jsdom",

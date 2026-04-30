@@ -6,7 +6,7 @@ import {
   deleteCategory,
   getCategories,
   updateCategory,
-} from "../../firebase/blogService";
+} from "../../api/apiService";
 import "./Admin.css";
 
 function slugify(str) {

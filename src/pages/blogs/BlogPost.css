@@ -779,7 +779,7 @@ a.bp-tech-pill:hover {
   max-width: 100%;
   border: 1px solid #d8dee8;
   border-radius: 8px;
-  overflow: visible;
+  overflow: hidden;
   background: #0f172a;
   box-sizing: border-box;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
@@ -829,12 +829,17 @@ a.bp-tech-pill:hover {
   color: #dbeafe;
   font-size: 12px;
   font-weight: 500;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .bp-codeblock-actions {
   display: inline-flex;
   align-items: center;
   gap: 10px;
   margin-left: auto;
+  flex-shrink: 0;
 }
 .bp-codeblock-copy {
   font-size: 13px;
@@ -878,6 +883,8 @@ a.bp-tech-pill:hover {
   max-height: min(62vh, 520px);
   overflow-x: auto;
   overflow-y: auto;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 .bp-codeblock-code {
   display: block;
@@ -2624,8 +2631,25 @@ a.bp-tech-pill:hover {
 
   /* code blocks */
   .bp-codeblock { border-radius: 8px; }
-  .bp-codeblock-label { padding: 6px 10px; font-size: 11px; }
+  .bp-codeblock-label { padding: 6px 8px; font-size: 11px; gap: 6px; }
   .bp-codeblock-mac-controls { display: none; }
+  .bp-codeblock-pre {
+    padding: 10px 10px 12px;
+    max-height: min(52vh, 340px);
+  }
+  .bp-codeblock-code { font-size: 12px; }
+  .bp-code-line {
+    grid-template-columns: 24px 1fr;
+    column-gap: 8px;
+  }
+  .bp-code-line::before { font-size: 11px; }
+  .bp-code-line-content { padding-right: 10px; }
+  /* plain markdown pre/code blocks */
+  .bp-body pre {
+    padding: 10px 12px;
+    font-size: 12px;
+    max-height: min(52vh, 340px);
+  }
 
   /* comment form */
   .bp-comment-form { padding: 16px 14px 14px; }
@@ -2725,4 +2749,15 @@ a.bp-tech-pill:hover {
 
   /* comment avatar */
   .bp-comment-avatar { width: 38px; height: 38px; font-size: 11px; }
+
+  /* code blocks */
+  .bp-codeblock-label { flex-wrap: wrap; gap: 4px; }
+  .bp-codeblock-lang { font-size: 10.5px; }
+  .bp-codeblock-copy { font-size: 11.5px; }
+  .bp-codeblock-pre { padding: 8px 8px 10px; max-height: min(48vh, 300px); }
+  .bp-codeblock-code { font-size: 11.5px; }
+  .bp-code-line { grid-template-columns: 20px 1fr; column-gap: 6px; }
+  .bp-code-line::before { font-size: 10px; }
+  .bp-code-line-content { padding-right: 6px; }
+  .bp-body pre { font-size: 11.5px; padding: 8px 10px; max-height: min(48vh, 300px); }
 }

@@ -6,7 +6,7 @@ import {
   deleteMediaItem,
   listAllMedia,
   uploadCoverImage,
-} from "../../firebase/blogService";
+} from "../../api/apiService";
 import "./Admin.css";
 
 /* ── helpers ─────────────────────────────────────────────── */
@@ -80,7 +80,7 @@ export default function AdminMedia() {
       setItems(data);
     } catch (e) {
       console.error(e);
-      setError("Failed to load media. Check Firebase Storage rules.");
+      setError(`Failed to load media. ${e?.message || "Check server permissions and try again."}`);
     } finally {
       setLoading(false);
     }
@@ -125,7 +125,7 @@ export default function AdminMedia() {
       toast?.addToast("Image uploaded!", "success");
       await load();
     } catch {
-      toast?.addToast("Upload failed. Check Firebase Storage rules.", "error");
+      toast?.addToast("Upload failed. Check server permissions and file size limits.", "error");
     } finally {
       setUploading(false);
       setUploadPct(0);

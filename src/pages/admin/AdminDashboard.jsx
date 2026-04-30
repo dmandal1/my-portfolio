@@ -1,6 +1,6 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { subscribeToBlogs, deleteBlog, updateBlog, getCategories, getTags, approvePendingPost, rejectPendingPost, publishScheduledPosts } from "../../firebase/blogService";
+import { subscribeToBlogs, deleteBlog, updateBlog, getCategories, getTags, approvePendingPost, rejectPendingPost, publishScheduledPosts } from "../../api/apiService";
 import AdminSidebar from "./components/AdminSidebar";
 import { useToast } from "./components/AdminToast";
 import { useAdminSettings } from "./components/useAdminSettings";

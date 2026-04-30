@@ -123,3 +123,36 @@
     word-break: break-all;
   }
 }
+
+@media (max-width: 480px) {
+  .qc-section {
+    padding: 0 4%;
+    margin-bottom: 48px;
+  }
+
+  .qc-availability {
+    font-size: 12.5px;
+    padding: 5px 12px;
+    margin-bottom: 20px;
+  }
+
+  .qc-card {
+    padding: 14px 12px;
+    gap: 10px;
+    border-radius: 10px;
+  }
+
+  .qc-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+  }
+
+  .qc-label {
+    font-size: 10px;
+  }
+
+  .qc-value {
+    font-size: 13px;
+  }
+}

@@ -1,8 +1,9 @@
-import React, { Component } from "react";
+import React from "react";
 import "./Organizations.css";
 import { Fade } from "../../components/animations/Reveal";
 import OrganizationList from "../../components/organizationList/OrganizationList";
-import { experience } from "../../portfolio";
+import { experience as defaultExperience } from "../../portfolio";
+import { usePortfolioData } from "../../contexts/PortfolioDataContext";
 
 function normalizeCompany(name) {
   return name
@@ -11,17 +12,10 @@ function normalizeCompany(name) {
     .toLowerCase();
 }
 
-const COMPANY_ORDER = [
-  "coding ninjas",
-  "cloudcraftz solutions",
-  "stulink",
-  "infosys",
-];
-
-function getUniqueCompanies(exp) {
+function getUniqueCompanies(sections) {
   const seen = new Set();
   const companies = [];
-  for (const section of exp.sections) {
+  for (const section of sections) {
     for (const e of section.experiences) {
       const key = normalizeCompany(e.company);
       if (!seen.has(key)) {
@@ -30,37 +24,30 @@ function getUniqueCompanies(exp) {
           company: e.company,
           company_url: e.company_url,
           logo_path: e.logo_path,
-          _key: key,
         });
       }
     }
   }
-  companies.sort((a, b) => {
-    const ai = COMPANY_ORDER.indexOf(a._key);
-    const bi = COMPANY_ORDER.indexOf(b._key);
-    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
-  });
-  companies.forEach((c) => delete c._key);
   return companies;
 }
 
-class Organizations extends Component {
-  render() {
-    const theme = this.props.theme;
-    const companies = getUniqueCompanies(experience);
-    return (
-      <div id="organizations">
-        <div className="organizations-header-div">
-          <Fade direction="up" duration={2000}>
-            <h1 className="organizations-header" style={{ color: theme.text }}>
-              Contributed Organizations
-            </h1>
-          </Fade>
-        </div>
-        <OrganizationList logos={companies} />
-      </div>
-    );
-  }
-}
+export default function Organizations({ theme }) {
+  const data = usePortfolioData();
+  const sections = data?.experiences?.length > 0
+    ? data.experiences
+    : defaultExperience.sections;
+  const companies = getUniqueCompanies(sections);
 
-export default Organizations;
+  return (
+    <div id="organizations">
+      <div className="organizations-header-div">
+        <Fade direction="up" duration={2000}>
+          <h1 className="organizations-header" style={{ color: theme.text }}>
+            Contributed Organizations
+          </h1>
+        </Fade>
+      </div>
+      <OrganizationList logos={companies} />
+    </div>
+  );
+}

@@ -1,14 +1,15 @@
 import React from "react";
 import "./StartupProjects.css";
-import { bigProjects } from "../../portfolio";
+import { bigProjects as defaultBigProjects } from "../../portfolio";
+import { usePortfolioData } from "../../contexts/PortfolioDataContext";
 
 export default function StartupProject() {
+  const data = usePortfolioData();
+  const bigProjects = data?.projects || defaultBigProjects;
+
   function openProjectInNewWindow(url) {
     const win = window.open(url, "_blank", "noopener,noreferrer");
-    if (win) {
-      win.opener = null;
-      win.focus();
-    }
+    if (win) { win.opener = null; win.focus(); }
   }
 
   return (
@@ -18,18 +19,13 @@ export default function StartupProject() {
         <p className="subTitle project-subtitle">{bigProjects.subtitle}</p>
         <div className="startup-projects-main">
           <div className="startup-project-text">
-            {bigProjects.projects.map((project) => {
-              return (
-                <div
-                  className="saaya-health-div"
-                  onClick={() => openProjectInNewWindow(project.link)}
-                >
-                  <img alt="Saad Working" src={project.image}></img>
-                </div>
-              );
-            })}
+            {(bigProjects.projects || []).map((project, i) => (
+              <div key={project.link || i} className="saaya-health-div" onClick={() => openProjectInNewWindow(project.link)}>
+                <img alt={project.title || "Project"} src={project.image} />
+              </div>
+            ))}
           </div>
-          <div className="starup-project-image"></div>
+          <div className="starup-project-image" />
         </div>
       </div>
     </div>

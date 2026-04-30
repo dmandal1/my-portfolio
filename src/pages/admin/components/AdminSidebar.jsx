@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
-import { getAllBlogsAdmin, saveAdminPanelSettings } from "../../../firebase/blogService";
+import { getAllBlogsAdmin, saveAdminPanelSettings } from "../../../api/apiService";
 import { useAdminSettings } from "./useAdminSettings";
 import {
   ADMIN_SETTINGS_UPDATED_EVENT,
@@ -33,6 +33,8 @@ const NAV_ITEMS = [
   { to: "/admin/editorial-planner", icon: "far fa-calendar-alt", label: "Planner" },
   { to: "/admin/content-audit", icon: "fas fa-clipboard-check", label: "Audit" },
   { divider: true, key: "d3" },
+  { to: "/admin/portfolio",      icon: "fas fa-user-circle",  label: "Portfolio" },
+  { divider: true, key: "d4" },
   { to: "/admin/settings",   icon: "fas fa-cog",         label: "Settings" },
 ];
 
@@ -47,6 +49,7 @@ const SEARCH_LINKS = [
   { to: "/admin/analytics", label: "Analytics", icon: "fas fa-chart-bar" },
   { to: "/admin/editorial-planner", label: "Editorial Planner", icon: "far fa-calendar-alt" },
   { to: "/admin/content-audit", label: "Content Audit", icon: "fas fa-clipboard-check" },
+  { to: "/admin/portfolio", label: "Portfolio Content", icon: "fas fa-user-circle" },
   { to: "/admin/settings", label: "Settings", icon: "fas fa-cog" },
 ];
 

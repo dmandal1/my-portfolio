@@ -4,7 +4,7 @@ import {
   subscribeToBlogs,
   subscribeToCategories,
   subscribeToCommentsOverview,
-} from "../../firebase/blogService";
+} from "../../api/apiService";
 import AdminSidebar from "./components/AdminSidebar";
 import "./Admin.css";
 

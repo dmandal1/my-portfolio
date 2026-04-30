@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { subscribeToAdminPanelSettings } from "../../../firebase/blogService";
+import { subscribeToAdminPanelSettings } from "../../../api/apiService";
 import {
   ADMIN_SETTINGS_UPDATED_EVENT,
   loadAdminSettings,

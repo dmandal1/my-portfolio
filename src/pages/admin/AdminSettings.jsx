@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import pkg from "../../../package.json";
 import { useAuth } from "../../contexts/AuthContext";
-import { saveAdminPanelSettings } from "../../firebase/blogService";
+import { saveAdminPanelSettings } from "../../api/apiService";
 import AdminSidebar from "./components/AdminSidebar";
 import {
   applyAdminTheme,

@@ -239,3 +239,27 @@
     padding: 0.75rem 1rem 0.75rem;
   }
 }
+
+@media (max-width: 480px) {
+  .ft-wave-box {
+    height: 28px;
+  }
+  .ft-name {
+    font-size: 1.2rem;
+  }
+  .ft-tagline {
+    font-size: 0.65rem;
+  }
+  .ft-social {
+    font-size: 1.4em;
+    gap: 4px;
+  }
+  .ft-icon-btn i {
+    height: 2rem;
+    width: 2rem;
+    font-size: 0.95rem;
+  }
+  .ft-credit {
+    font-size: 0.78rem;
+  }
+}

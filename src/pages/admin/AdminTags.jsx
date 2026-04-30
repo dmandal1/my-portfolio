@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import AdminSidebar from "./components/AdminSidebar";
 import { useToast } from "./components/AdminToast";
-import { createTag, deleteTag, getTags, updateTag } from "../../firebase/blogService";
+import { createTag, deleteTag, getTags, updateTag } from "../../api/apiService";
 import "./Admin.css";
 
 function slugify(str) {

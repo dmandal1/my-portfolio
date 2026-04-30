@@ -13,7 +13,7 @@ import php from "highlight.js/lib/languages/php";
 import go from "highlight.js/lib/languages/go";
 import ruby from "highlight.js/lib/languages/ruby";
 import "highlight.js/styles/github-dark.css";
-import { createBlog, createCategory, createTag, getCategories, getTags, getBlogById, listAllMedia, publishScheduledPosts, updateBlog, uploadCoverImage } from "../../firebase/blogService";
+import { createBlog, createCategory, createTag, getCategories, getTags, getBlogById, listAllMedia, publishScheduledPosts, updateBlog, uploadCoverImage } from "../../api/apiService";
 import AdminSidebar from "./components/AdminSidebar";
 import AdminDatePicker from "./components/AdminDatePicker";
 import { useToast } from "./components/AdminToast";
@@ -1049,6 +1049,7 @@ export default function AdminPostEditor() {
   const initialPublishedRef = useRef(false);
   const autoSaveTimer = useRef(null);
   const lastSavedId = useRef(null);
+  const savingManually = useRef(false); // ref-mirror of `saving` — readable inside async autosave callbacks
   const formRef = useRef(form); // always mirrors latest form — used inside auto-save timer to avoid stale closure
 
 
@@ -1068,6 +1069,20 @@ export default function AdminPostEditor() {
   const [contentImagePct, setContentImagePct] = useState(0);
   const coverInputRef = useRef(null);
   const contentImageInputRef = useRef(null);
+
+  /* Pending cover — file chosen but NOT yet uploaded to the server.
+   * Upload happens only when the post is actually saved/published. */
+  const [pendingCoverFile, setPendingCoverFile] = useState(null);
+  const [pendingCoverPreview, setPendingCoverPreview] = useState("");
+
+  /* Revoke the blob URL when a new file replaces it, or on unmount. */
+  const pendingCoverPreviewRef = useRef("");
+  useEffect(() => {
+    pendingCoverPreviewRef.current = pendingCoverPreview;
+  }, [pendingCoverPreview]);
+  useEffect(() => {
+    return () => { if (pendingCoverPreviewRef.current) URL.revokeObjectURL(pendingCoverPreviewRef.current); };
+  }, []);
 
   /* ── Live categories from Firestore ── */
   const [allCategories, setAllCategories]     = useState([]);
@@ -2730,8 +2745,8 @@ export default function AdminPostEditor() {
     };
   }, [toast, loading]); // loading added: editor div absent on initial mount in edit mode, must re-run once it appears
 
-  /* ── Cover image upload ── */
-  async function handleCoverUpload(e) {
+  /* ── Cover image — select locally, upload only on save ── */
+  function handleCoverUpload(e) {
     const file = e.target.files?.[0];
     if (!file) return;
     const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
@@ -2743,24 +2758,13 @@ export default function AdminPostEditor() {
       toast?.addToast(`Image must be under ${maxUploadSizeMb} MB.`, "error");
       return;
     }
-    setUploading(true);
-    setUploadPct(0);
-    try {
-      const url = await uploadCoverImage(
-        file,
-        (pct) => setUploadPct(Math.round(pct)),
-        form.image
-      );
-      setForm((prev) => ({ ...prev, image: url }));
-      toast?.addToast("Cover image uploaded!", "success");
-    } catch {
-      toast?.addToast("Upload failed. Check Firebase Storage rules.", "error");
-    } finally {
-      setUploading(false);
-      setUploadPct(0);
-      // Reset input so same file can be re-selected
-      if (coverInputRef.current) coverInputRef.current.value = "";
-    }
+    // Revoke previous pending blob URL to avoid memory leaks
+    if (pendingCoverPreviewRef.current) URL.revokeObjectURL(pendingCoverPreviewRef.current);
+    const preview = URL.createObjectURL(file);
+    setPendingCoverFile(file);
+    setPendingCoverPreview(preview);
+    // Reset input so same file can be re-selected later
+    if (coverInputRef.current) coverInputRef.current.value = "";
   }
 
   /* ── WYSIWYG helpers ── */
@@ -4221,6 +4225,7 @@ export default function AdminPostEditor() {
     autoSaveTimer.current = setTimeout(async () => {
       const currentForm = formRef.current;
       if (!currentForm.title.trim()) return;
+      if (savingManually.current) return; // manual save in progress — skip to avoid duplicate create
       setAutoSaveState("saving");
       try {
         const freshContentRaw = stripEditorUiArtifacts(contentEditableRef.current?.innerHTML ?? currentForm.content);
@@ -4260,6 +4265,8 @@ export default function AdminPostEditor() {
   /* ── Save ── */
   // mode: "draft" | "publish" | "review"
   async function handleSave(mode = "draft") {
+    clearTimeout(autoSaveTimer.current); // cancel any pending autosave so it can't race createBlog
+    savingManually.current = true;
     setError("");
     if (!form.title.trim()) { setError("Title is required."); return; }
     const publishLike = mode === "publish" || mode === "schedule";
@@ -4270,7 +4277,7 @@ export default function AdminPostEditor() {
         return;
       }
     }
-    if (publishLike && editorSettings.requireCoverBeforePublish && !form.image.trim()) {
+    if (publishLike && editorSettings.requireCoverBeforePublish && !form.image.trim() && !pendingCoverFile) {
       setError("Cover image is required before publishing (Settings → Content).");
       toast?.addToast("Add a cover image before publishing.", "error");
       return;
@@ -4293,6 +4300,34 @@ export default function AdminPostEditor() {
       return;
     }
     setSaving(true);
+
+    // Upload pending cover image now (deferred from selection time)
+    let resolvedImage = form.image;
+    if (pendingCoverFile) {
+      setUploading(true);
+      setUploadPct(0);
+      try {
+        resolvedImage = await uploadCoverImage(
+          pendingCoverFile,
+          (pct) => setUploadPct(Math.round(pct)),
+          form.image
+        );
+        URL.revokeObjectURL(pendingCoverPreview);
+        setPendingCoverFile(null);
+        setPendingCoverPreview("");
+        setForm((prev) => ({ ...prev, image: resolvedImage }));
+      } catch {
+        toast?.addToast("Cover image upload failed. Check server permissions and file size limits.", "error");
+        setSaving(false);
+        setUploading(false);
+        setUploadPct(0);
+        return;
+      } finally {
+        setUploading(false);
+        setUploadPct(0);
+      }
+    }
+
     // Always read the live DOM content at save-time so we never lose text
     // that was typed since the last debounced sync.
     const freshContentRaw = stripEditorUiArtifacts(contentEditableRef.current?.innerHTML ?? form.content);
@@ -4302,6 +4337,7 @@ export default function AdminPostEditor() {
 
     const payload = {
       ...form,
+      image: resolvedImage,
       content: freshContent,
       tags: form.tags.join(", "),
       published: willPublish,
@@ -4321,6 +4357,7 @@ export default function AdminPostEditor() {
         else                 toast?.addToast("Saved as draft.", "success");
       } else {
         const ref = await createBlog(payload);
+        lastSavedId.current = ref.id; // guard: prevents any stale autosave timer from creating a second post
         if (willSchedule) await publishScheduledPosts();
         if (willReview) toast?.addToast("Post created and submitted for review.", "success");
         else if (willSchedule) toast?.addToast("Post scheduled.", "success");
@@ -4332,6 +4369,7 @@ export default function AdminPostEditor() {
       setError("Failed to save. Please try again.");
       toast?.addToast("Save failed.", "error");
     }
+    savingManually.current = false;
     setSaving(false);
   }
 
@@ -4348,7 +4386,7 @@ export default function AdminPostEditor() {
     { label: "Scannable headings", done: headingCount >= 2 },
     { label: "Technical evidence included", done: codeBlockCount > 0 || hasTechnicalBlock },
     { label: "Tags and category selected", done: form.tags.length > 0 && form.categoryIds.length > 0 },
-    { label: "Featured image selected", done: Boolean(form.image) },
+    { label: "Featured image selected", done: Boolean(form.image) || Boolean(pendingCoverFile) },
   ];
   const completedChecks = editorChecks.filter((item) => item.done).length;
   const postSummary = {
@@ -6312,13 +6350,21 @@ export default function AdminPostEditor() {
                 </div>
                 {featPanelOpen && (
                   <>
-                    {form.image && (
+                    {(pendingCoverPreview || form.image) && (
                       <div className="aeditor-feat-img-wrap">
-                        <img src={form.image} alt="Featured" className="aeditor-feat-img" />
+                        <img src={pendingCoverPreview || form.image} alt="Featured" className="aeditor-feat-img" />
+                        {pendingCoverPreview && (
+                          <span style={{ position: "absolute", top: 6, left: 6, background: "rgba(0,0,0,.55)", color: "#fff", fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 4, pointerEvents: "none" }}>
+                            Not saved yet
+                          </span>
+                        )}
                         <button
                           type="button"
                           className="acover-remove-btn"
-                          onClick={() => setForm((p) => ({ ...p, image: "", imageAlt: "" }))}
+                          onClick={() => {
+                            if (pendingCoverPreview) { URL.revokeObjectURL(pendingCoverPreview); setPendingCoverPreview(""); setPendingCoverFile(null); }
+                            setForm((p) => ({ ...p, image: "", imageAlt: "" }));
+                          }}
                         >✕</button>
                       </div>
                     )}
@@ -6340,7 +6386,7 @@ export default function AdminPostEditor() {
                         style={{ width: "100%", justifyContent: "center", boxSizing: "border-box" }}
                         onClick={() => coverInputRef.current?.click()}
                       >
-                        {form.image ? "Change Featured Image" : "Set Featured Image"}
+                        {(pendingCoverPreview || form.image) ? "Change Featured Image" : "Set Featured Image"}
                       </button>
                       <input
                         ref={coverInputRef}
@@ -6456,9 +6502,9 @@ export default function AdminPostEditor() {
               <span className="apreview-label">📄 Preview</span>
               <button className="abtn abtn-ghost abtn-sm" onClick={() => setPreviewOpen(false)}>× Close</button>
             </div>
-            {form.image && (
+            {(pendingCoverPreview || form.image) && (
               <img
-                src={form.image}
+                src={pendingCoverPreview || form.image}
                 alt="Cover"
                 style={{ width: "100%", maxHeight: 320, objectFit: "cover" }}
               />

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import AdminSidebar from "./components/AdminSidebar";
-import { getAllBlogsAdmin, getComments, addComment, deleteComment } from "../../firebase/blogService";
+import { getAllBlogsAdmin, getComments, addComment, deleteComment } from "../../api/apiService";
 import { greeting } from "../../portfolio";
 import "./Admin.css";
 

@@ -6,7 +6,8 @@ import { chosenTheme, darkTheme } from "./theme";
 import { GlobalStyles } from "./global";
 
 const PORTFOLIO_THEME_PREVIEW_EVENT = "portfolioThemePreviewUpdated";
-const PORTFOLIO_DARK_MODE_KEY = "portfolioDarkMode";
+const PORTFOLIO_DARK_MODE_KEY       = "portfolioDarkMode";
+const API = import.meta.env.VITE_API_URL || "/api";
 
 function resolvePublicTheme() {
   if (typeof window === "undefined") return chosenTheme;
@@ -14,7 +15,27 @@ function resolvePublicTheme() {
 }
 
 function App() {
-  const [theme, setTheme] = useState(resolvePublicTheme);
+  const [theme, setTheme]             = useState(resolvePublicTheme);
+  const [installChecked, setChecked]  = useState(false);
+
+  // On mount: check if the site has been installed.
+  // If not, redirect the browser to the #/install route.
+  useEffect(() => {
+    fetch(`${API}/status.php`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (!d.installed && !window.location.hash.startsWith("#/install")) {
+          window.location.hash = "#/install";
+        }
+      })
+      .catch(() => {
+        // API unreachable — backend not yet uploaded; show installer anyway
+        if (!window.location.hash.startsWith("#/install")) {
+          window.location.hash = "#/install";
+        }
+      })
+      .finally(() => setChecked(true));
+  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute(
@@ -37,6 +58,10 @@ function App() {
     window.addEventListener(PORTFOLIO_THEME_PREVIEW_EVENT, onPreviewTheme);
     return () => window.removeEventListener(PORTFOLIO_THEME_PREVIEW_EVENT, onPreviewTheme);
   }, []);
+
+  // Show nothing until we know whether the site is installed.
+  // This prevents a flash of the portfolio before redirect to /install.
+  if (!installChecked) return null;
 
   return (
     <ThemeProvider theme={theme}>
