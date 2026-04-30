@@ -439,6 +439,12 @@ export const getContactPageData     = () => getSection('portfolioContactPageData
 export const saveContactPageData    = (d) => saveSection('portfolioContactPageData', d);
 export const getProjectsHeader      = () => getSection('portfolioProjectsHeader');
 export const saveProjectsHeader     = (d) => saveSection('portfolioProjectsHeader', d);
+export const getOpenSourceConfig    = () => getSection('portfolioOpenSource');
+export const saveOpenSourceConfig   = (d) => saveSection('portfolioOpenSource', d);
+export const getPodcastSection      = () => getSection('portfolioPodcast');
+export const savePodcastSection     = (d) => saveSection('portfolioPodcast', d);
+export const getBlogSectionConfig   = () => getSection('portfolioBlogSection');
+export const saveBlogSectionConfig  = (d) => saveSection('portfolioBlogSection', d);
 
 // ── Portfolio: collection sections ─────────────────────────────────────────
 function makeCollection(collectionName) {
@@ -503,3 +509,32 @@ export const getExperiences          = () => _exp.getAll();
 export const createExperience        = (d) => _exp.create(d);
 export const updateExperience        = (id, d) => _exp.update(id, d);
 export const deleteExperience        = (id) => _exp.remove(id);
+
+// ── Database management ────────────────────────────────────────────────────
+export const getDatabaseStats = () => apiFetch('/database.php?action=stats');
+
+export const optimizeDatabase = () =>
+  apiFetch('/database.php?action=optimize', { method: 'POST' });
+
+export const truncateTable = (table) =>
+  apiFetch(`/database.php?action=truncate&table=${encodeURIComponent(table)}`, { method: 'POST' });
+
+export async function downloadDatabaseBackup(table = '') {
+  const { getToken } = await import('./config');
+  const token = getToken();
+  const query = table ? `&table=${encodeURIComponent(table)}` : '';
+  const res = await fetch(`${API_BASE}/database.php?action=backup${query}`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) throw new Error('Backup failed');
+  const blob = await res.blob();
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = table
+    ? `portfolio_table_${table}_${new Date().toISOString().slice(0,10)}.sql`
+    : `portfolio_backup_${new Date().toISOString().slice(0,10)}.sql`;
+  a.click();
+  URL.revokeObjectURL(url);
+}

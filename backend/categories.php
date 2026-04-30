@@ -11,8 +11,20 @@ if ($method === 'GET') {
 
     $rows = $db->query('SELECT * FROM categories ORDER BY name ASC')->fetchAll();
 
+    // Normalise snake_case DB columns → camelCase for the frontend
+    $rows = array_map(fn($r) => [
+        'id'          => $r['id'],
+        'name'        => $r['name'],
+        'slug'        => $r['slug'],
+        'parentId'    => $r['parent_id'] ?: null,
+        'description' => $r['description'] ?? '',
+        'postCount'   => (int)($r['post_count'] ?? 0),
+        'createdAt'   => $r['created_at']  ?? null,
+        'updatedAt'   => $r['updated_at']  ?? null,
+    ], $rows);
+
     if ($withCounts) {
-        // Count published blogs per category
+        // Count published blogs per category (overrides the stored post_count)
         $blogRows = $db->query('SELECT category_id, category_ids FROM blogs')->fetchAll();
         $counts   = [];
         foreach ($blogRows as $b) {

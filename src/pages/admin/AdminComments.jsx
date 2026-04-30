@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import AdminSidebar from "./components/AdminSidebar";
 import { getAllBlogsAdmin, getComments, addComment, deleteComment } from "../../api/apiService";
-import { greeting } from "../../portfolio";
+import { usePortfolioData } from "../../contexts/PortfolioDataContext";
 import "./Admin.css";
 
 function formatDate(ts) {
@@ -42,7 +42,8 @@ export default function AdminComments() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting]     = useState(false);
 
-  const authorName = greeting.logo_name || "Author";
+  const { profile } = usePortfolioData();
+  const authorName = profile?.logo_name || profile?.title || "Author";
   const location = useLocation();
 
   useEffect(() => {

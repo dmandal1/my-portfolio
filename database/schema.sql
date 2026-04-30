@@ -96,6 +96,19 @@ CREATE TABLE IF NOT EXISTS admin_settings (
     updated_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- ── Admin audit trail ────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS admin_audit_events (
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    action       VARCHAR(80)  NOT NULL,
+    target       VARCHAR(255) DEFAULT '',
+    details_json LONGTEXT,
+    ip_address   VARCHAR(64)  DEFAULT '',
+    user_agent   VARCHAR(255) DEFAULT '',
+    created_at   TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_created_at (created_at),
+    INDEX idx_action     (action)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- ── Author followers ──────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS author_followers (
     client_id   VARCHAR(255) PRIMARY KEY,

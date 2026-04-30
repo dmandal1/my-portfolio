@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { subscribeToBlogs, deleteBlog, publishScheduledPosts, updateBlog, getCategories, getTags, subscribeToRecentComments, deleteComment, addComment } from "../../api/apiService";
-import { greeting } from "../../portfolio";
+import { usePortfolioData } from "../../contexts/PortfolioDataContext";
 import AdminSidebar from "./components/AdminSidebar";
 import { useAdminSettings } from "./components/useAdminSettings";
 import { useToast } from "./components/AdminToast";
@@ -148,6 +148,7 @@ function EditActions({ blog, onDelete, onQuickEdit }) {
 export default function AdminHome() {
   const toast = useToast();
   const adminSettings = useAdminSettings();
+  const { profile } = usePortfolioData();
   const [blogs, setBlogs]     = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal]     = useState(null); // { id, title }
@@ -177,7 +178,7 @@ export default function AdminHome() {
   const [replyText, setReplyText] = useState("");
   const [replyPosting, setReplyPosting] = useState(false);
 
-  const authorName = greeting.logo_name || "Author";
+  const authorName = profile?.logo_name || profile?.title || "Author";
 
 
   useEffect(() => {

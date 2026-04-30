@@ -33,9 +33,10 @@ const NAV_ITEMS = [
   { to: "/admin/editorial-planner", icon: "far fa-calendar-alt", label: "Planner" },
   { to: "/admin/content-audit", icon: "fas fa-clipboard-check", label: "Audit" },
   { divider: true, key: "d3" },
-  { to: "/admin/portfolio",      icon: "fas fa-user-circle",  label: "Portfolio" },
+  { to: "/admin/portfolio",  icon: "fas fa-user-circle",   label: "Portfolio" },
   { divider: true, key: "d4" },
-  { to: "/admin/settings",   icon: "fas fa-cog",         label: "Settings" },
+  { to: "/admin/database",   icon: "fas fa-database",      label: "Database" },
+  { to: "/admin/settings",   icon: "fas fa-cog",           label: "Settings" },
 ];
 
 const SEARCH_LINKS = [
@@ -50,7 +51,8 @@ const SEARCH_LINKS = [
   { to: "/admin/editorial-planner", label: "Editorial Planner", icon: "far fa-calendar-alt" },
   { to: "/admin/content-audit", label: "Content Audit", icon: "fas fa-clipboard-check" },
   { to: "/admin/portfolio", label: "Portfolio Content", icon: "fas fa-user-circle" },
-  { to: "/admin/settings", label: "Settings", icon: "fas fa-cog" },
+  { to: "/admin/database",  label: "Database",          icon: "fas fa-database" },
+  { to: "/admin/settings",  label: "Settings",          icon: "fas fa-cog" },
 ];
 
 const ADMIN_NOTIF_LAST_READ_KEY = "adminNotifLastReadAt";

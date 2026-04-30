@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { greeting, socialMediaLinks, contactInfo, experience } from "../../portfolio";
+import { usePortfolioData } from "../../contexts/PortfolioDataContext";
 import profilePhoto from "../../assests/images/deepak_mandal.jpeg";
 import "./PortfolioMaintenance.css";
 
@@ -84,8 +84,8 @@ const FEATURED_SOCIALS = ["Github", "LinkedIn", "Twitter", "Gmail"];
 const PARTICLE_COUNT = 16;
 const PARTICLES = Array.from({ length: PARTICLE_COUNT }, (_, i) => i);
 
-function getCurrentExperience() {
-  const workItems = experience?.sections?.flatMap(section => section.experiences || []) || [];
+function getCurrentExperience(experiences) {
+  const workItems = experiences?.flatMap(section => section.experiences || []) || [];
   return workItems.find(item => /present/i.test(item.duration || "")) || workItems[0] || null;
 }
 
@@ -95,6 +95,7 @@ function formatRole(role) {
 
 /* ── Main ── */
 export default function PortfolioMaintenancePage({ settings = {}, theme = {} }) {
+  const { profile, socialLinks, contactInfo, experiences } = usePortfolioData();
   const title      = settings.portfolioMaintenanceTitle    || "Portfolio is under maintenance";
   const message    = settings.portfolioMaintenanceMessage  || "I'm making some updates. Please check back shortly.";
   const contactUrl = settings.portfolioMaintenanceContactUrl?.trim() || "";
@@ -209,14 +210,14 @@ export default function PortfolioMaintenancePage({ settings = {}, theme = {} }) 
   const mx = mousePos.x, my = mousePos.y;
 
   /* Filtered socials */
-  const socials = (socialMediaLinks || []).filter(s => FEATURED_SOCIALS.includes(s.name));
+  const socials = (socialLinks || []).filter(s => FEATURED_SOCIALS.includes(s.name));
 
-  const resumeLink = greeting?.resumeLink || "";
-  const githubLink = greeting?.githubProfile || "";
+  const resumeLink = profile?.resumeLink || "";
+  const githubLink = profile?.githubProfile || "";
   const email      = contactInfo?.email_address || "me@deepakmandal.dev";
-  const authorName = greeting?.title || "Deepak Mandal";
-  const currentExperience = getCurrentExperience();
-  const authorRole = formatRole(currentExperience?.title || greeting?.job_profile?.split(" | ")[0] || "Full Stack Developer");
+  const authorName = profile?.title || "Deepak Mandal";
+  const currentExperience = getCurrentExperience(experiences);
+  const authorRole = formatRole(currentExperience?.title || profile?.job_profile?.split(" | ")[0] || "Full Stack Developer");
   const authorCompany = currentExperience?.company || "";
   const authorLocation = currentExperience?.location || "Noida, India";
   const authorInitial = authorName.charAt(0).toUpperCase();

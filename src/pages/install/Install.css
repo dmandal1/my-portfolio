@@ -240,7 +240,7 @@
 
 /* ── Card Hero ─────────────────── */
 .ins-card-hero {
-  padding: 48px 64px 36px;
+  padding: 32px 64px 28px;
   background: linear-gradient(135deg, #eef4ff 0%, #f5f8ff 50%, #ffffff 100%);
   border-bottom: 1px solid var(--border);
   display: flex;
@@ -304,7 +304,7 @@
 
 /* Step panel — content below hero */
 .ins-step-panel {
-  padding: 40px 64px 56px;
+  padding: 28px 64px 36px;
   max-width: 1100px;
   animation: ins-step-enter 0.36s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
@@ -316,7 +316,7 @@
 .ins-section-label {
   font-size: 11px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.09em;
-  color: var(--muted); margin: 32px 0 14px;
+  color: var(--muted); margin: 20px 0 12px;
 }
 .ins-section-label:first-of-type { margin-top: 0; }
 
@@ -371,7 +371,7 @@
 }
 .ins-fields-grid .ins-field--full { grid-column: 1 / -1; }
 
-.ins-field { margin-bottom: 22px; }
+.ins-field { margin-bottom: 16px; }
 
 .ins-field-label {
   display: flex; align-items: baseline; gap: 7px;
@@ -439,7 +439,7 @@
    ═══════════════════════════════════════════════════════════════════ */
 .ins-btn-row {
   display: flex; justify-content: flex-end; align-items: center;
-  gap: 12px; margin-top: 40px; padding-top: 28px;
+  gap: 12px; margin-top: 24px; padding-top: 20px;
   border-top: 1px solid var(--border); flex-wrap: wrap;
 }
 
@@ -626,15 +626,15 @@
 .ins-spin-sm--blue { border: 2.5px solid var(--border); border-top-color: var(--blue); }
 
 /* ── Divider ── */
-.ins-divider { height: 1px; background: var(--border); margin: 24px 0; }
+.ins-divider { height: 1px; background: var(--border); margin: 16px 0; }
 
 /* ═══════════════════════════════════════════════════════════════════
    RESPONSIVE ≤ 1100px
    ═══════════════════════════════════════════════════════════════════ */
 @media (max-width: 1100px) {
   .ins-sidebar      { --sb-width: 260px; padding: 36px 22px 28px; }
-  .ins-card-hero    { padding: 40px 40px 32px; }
-  .ins-step-panel   { padding: 36px 40px 48px; }
+  .ins-card-hero    { padding: 28px 40px 24px; }
+  .ins-step-panel   { padding: 24px 40px 32px; }
   .ins-req-grid     { grid-template-columns: repeat(2, 1fr); }
 }
 
@@ -643,9 +643,9 @@
    ═══════════════════════════════════════════════════════════════════ */
 @media (max-width: 900px) {
   .ins-sidebar      { --sb-width: 230px; padding: 28px 18px 24px; }
-  .ins-card-hero    { padding: 32px 28px 28px; gap: 18px; }
+  .ins-card-hero    { padding: 24px 28px 20px; gap: 18px; }
   .ins-card-hero-icon { width: 56px; height: 56px; border-radius: 16px; }
-  .ins-step-panel   { padding: 28px 28px 40px; }
+  .ins-step-panel   { padding: 22px 28px 30px; }
   .ins-fields-grid  { grid-template-columns: 1fr; }
   .ins-fields-grid .ins-field--full { grid-column: span 1; }
   .ins-req-grid     { grid-template-columns: 1fr 1fr; }
@@ -701,6 +701,31 @@
 
   .ins-success-btns { flex-direction: column; align-items: center; width: 100%; }
   .ins-success-btns .ins-btn { width: 100%; max-width: 300px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SHORT SCREENS — prevent inner scroll on step 3
+   ═══════════════════════════════════════════════════════════════════ */
+@media (max-height: 800px) {
+  .ins-card-hero    { padding: 22px 64px 20px; }
+  .ins-card-hero-icon { width: 56px; height: 56px; border-radius: 16px; }
+  .ins-card-title   { font-size: 22px; }
+  .ins-step-panel   { padding: 20px 64px 28px; }
+  .ins-section-label { margin: 14px 0 10px; }
+  .ins-field        { margin-bottom: 12px; }
+  .ins-input        { padding: 10px 14px; font-size: 13.5px; }
+  .ins-btn-row      { margin-top: 16px; padding-top: 16px; }
+  .ins-divider      { margin: 12px 0; }
+}
+@media (max-height: 680px) {
+  .ins-card-hero    { padding: 16px 64px 14px; }
+  .ins-card-hero-icon { width: 48px; height: 48px; }
+  .ins-card-title   { font-size: 19px; margin-bottom: 2px; }
+  .ins-card-sub     { font-size: 13px; }
+  .ins-step-panel   { padding: 16px 64px 20px; }
+  .ins-field        { margin-bottom: 10px; }
+  .ins-input        { padding: 9px 12px; }
+  .ins-btn-row      { margin-top: 12px; padding-top: 12px; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════

@@ -22,6 +22,7 @@ import AdminTags from "../pages/admin/AdminTags";
 import AdminSettings from "../pages/admin/AdminSettings";
 import AdminAnalytics from "../pages/admin/AdminAnalytics";
 import AdminPortfolio from "../pages/admin/AdminPortfolio";
+import AdminDatabase from "../pages/admin/AdminDatabase";
 import Install from "../pages/install/Install";
 import { PortfolioDataProvider } from "../contexts/PortfolioDataContext";
 import AdminContentAudit from "../pages/admin/AdminContentAudit";
@@ -215,6 +216,17 @@ const commonRoutes = (theme, onToggle) => (
         <ProtectedRoute>
           <ToastProvider>
             <AdminEditorialPlanner />
+          </ToastProvider>
+        </ProtectedRoute>
+      }
+    />
+
+    <Route
+      path="/admin/database"
+      element={
+        <ProtectedRoute>
+          <ToastProvider>
+            <AdminDatabase />
           </ToastProvider>
         </ProtectedRoute>
       }

@@ -474,10 +474,11 @@ export default function AdminCategories() {
                   {[1,2,3,4,5].map((i) => (
                     <div key={i} className="acat-skel-row">
                       <div className="askel askel-av" style={{ width: 18, height: 18, borderRadius: 3 }} />
-                      <div className="askel askel-line" style={{ width: "22%", flex: "0 0 auto" }} />
+                      <div className="askel askel-line" style={{ width: "18%", flex: "0 0 auto" }} />
+                      <div className="askel askel-line" style={{ width: "14%", flex: "0 0 auto" }} />
                       <div className="askel askel-line" style={{ flex: 1 }} />
                       <div className="askel askel-line" style={{ width: "12%", flex: "0 0 auto" }} />
-                      <div className="askel askel-line" style={{ width: 56, flex: "0 0 auto" }} />
+                      <div className="askel askel-line" style={{ width: 40, flex: "0 0 auto" }} />
                     </div>
                   ))}
                 </div>
@@ -487,6 +488,7 @@ export default function AdminCategories() {
                     <colgroup>
                       <col className="acat-col-check" />
                       <col className="acat-col-name" />
+                      <col className="acat-col-parent" />
                       <col className="acat-col-desc" />
                       <col className="acat-col-slug" />
                       <col className="acat-col-posts" />
@@ -510,6 +512,7 @@ export default function AdminCategories() {
                             Name <SortIcon col="name" />
                           </button>
                         </th>
+                        <th>Parent</th>
                         <th>Description</th>
                         <th>Slug</th>
                         <th>
@@ -527,6 +530,7 @@ export default function AdminCategories() {
                       <colgroup>
                         <col className="acat-col-check" />
                         <col className="acat-col-name" />
+                        <col className="acat-col-parent" />
                         <col className="acat-col-desc" />
                         <col className="acat-col-slug" />
                         <col className="acat-col-posts" />
@@ -535,7 +539,7 @@ export default function AdminCategories() {
                       <tbody>
                         {sorted.length === 0 ? (
                           <tr>
-                            <td colSpan={6} className="acat-empty-row">
+                            <td colSpan={7} className="acat-empty-row">
                               <div className="acat-empty-state">
                                 <span className="acat-empty-icon">
                                   {catSearch ? "🔍" : "🗂️"}
@@ -583,16 +587,23 @@ export default function AdminCategories() {
                                 <td>
                                   <div className="acat-name-cell">
                                     <span className="acat-name-link">{cat.name}</span>
-                                    {pLabel && (
-                                      <span className="acat-parent-badge">
-                                        <i className="fas fa-level-up-alt" style={{ fontSize: 9, marginRight: 3, opacity: 0.7 }} />
-                                        {pLabel}
-                                      </span>
-                                    )}
                                     {isEditing && (
                                       <span className="acat-editing-badge">editing</span>
                                     )}
                                   </div>
+                                </td>
+                                <td className="acat-parent-cell">
+                                  {pLabel ? (
+                                    <span className="acat-parent-pill">
+                                      <i className="fas fa-sitemap" />
+                                      {pLabel}
+                                    </span>
+                                  ) : (
+                                    <span className="acat-toplevel-pill">
+                                      <i className="fas fa-layer-group" />
+                                      Top-level
+                                    </span>
+                                  )}
                                 </td>
                                 <td className="acat-desc-cell">
                                   {cat.description

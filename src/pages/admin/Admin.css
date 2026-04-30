@@ -30,6 +30,11 @@
   --atxt2: #4a6fa5;
   --amut: #6b8cba;
 
+  /* Utility aliases used across admin pages */
+  --ap-muted: #6b8cba;
+  --ap-soft: rgba(21, 101, 192, 0.06);
+  --ap-accent: #1565c0;
+
   /* Semantic colors */
   --ok: #00897b;
   --ok-bg: #e0f2f1;
@@ -9666,6 +9671,19 @@
   --atxt2: #94a3b8;
   --amut: #64748b;
   --aborder: rgba(255, 255, 255, 0.09);
+
+  /* Semantic colour overrides for dark backgrounds */
+  --ok: #26a69a;
+  --ok-bg: rgba(38, 166, 154, 0.12);
+  --ok-bdr: rgba(38, 166, 154, 0.35);
+  --err: #ef5350;
+  --err-bg: rgba(239, 83, 80, 0.12);
+  --err-bdr: rgba(239, 83, 80, 0.35);
+
+  /* Utility aliases — dark overrides */
+  --ap-muted: #64748b;
+  --ap-soft: rgba(255, 255, 255, 0.06);
+  --ap-accent: #60a5fa;
   --ahover: rgba(255, 255, 255, 0.06);
   --sh-xs: 0 1px 3px rgba(0, 0, 0, 0.3);
   --sh-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
@@ -13403,15 +13421,46 @@
   color: #2271b1;
 }
 .acat-parent-badge {
-  display: inline-block;
+  display: inline-flex; align-items: center; gap: 4px;
   margin-left: 6px;
   font-size: 0.72rem;
-  color: #64748b;
-  background: var(--abg2, #f1f5f9);
-  border: 1px solid var(--aborder, #e5e7eb);
+  color: #1565c0;
+  background: rgba(21,101,192,0.08);
+  border: 1px solid rgba(21,101,192,0.2);
   border-radius: 4px;
-  padding: 1px 6px;
+  padding: 1px 7px;
+  font-weight: 600;
 }
+
+/* Dedicated parent column pills */
+.acat-col-parent { min-width: 120px; }
+
+.acat-parent-cell { white-space: nowrap; }
+
+.acat-parent-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px; font-weight: 600;
+  background: rgba(21,101,192,0.08);
+  color: #1565c0;
+  border: 1px solid rgba(21,101,192,0.20);
+  white-space: nowrap;
+  max-width: 160px; overflow: hidden; text-overflow: ellipsis;
+}
+.acat-parent-pill i { font-size: 10px; flex-shrink: 0; }
+
+.acat-toplevel-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px; font-weight: 500;
+  background: transparent;
+  color: var(--amut, #6b8cba);
+  border: 1px solid var(--abdr, #e5e7eb);
+  white-space: nowrap;
+}
+.acat-toplevel-pill i { font-size: 10px; flex-shrink: 0; opacity: 0.6; }
 .acat-none {
   color: #94a3b8;
 }
@@ -13869,6 +13918,118 @@
   color: #dc2626;
 }
 
+/* ── Database page: stat cards ── */
+.acat-stat-card {
+  background: var(--acard);
+  border: 1px solid var(--abdr);
+  border-radius: 10px;
+  padding: 16px 18px;
+  box-shadow: var(--sh-xs);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+.acat-stat-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.acat-stat-body {
+  min-width: 0;
+  flex: 1;
+}
+.acat-stat-label {
+  font-size: 0.75rem;
+  color: var(--ap-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 3px;
+}
+.acat-stat-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--atxt);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Database page: table body wrap standalone ── */
+.acat-table-body-wrap {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: clamp(300px, 55vh, 600px);
+}
+
+/* ── Database page: empty / loading state ── */
+.acat-empty {
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--ap-muted);
+  font-size: 0.9rem;
+}
+.acat-empty p { margin: 4px 0 0; }
+
+/* ── Database page: danger ghost button border ── */
+.abtn-ghost-danger {
+  border-color: #ffcdd2 !important;
+  color: #c62828 !important;
+}
+[data-admin-theme="dark"] .abtn-ghost-danger {
+  border-color: rgba(239, 154, 154, 0.4) !important;
+  color: #ef9a9a !important;
+}
+[data-admin-theme="dark"] .abtn-ghost-danger:hover:not(:disabled) {
+  background: rgba(198, 40, 40, 0.12) !important;
+}
+
+/* ── Database page: danger confirm box ── */
+.adb-confirm-box {
+  background: #fff5f5;
+  border: 1px solid #ffcdd2;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+[data-admin-theme="dark"] .adb-confirm-box {
+  background: rgba(198, 40, 40, 0.12);
+  border-color: rgba(198, 40, 40, 0.35);
+}
+
+/* ── Database page: backup icon ── */
+.adb-backup-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(21, 101, 192, 0.08);
+  color: #1565c0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+[data-admin-theme="dark"] .adb-backup-icon {
+  background: rgba(96, 165, 250, 0.12);
+  color: #60a5fa;
+}
+
+/* ── Database page: stat icon brightness in dark mode ── */
+[data-admin-theme="dark"] .acat-stat-icon {
+  filter: brightness(1.35);
+}
+
+@media (max-width: 860px) {
+  .adb-two-col {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 /* ── dark mode ── */
 [data-admin-theme="dark"] .acat-form-card,
 [data-admin-theme="dark"] .acat-table-card,
@@ -13967,9 +14128,18 @@
   color: #60a5fa;
 }
 [data-admin-theme="dark"] .acat-parent-badge {
-  background: #273045;
-  border-color: rgba(255, 255, 255, 0.08);
-  color: #94a3b8;
+  background: rgba(96,165,250,0.10);
+  border-color: rgba(96,165,250,0.22);
+  color: #60a5fa;
+}
+[data-admin-theme="dark"] .acat-parent-pill {
+  background: rgba(96,165,250,0.10);
+  border-color: rgba(96,165,250,0.22);
+  color: #60a5fa;
+}
+[data-admin-theme="dark"] .acat-toplevel-pill {
+  border-color: rgba(255,255,255,0.10);
+  color: #64748b;
 }
 [data-admin-theme="dark"] .acat-slug {
   background: #273045;

@@ -12,6 +12,9 @@ import {
   certifications as defaultCertifications,
   experience as defaultExperience,
   projectsHeader as defaultProjectsHeader,
+  openSource as defaultOpenSource,
+  blogSection as defaultBlogSection,
+  podcastSection as defaultPodcastSection,
 } from "../portfolio";
 import {
   getPortfolioProfile,
@@ -27,6 +30,9 @@ import {
   getExperienceHeader,
   getContactPageData,
   getProjectsHeader,
+  getOpenSourceConfig,
+  getPodcastSection,
+  getBlogSectionConfig,
 } from "../api/apiService";
 
 const PortfolioDataContext = createContext(null);
@@ -50,6 +56,9 @@ export function PortfolioDataProvider({ children }) {
       description: defaultExperience.description,
     },
     projectsHeader:   defaultProjectsHeader,
+    openSource:       defaultOpenSource,
+    podcastSection:   defaultPodcastSection,
+    blogSectionConfig: defaultBlogSection,
   });
 
   useEffect(() => {
@@ -60,6 +69,7 @@ export function PortfolioDataProvider({ children }) {
           degrees, competitive, projects, skills,
           certifications, experiences, experienceHeader,
           contactPageData, projectsHeader,
+          openSource, podcastSection, blogSectionConfig,
         ] = await Promise.all([
           getPortfolioProfile(),
           getPortfolioSeo(),
@@ -74,6 +84,9 @@ export function PortfolioDataProvider({ children }) {
           getExperienceHeader(),
           getContactPageData(),
           getProjectsHeader(),
+          getOpenSourceConfig(),
+          getPodcastSection(),
+          getBlogSectionConfig(),
         ]);
 
         // Build experience sections from flat array
@@ -107,6 +120,9 @@ export function PortfolioDataProvider({ children }) {
           },
           contactPageData:  contactPageData  || defaultContactPageData,
           projectsHeader:   projectsHeader   || defaultProjectsHeader,
+          openSource:       openSource       || defaultOpenSource,
+          podcastSection:   podcastSection   || defaultPodcastSection,
+          blogSectionConfig: blogSectionConfig || defaultBlogSection,
         });
       } catch { /* keep portfolio.js defaults on any error */ }
     }
