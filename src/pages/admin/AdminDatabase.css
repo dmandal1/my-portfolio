@@ -213,20 +213,22 @@
   gap: 0;
   padding: 0 28px;
   margin: 0 0 24px;
-  border-left: 1px solid var(--abdr);
+  border-top: 1px solid var(--abdr);
   border-bottom: 1px solid var(--abdr);
   background: color-mix(in srgb, var(--ap-accent) 3%, var(--acard));
 }
 .adb-insight {
   min-width: 0;
   background: transparent;
-  border-top: 1px solid color-mix(in srgb, var(--abdr) 70%, transparent);
   border-right: 1px solid color-mix(in srgb, var(--abdr) 70%, transparent);
   padding: 12px 18px 14px;
   display: flex;
   flex-direction: column;
   gap: 3px;
   transition: background .15s;
+}
+.adb-insight:last-child {
+  border-right: none;
 }
 .adb-insight:hover { background: color-mix(in srgb, var(--ap-accent) 4%, transparent); }
 .adb-insight-label {
@@ -956,6 +958,8 @@ tr:hover .adb-tname {
   .adb-right > .adb-panel--danger .adb-danger-wrap { overflow-y: visible; }
   .adb-cards-row { grid-template-columns: repeat(3, 1fr); margin-bottom: 20px; }
   .adb-insights { grid-template-columns: repeat(2, 1fr); }
+  .adb-insight:nth-child(n+3) { border-top: 1px solid color-mix(in srgb, var(--abdr) 70%, transparent); }
+  .adb-insight:nth-child(2n) { border-right: none; }
 
   .adb-banner { padding: 24px 20px 30px; }
   .adb-banner-title { font-size: 22px; }
@@ -1002,6 +1006,8 @@ tr:hover .adb-tname {
 
   .adb-cards-row { grid-template-columns: 1fr; }
   .adb-insights { grid-template-columns: 1fr; margin-bottom: 18px; }
+  .adb-insight { border-right: none; }
+  .adb-insight:nth-child(n+2) { border-top: 1px solid color-mix(in srgb, var(--abdr) 70%, transparent); }
 
   .adb-audit-panel { margin: 0 12px 18px; }
   .adb-audit-grid { grid-template-columns: 1fr; padding: 16px; }
