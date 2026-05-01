@@ -209,16 +209,13 @@
 .aLogin-panel--brand {
   flex: 1;
   min-width: 0;
-  background: linear-gradient(
-    145deg,
-    #0d47a1 0%,
-    #1565c0 40%,
-    #1976d2 70%,
-    #42a5f5 100%
-  );
+  background: #0f172a;
   position: relative;
   overflow: hidden;
   padding: clamp(32px, 6vh, 64px) clamp(28px, 6vw, 72px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 /* Subtle background orbs */
@@ -226,55 +223,60 @@
   position: absolute;
   border-radius: 50%;
   pointer-events: none;
+  filter: blur(80px);
+  opacity: 0.5;
+  animation: floatOrb 12s ease-in-out infinite alternate;
+}
+@keyframes floatOrb {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(30px, -40px) scale(1.1); }
 }
 .aLogin-brand-orb--1 {
-  width: 420px;
-  height: 420px;
-  background: rgba(255, 255, 255, 0.06);
-  top: -120px;
-  right: -120px;
+  width: 600px; height: 600px;
+  background: #3b82f6;
+  top: -200px; right: -100px;
+  animation-delay: 0s;
 }
 .aLogin-brand-orb--2 {
-  width: 280px;
-  height: 280px;
-  background: rgba(255, 255, 255, 0.05);
-  bottom: -80px;
-  left: -80px;
+  width: 500px; height: 500px;
+  background: #8b5cf6;
+  bottom: -150px; left: -100px;
+  animation-delay: -4s;
 }
 .aLogin-brand-orb--3 {
-  width: 160px;
-  height: 160px;
-  background: rgba(66, 165, 245, 0.18);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  width: 400px; height: 400px;
+  background: #06b6d4;
+  top: 40%; left: 30%;
+  animation-delay: -8s;
 }
 
 .aLogin-brand-inner {
   position: relative;
-  z-index: 1;
-  max-width: 480px;
-  animation: fadeUp 0.5s both;
+  z-index: 10;
+  max-width: 520px;
+  animation: fadeUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 .aLogin-brand-logo {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 72px;
-  height: 72px;
-  background: rgba(255, 255, 255, 0.15);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 18px;
-  font-size: 24px;
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 24px;
+  font-size: 28px;
   font-weight: 900;
   letter-spacing: -1px;
-  margin-bottom: 28px;
-  backdrop-filter: blur(8px);
+  margin-bottom: 36px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15), inset 0 0 0 1px rgba(255,255,255,0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 .aLogin-brand-logo .aLogin-logo-lt,
 .aLogin-brand-logo .aLogin-logo-gt {
-  color: #bbdefb;
+  color: #93c5fd;
 }
 .aLogin-brand-logo .aLogin-logo-sl {
   color: #fff;
@@ -282,51 +284,76 @@
 }
 
 .aLogin-brand-title {
-  font-size: 36px;
-  font-weight: 700;
+  font-size: clamp(32px, 4vw, 44px);
+  font-weight: 800;
   color: #fff;
-  margin: 0 0 10px;
-  line-height: 1.2;
-  letter-spacing: -0.5px;
+  margin: 0 0 12px;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  background: linear-gradient(to right, #ffffff, #93c5fd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 .aLogin-brand-sub {
-  font-size: 15px;
-  color: rgba(255, 255, 255, 0.72);
-  margin: 0 0 32px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #94a3b8;
+  margin: 0 0 36px;
+  letter-spacing: 0.2px;
 }
 .aLogin-brand-divider {
-  width: 48px;
-  height: 3px;
-  background: rgba(255, 255, 255, 0.4);
-  border-radius: 3px;
-  margin-bottom: 28px;
+  display: none;
 }
 .aLogin-brand-quote {
-  font-size: 15px;
-  color: rgba(255, 255, 255, 0.65);
-  line-height: 1.7;
-  max-width: 380px;
+  font-size: 16px;
+  color: #cbd5e1;
+  line-height: 1.6;
+  max-width: 420px;
   margin: 0;
+  padding-left: 18px;
+  border-left: 3px solid #3b82f6;
 }
 .aLogin-brand-features {
-  margin-top: 40px;
+  margin-top: 48px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 .aLogin-brand-feature {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 13.5px;
-  color: rgba(255, 255, 255, 0.75);
+  gap: 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 12px 18px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  font-size: 14.5px;
+  font-weight: 500;
+  color: #e2e8f0;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+.aLogin-brand-feature:hover {
+  transform: translateX(6px);
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.15);
 }
 .aLogin-brand-feature-dot {
-  width: 6px;
-  height: 6px;
-  background: #bbdefb;
-  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
   flex-shrink: 0;
+}
+.aLogin-brand-feature-dot::after {
+  content: "\2713";
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
 }
 
 /* ── Right: Form panel ──────────────────────────────────────── */
