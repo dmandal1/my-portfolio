@@ -29,6 +29,9 @@ export async function apiFetch(path, options = {}) {
   });
 
   if (!res.ok) {
+    if (res.status === 401) {
+      window.dispatchEvent(new Event('unauthorized_api_call'));
+    }
     let msg = `API error ${res.status}`;
     try { const j = await res.json(); msg = j.error || msg; } catch {}
     const err = new Error(msg);
@@ -48,6 +51,9 @@ export async function apiUpload(path, formData) {
   });
 
   if (!res.ok) {
+    if (res.status === 401) {
+      window.dispatchEvent(new Event('unauthorized_api_call'));
+    }
     let msg = `Upload error ${res.status}`;
     try { const j = await res.json(); msg = j.error || msg; } catch {}
     const err = new Error(msg);

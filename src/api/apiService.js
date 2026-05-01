@@ -527,6 +527,9 @@ export const optimizeDatabase = () =>
 export const truncateTable = (table) =>
   apiFetch(`/database.php?action=truncate&table=${encodeURIComponent(table)}`, { method: 'POST' });
 
+export const restoreDatabaseTable = (auditId) =>
+  apiFetch(`/database.php?action=restore&id=${auditId}`, { method: 'POST' });
+
 export async function downloadDatabaseBackup(table = '') {
   const { getToken } = await import('./config');
   const token = getToken();

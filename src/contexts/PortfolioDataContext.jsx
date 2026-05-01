@@ -62,6 +62,8 @@ export function PortfolioDataProvider({ children }) {
   });
 
   useEffect(() => {
+    if (window.location.hash.startsWith("#/install")) return;
+
     async function load() {
       try {
         const [

@@ -15,7 +15,7 @@ if ($method === 'GET' && $section) {
     $stmt = $db->prepare('SELECT data_json FROM portfolio_sections WHERE section_name = ?');
     $stmt->execute([$section]);
     $row = $stmt->fetch();
-    jsonResponse($row ? (json_decode($row['data_json'], true) ?? []) : null);
+    jsonResponse($row ? (json_decode($row['data_json'], true) ?? []) : []);
 }
 
 // ── Single-doc sections (POST/PUT) ────────────────────────────────────────

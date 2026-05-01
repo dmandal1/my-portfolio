@@ -9,7 +9,7 @@ $db     = getDb();
 if ($method === 'GET') {
     $row = $db->query('SELECT settings_json FROM admin_settings WHERE id = 1')->fetch();
     $settings = $row ? json_decode($row['settings_json'], true) : [];
-    jsonResponse($settings ?: (object)[]);
+    jsonResponse($settings ?: []);
 }
 
 if ($method === 'POST') {

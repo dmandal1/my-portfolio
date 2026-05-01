@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import AdminSidebar from "./components/AdminSidebar";
 import { useToast } from "./components/AdminToast";
 import {
@@ -6,6 +7,7 @@ import {
   optimizeDatabase,
   truncateTable,
   downloadDatabaseBackup,
+  restoreDatabaseTable,
 } from "../../api/apiService";
 import "./Admin.css";
 import "./AdminDatabase.css";
@@ -59,9 +61,11 @@ export default function AdminDatabase() {
   const [loading,      setLoading]      = useState(true);
   const [optimizing,   setOptimizing]   = useState(false);
   const [backing,      setBacking]      = useState(false);
+  const [restoring,    setRestoring]    = useState(null);
   const [truncating,   setTruncating]   = useState(null);
   const [confirmTrunc, setConfirmTrunc] = useState(null);
   const [confirmText,  setConfirmText]  = useState("");
+  const [restoreConfirm, setRestoreConfirm] = useState(null);
   const [exporting,    setExporting]    = useState(null);
   const [tableQuery,   setTableQuery]   = useState("");
   const [tableFilter,  setTableFilter]  = useState("all");
@@ -95,6 +99,19 @@ export default function AdminDatabase() {
   }, [addToast]);
 
   useEffect(() => { loadStats(); }, [loadStats]);
+
+  useEffect(() => {
+    const mainEl = document.querySelector(".amain");
+    if (!mainEl) return;
+    if (restoreConfirm) {
+      mainEl.style.overflow = "hidden";
+    } else {
+      mainEl.style.overflow = "";
+    }
+    return () => {
+      if (mainEl) mainEl.style.overflow = "";
+    };
+  }, [restoreConfirm]);
 
   async function handleOptimize() {
     setOptimizing(true);
@@ -137,6 +154,23 @@ export default function AdminDatabase() {
       loadStats();
     } catch { addToast(`Failed to clear "${table}".`, "error"); }
     finally { setTruncating(null); }
+  }
+
+  function handleRestoreClick(auditId, table) {
+    setRestoreConfirm({ id: auditId, target: table });
+  }
+
+  async function handleRestoreConfirmAction() {
+    if (!restoreConfirm) return;
+    const { id, target } = restoreConfirm;
+    setRestoring(id);
+    setRestoreConfirm(null);
+    try {
+      await restoreDatabaseTable(id);
+      addToast(`Restored data for "${target}".`, "success");
+      loadStats();
+    } catch { addToast(`Failed to restore "${target}".`, "error"); }
+    finally { setRestoring(null); }
   }
 
   function handleSort(key) {
@@ -521,32 +555,53 @@ export default function AdminDatabase() {
                 </div>
               </div>
 
-              {/* Recent activity */}
-              {stats?.audit?.length > 0 && (
-                <div className="adb-panel">
-                  <div className="adb-panel-head">
-                    <div className="adb-panel-head-l">
-                      <div className="adb-panel-icon"><i className="fas fa-history" /></div>
-                      <span className="adb-panel-title">Recent Activity</span>
-                    </div>
-                  </div>
-                  <div className="adb-audit-list">
-                    {stats.audit.map((event, index) => (
-                      <div key={`${event.created_at}-${index}`} className="adb-audit-item">
-                        <div className="adb-audit-action">{event.action.replace("database.", "")}</div>
-                        <div className="adb-audit-meta">
-                          <span title={event.target}>{event.target}</span>
-                          <span>{new Date(event.created_at).toLocaleString()}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+
 
 
             </div>
           </div>
+
+          {/* ══ Recent Activity — full-width ══════════════════════════ */}
+          {stats?.audit?.length > 0 && (
+            <div className="adb-audit-panel">
+              <div className="adb-audit-head">
+                <div className="adb-audit-icon"><i className="fas fa-history" /></div>
+                <div>
+                  <h3 className="adb-audit-title">Recent Activity</h3>
+                  <p className="adb-audit-desc">A log of your recent database operations. Truncated tables can be safely restored.</p>
+                </div>
+              </div>
+              <div className="adb-audit-grid">
+                {stats.audit.map((event, index) => (
+                  <div key={`${event.created_at}-${index}`} className={`adb-audit-card ${event.can_restore ? 'adb-audit-card--restorable' : ''}`}>
+                    <div className="adb-audit-card-head">
+                      <span className="adb-audit-badge">
+                        <i className={event.action === 'database.truncate' ? 'fas fa-trash-alt' : 'fas fa-cog'} />
+                        {event.action.replace("database.", "")}
+                      </span>
+                      <span className="adb-audit-time">{new Date(event.created_at).toLocaleTimeString()}</span>
+                    </div>
+                    <div className="adb-audit-card-body">
+                      <div className="adb-audit-target"><strong>{event.target}</strong></div>
+                      <div className="adb-audit-date">{new Date(event.created_at).toLocaleDateString()}</div>
+                    </div>
+                    {event.can_restore && (
+                      <div className="adb-audit-card-foot">
+                        <button 
+                          className="adb-audit-restore-btn" 
+                          onClick={() => handleRestoreClick(event.id, event.target)}
+                          disabled={restoring === event.id}
+                        >
+                          <i className={`fas fa-${restoring === event.id ? "spinner fa-spin" : "undo"}`} />
+                          {restoring === event.id ? "Restoring..." : "Restore Data"}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* ══ Backup Format — full-width below both panels ══════════ */}
           <div className="adb-backup-bar">
@@ -564,6 +619,27 @@ export default function AdminDatabase() {
               <span className="adb-backup-tag"><i className="fas fa-check-circle" /> MySQL CLI</span>
             </div>
           </div>
+
+          {/* ══ Restore Confirmation Modal ══════════════════════════ */}
+          {restoreConfirm && createPortal(
+            <div className="adb-modal-overlay">
+              <div className="adb-modal">
+                <div className="adb-modal-icon"><i className="fas fa-undo" /></div>
+                <h3 className="adb-modal-title">Restore Data</h3>
+                <p className="adb-modal-desc">
+                  Are you sure you want to restore data for <strong>{restoreConfirm.target}</strong>? 
+                  Existing rows might be replaced.
+                </p>
+                <div className="adb-modal-actions">
+                  <button className="adb-modal-btn adb-modal-btn--cancel" onClick={() => setRestoreConfirm(null)}>Cancel</button>
+                  <button className="adb-modal-btn adb-modal-btn--confirm" onClick={handleRestoreConfirmAction}>
+                    Yes, Restore
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body
+          )}
 
         </div>
       </main>

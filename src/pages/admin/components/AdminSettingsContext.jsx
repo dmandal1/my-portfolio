@@ -19,6 +19,14 @@ export function AdminSettingsProvider({ children }) {
     window.addEventListener("storage", refresh);
     window.addEventListener(ADMIN_SETTINGS_UPDATED_EVENT, refresh);
 
+    if (window.location.hash.startsWith("#/install")) {
+      setLoading(false);
+      return () => {
+        window.removeEventListener("storage", refresh);
+        window.removeEventListener(ADMIN_SETTINGS_UPDATED_EVENT, refresh);
+      };
+    }
+
     const unsubscribe = subscribeToAdminPanelSettings(
       (incoming) => {
         setSettings(normalizeAdminSettings(incoming));

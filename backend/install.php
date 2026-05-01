@@ -276,7 +276,7 @@ function generateUuid(): string {
     return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex(\$data), 4));
 }
 
-function jsonResponse(array \$data, int \$code = 200): never {
+function jsonResponse(\$data, int \$code = 200): never {
     http_response_code(\$code);
     echo json_encode(\$data);
     exit;

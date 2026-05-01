@@ -418,6 +418,15 @@
   color: #90a4c0;
 }
 
+/* Fix Chrome autofill background */
+.aLogin-field input:-webkit-autofill,
+.aLogin-field input:-webkit-autofill:hover, 
+.aLogin-field input:-webkit-autofill:focus, 
+.aLogin-field input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #f0f8ff inset !important;
+  -webkit-text-fill-color: #0a1628 !important;
+}
+
 .aLogin-pw-wrap {
   position: relative;
 }
@@ -18876,6 +18885,11 @@
   font-weight: 700 !important;
   border-bottom-width: 3px !important;
 }
+.abar-brand {
+  height: calc(100% + 1px) !important;
+  margin-bottom: -1px !important;
+  border-bottom: 1px solid var(--as-bdr) !important;
+}
 
 /* ═══════════════════════════════════════════════════════════════
    DARK MODE — Premium upgrade overrides
@@ -18883,6 +18897,11 @@
 [data-admin-theme="dark"] .apage-topbar {
   background: linear-gradient(135deg, #0d2a5e 0%, #1565c0 55%, #1976d2 100%) !important;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4) !important;
+}
+[data-admin-theme="dark"] .aadminbar {
+  background: #1e293b !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.4) !important;
 }
 [data-admin-theme="dark"] .astat-card {
   background:

@@ -58,13 +58,16 @@ function getRecentAudit(PDO $db): array {
     try {
         ensureAuditTable($db);
         $rows = $db->query(
-            "SELECT action, target, details_json, ip_address, created_at
+            "SELECT id, action, target, details_json, ip_address, created_at
              FROM admin_audit_events
              ORDER BY created_at DESC
              LIMIT 5"
         )->fetchAll(PDO::FETCH_ASSOC);
         foreach ($rows as &$row) {
-            $row['details'] = json_decode($row['details_json'] ?? '', true) ?: [];
+            $details = json_decode($row['details_json'] ?? '', true) ?: [];
+            $row['can_restore'] = isset($details['restore_sql']);
+            unset($details['restore_sql']); // Don't send large payload to frontend
+            $row['details'] = $details;
             unset($row['details_json']);
         }
         unset($row);
@@ -322,6 +325,10 @@ if ($method === 'POST' && $action === 'truncate') {
     $dbName = $db->query('SELECT DATABASE()')->fetchColumn();
     if (!tableExists($db, $dbName, $table)) errorResponse("Table '$table' does not exist", 404);
 
+    // Create a backup of the table before truncating
+    $backupSql = buildBackupSql($db, $dbName, [$table]);
+    $encodedBackup = base64_encode($backupSql);
+
     $mediaCleanup = null;
     if ($table === 'media_files') {
         $mediaCleanup = deleteMediaUploads($db);
@@ -333,8 +340,17 @@ if ($method === 'POST' && $action === 'truncate') {
         }
     }
 
-    $db->exec("TRUNCATE TABLE " . quoteIdent($table));
-    logAdminAction($db, 'database.truncate', $table, ['media_cleanup' => $mediaCleanup]);
+    try {
+        $db->exec("TRUNCATE TABLE " . quoteIdent($table));
+    } catch (\PDOException $e) {
+        // TRUNCATE fails if referenced by a foreign key (e.g., blogs <- comments). 
+        // Fallback to DELETE which respects ON DELETE CASCADE.
+        $db->exec("DELETE FROM " . quoteIdent($table));
+    }
+    logAdminAction($db, 'database.truncate', $table, [
+        'media_cleanup' => $mediaCleanup,
+        'restore_sql' => $encodedBackup
+    ]);
     jsonResponse(['ok' => true, 'table' => $table, 'media_cleanup' => $mediaCleanup]);
 }
 
@@ -359,6 +375,35 @@ if ($method === 'POST' && $action === 'backup') {
     header('Content-Length: ' . strlen($sql));
     echo $sql;
     exit;
+}
+
+// ── POST: restore ──────────────────────────────────────────────────────────
+if ($method === 'POST' && $action === 'restore') {
+    $auditId = (int)($_GET['id'] ?? 0);
+    if (!$auditId) errorResponse('Missing audit ID', 400);
+
+    $stmt = $db->prepare("SELECT details_json, target FROM admin_audit_events WHERE id = ? AND action = 'database.truncate'");
+    $stmt->execute([$auditId]);
+    $event = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$event) errorResponse('Audit event not found or not a truncate action', 404);
+
+    $details = json_decode($event['details_json'] ?? '', true) ?: [];
+    if (empty($details['restore_sql'])) {
+        errorResponse('No restore data available for this event', 404);
+    }
+
+    $sql = base64_decode($details['restore_sql']);
+    if (!$sql) errorResponse('Invalid restore data', 500);
+
+    try {
+        $db->exec($sql);
+    } catch (\Throwable $e) {
+        errorResponse('Restore failed: ' . $e->getMessage(), 500);
+    }
+
+    logAdminAction($db, 'database.restore', $event['target'], ['restored_from_audit_id' => $auditId]);
+    jsonResponse(['ok' => true]);
 }
 
 errorResponse('Method or action not allowed', 405);

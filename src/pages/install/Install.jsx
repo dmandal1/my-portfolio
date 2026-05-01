@@ -358,34 +358,57 @@ function StepInstall({ db, account, onBack }) {
   async function runInstall() {
     setPhase("installing");
     setProgress(0);
-    const ticker = setInterval(() => {
-      setProgress((p) => (p < PROG_STEPS.length - 2 ? p + 1 : p));
-    }, 700);
+    setError("");
 
-    try {
-      const res  = await fetch(`${API}/install.php`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action:         "install",
-          ...db,
-          admin_email:    account.admin_email,
-          admin_password: account.admin_password,
-          site_name:      account.site_name,
-        }),
+    let apiDone = false;
+    let apiResult = null;
+
+    // Start backend call concurrently
+    const apiTask = fetch(`${API}/install.php`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action:         "install",
+        ...db,
+        admin_email:    account.admin_email,
+        admin_password: account.admin_password,
+        site_name:      account.site_name,
+      }),
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        apiDone = true;
+        apiResult = d;
+        return d;
+      })
+      .catch(() => {
+        apiDone = true;
+        apiResult = { error: "Network error — could not reach the API." };
+        return apiResult;
       });
-      const data = await res.json();
-      clearInterval(ticker);
-      if (data.success) {
-        setProgress(PROG_STEPS.length - 1);
-        setTimeout(() => setPhase("done"), 700);
-      } else {
-        setError(data.error || "Installation failed.");
-        setPhase("error");
+
+    // Animate progress smoothly (at least 1 second per step)
+    for (let i = 0; i < PROG_STEPS.length - 1; i++) {
+      setProgress(i);
+      await new Promise((r) => setTimeout(r, 1000));
+      
+      // Stop animating early if the API failed
+      if (apiDone && !apiResult.success) {
+        break;
       }
-    } catch {
-      clearInterval(ticker);
-      setError("Network error — could not reach the API.");
+    }
+
+    // Wait for API to finish if it's still running
+    if (!apiDone) {
+      await apiTask;
+    }
+
+    if (apiResult && apiResult.success) {
+      setProgress(PROG_STEPS.length - 1);
+      await new Promise((r) => setTimeout(r, 1000)); // Show final checkmark
+      setPhase("done");
+    } else {
+      setError(apiResult?.error || "Installation failed.");
       setPhase("error");
     }
   }
