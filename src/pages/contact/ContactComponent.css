@@ -153,6 +153,10 @@
   justify-content: center;
 }
 
+.contact-heading-text-div .social-media-div {
+  justify-content: center;
+}
+
 /* Tablet */
 @media (max-width: 1024px) {
   .contact-heading-text {

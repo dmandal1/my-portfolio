@@ -4267,110 +4267,120 @@ export default function AdminPostEditor() {
   async function handleSave(mode = "draft") {
     clearTimeout(autoSaveTimer.current); // cancel any pending autosave so it can't race createBlog
     savingManually.current = true;
-    setError("");
-    if (!form.title.trim()) { setError("Title is required."); return; }
-    const publishLike = mode === "publish" || mode === "schedule";
-    if (publishLike && editorSettings.requireSeoBeforePublish) {
-      if (!form.metaTitle.trim() || !form.metaDescription.trim()) {
-        setError("Meta title and description are required before publishing (Settings → Editor).");
-        toast?.addToast("Fill in SEO meta title & description before publishing.", "error");
-        return;
-      }
-    }
-    if (publishLike && editorSettings.requireCoverBeforePublish && !form.image.trim() && !pendingCoverFile) {
-      setError("Cover image is required before publishing (Settings → Content).");
-      toast?.addToast("Add a cover image before publishing.", "error");
-      return;
-    }
-    if (publishLike && editorSettings.requireCategoryBeforePublish && form.categoryIds.length === 0) {
-      setError("At least one category is required before publishing (Settings → Content).");
-      toast?.addToast("Select at least one category before publishing.", "error");
-      return;
-    }
-    if (publishLike && editorSettings.requireTagsBeforePublish && form.tags.length === 0) {
-      setError("At least one tag is required before publishing (Settings → Content).");
-      toast?.addToast("Add at least one tag before publishing.", "error");
-      return;
-    }
-    const willSchedule = mode === "schedule";
-    const scheduledDate = form.scheduledAt ? new Date(form.scheduledAt) : null;
-    if (willSchedule && (!scheduledDate || Number.isNaN(scheduledDate.getTime()))) {
-      setError("Please choose a valid scheduled publish date.");
-      toast?.addToast("Choose a scheduled publish date.", "error");
-      return;
-    }
-    setSaving(true);
-
-    // Upload pending cover image now (deferred from selection time)
-    let resolvedImage = form.image;
-    if (pendingCoverFile) {
-      setUploading(true);
-      setUploadPct(0);
-      try {
-        resolvedImage = await uploadCoverImage(
-          pendingCoverFile,
-          (pct) => setUploadPct(Math.round(pct)),
-          form.image
-        );
-        URL.revokeObjectURL(pendingCoverPreview);
-        setPendingCoverFile(null);
-        setPendingCoverPreview("");
-        setForm((prev) => ({ ...prev, image: resolvedImage }));
-      } catch {
-        toast?.addToast("Cover image upload failed. Check server permissions and file size limits.", "error");
-        setSaving(false);
-        setUploading(false);
-        setUploadPct(0);
-        return;
-      } finally {
-        setUploading(false);
-        setUploadPct(0);
-      }
-    }
-
-    // Always read the live DOM content at save-time so we never lose text
-    // that was typed since the last debounced sync.
-    const freshContentRaw = stripEditorUiArtifacts(contentEditableRef.current?.innerHTML ?? form.content);
-    const freshContent = normalizeTechnicalBlocksHtml(normalizeCodeBlocksHtml(serializeCodeBlocksForStorage(freshContentRaw)), { includeControls: false });
-    const willPublish = mode === "publish";
-    const willReview  = mode === "review";
-
-    const payload = {
-      ...form,
-      image: resolvedImage,
-      content: freshContent,
-      tags: form.tags.join(", "),
-      published: willPublish,
-      pendingReview: willReview,
-      scheduledAt: willSchedule ? scheduledDate : null,
-      slug: form.slug.trim() || slugify(form.title),
-    };
     try {
-      if (isEditing) {
-        await updateBlog(id, payload);
-        if (willSchedule) await publishScheduledPosts();
-        if (willPublish) initialPublishedRef.current = true;
-        setForm((prev) => ({ ...prev, published: willPublish, pendingReview: willReview, scheduledAt: willSchedule ? prev.scheduledAt : "" }));
-        if (willPublish)     toast?.addToast("Post published!", "success");
-        else if (willSchedule) toast?.addToast("Post scheduled.", "success");
-        else if (willReview) toast?.addToast("Submitted for review.", "success");
-        else                 toast?.addToast("Saved as draft.", "success");
-      } else {
-        const ref = await createBlog(payload);
-        lastSavedId.current = ref.id; // guard: prevents any stale autosave timer from creating a second post
-        if (willSchedule) await publishScheduledPosts();
-        if (willReview) toast?.addToast("Post created and submitted for review.", "success");
-        else if (willSchedule) toast?.addToast("Post scheduled.", "success");
-        else            toast?.addToast("Post created!", "success");
-        navigate(`/admin/post/${ref.id}/edit`, { replace: true });
+      setError("");
+      if (!form.title.trim()) { setError("Title is required."); return; }
+      const publishLike = mode === "publish" || mode === "schedule";
+      if (publishLike && editorSettings.requireSeoBeforePublish) {
+        if (!form.metaTitle.trim() || !form.metaDescription.trim()) {
+          setError("Meta title and description are required before publishing (Settings → Editor).");
+          toast?.addToast("Fill in SEO meta title & description before publishing.", "error");
+          return;
+        }
       }
-    } catch (err) {
-      console.error(err);
-      setError("Failed to save. Please try again.");
-      toast?.addToast("Save failed.", "error");
+      if (publishLike && editorSettings.requireCoverBeforePublish && !form.image.trim() && !pendingCoverFile) {
+        setError("Cover image is required before publishing (Settings → Content).");
+        toast?.addToast("Add a cover image before publishing.", "error");
+        return;
+      }
+      if (publishLike && editorSettings.requireCategoryBeforePublish && form.categoryIds.length === 0) {
+        setError("At least one category is required before publishing (Settings → Content).");
+        toast?.addToast("Select at least one category before publishing.", "error");
+        return;
+      }
+      if (publishLike && editorSettings.requireTagsBeforePublish && form.tags.length === 0) {
+        setError("At least one tag is required before publishing (Settings → Content).");
+        toast?.addToast("Add at least one tag before publishing.", "error");
+        return;
+      }
+      const willSchedule = mode === "schedule";
+      const scheduledDate = form.scheduledAt ? new Date(form.scheduledAt) : null;
+      if (willSchedule && (!scheduledDate || Number.isNaN(scheduledDate.getTime()))) {
+        setError("Please choose a valid scheduled publish date.");
+        toast?.addToast("Choose a scheduled publish date.", "error");
+        return;
+      }
+      setSaving(true);
+
+      // Upload pending cover image now (deferred from selection time)
+      let resolvedImage = form.image;
+      if (pendingCoverFile) {
+        setUploading(true);
+        setUploadPct(0);
+        let uploadOk = false;
+        try {
+          resolvedImage = await uploadCoverImage(
+            pendingCoverFile,
+            (pct) => setUploadPct(Math.round(pct)),
+            form.image
+          );
+          URL.revokeObjectURL(pendingCoverPreview);
+          setPendingCoverFile(null);
+          setPendingCoverPreview("");
+          setForm((prev) => ({ ...prev, image: resolvedImage }));
+          uploadOk = true;
+        } catch {
+          toast?.addToast("Cover image upload failed. Check server permissions and file size limits.", "error");
+        } finally {
+          setUploading(false);
+          setUploadPct(0);
+        }
+        if (!uploadOk) return;
+      }
+
+      // Always read the live DOM content at save-time so we never lose text
+      // that was typed since the last debounced sync.
+      const freshContentRaw = stripEditorUiArtifacts(contentEditableRef.current?.innerHTML ?? form.content);
+      const freshContent = normalizeTechnicalBlocksHtml(normalizeCodeBlocksHtml(serializeCodeBlocksForStorage(freshContentRaw)), { includeControls: false });
+      const willPublish = mode === "publish";
+      const willReview  = mode === "review";
+
+      const payload = {
+        ...form,
+        image: resolvedImage,
+        content: freshContent,
+        tags: form.tags.join(", "),
+        published: willPublish,
+        pendingReview: willReview,
+        scheduledAt: willSchedule ? scheduledDate : null,
+        slug: form.slug.trim() || slugify(form.title),
+      };
+      try {
+        if (isEditing) {
+          await updateBlog(id, payload);
+          if (willSchedule) await publishScheduledPosts();
+          if (willPublish) initialPublishedRef.current = true;
+          setForm((prev) => ({ ...prev, published: willPublish, pendingReview: willReview, scheduledAt: willSchedule ? prev.scheduledAt : "" }));
+          if (willPublish)       toast?.addToast("Post published!", "success");
+          else if (willSchedule) toast?.addToast("Post scheduled.", "success");
+          else if (willReview)   toast?.addToast("Submitted for review.", "success");
+          else                   toast?.addToast("Saved as draft.", "success");
+        } else {
+          let savedId;
+          if (lastSavedId.current) {
+            // autosave already created a draft — update it instead of creating a duplicate
+            await updateBlog(lastSavedId.current, payload);
+            savedId = lastSavedId.current;
+          } else {
+            const ref = await createBlog(payload);
+            lastSavedId.current = ref.id;
+            savedId = ref.id;
+          }
+          if (willSchedule) await publishScheduledPosts();
+          if (willReview)        toast?.addToast("Post created and submitted for review.", "success");
+          else if (willSchedule) toast?.addToast("Post scheduled.", "success");
+          else                   toast?.addToast("Post created!", "success");
+          navigate(`/admin/post/${savedId}/edit`, { replace: true });
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Failed to save. Please try again.");
+        toast?.addToast("Save failed.", "error");
+      }
+    } finally {
+      savingManually.current = false;
+      setSaving(false);
     }
-    savingManually.current = false;
-    setSaving(false);
   }
 
   const stats = contentStats(form.content, readingSpeedWpm);

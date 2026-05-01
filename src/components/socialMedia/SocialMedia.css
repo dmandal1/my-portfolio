@@ -11,6 +11,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  text-decoration: none;
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
               filter 0.3s ease;
 }
@@ -37,6 +38,15 @@
 
 .icon-button:hover i {
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.15);
+}
+
+/* Dark mode: add a subtle ring so near-black icons (e.g. GitHub) don't vanish */
+[data-portfolio-theme="dark"] .icon-button i {
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.18);
+}
+
+[data-portfolio-theme="dark"] .icon-button:hover i {
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.12);
 }
 
 @media (max-width: 768px) {

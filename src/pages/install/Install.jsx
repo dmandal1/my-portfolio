@@ -127,6 +127,7 @@ function StepDatabase({ db, setDb, onNext, onBack }) {
   const [testing, setTesting]       = useState(false);
   const [testResult, setTestResult] = useState(null);
   const [testMsg, setTestMsg]       = useState("");
+  const [showDbPw, setShowDbPw]     = useState(false);
 
   function handleChange(e) {
     setTestResult(null);
@@ -187,11 +188,16 @@ function StepDatabase({ db, setDb, onNext, onBack }) {
 
         <div className="ins-field">
           <div className="ins-field-label">Database Password</div>
-          <input
-            className="ins-input" name="db_pass" type="password"
-            value={db.db_pass} onChange={handleChange}
-            placeholder="••••••••••" autoComplete="new-password"
-          />
+          <div className="ins-pw-wrap">
+            <input
+              className="ins-input" name="db_pass" type={showDbPw ? "text" : "password"}
+              value={db.db_pass} onChange={handleChange}
+              placeholder="••••••••••" autoComplete="new-password"
+            />
+            <button type="button" className="ins-pw-toggle" onClick={() => setShowDbPw((v) => !v)}>
+              {showDbPw ? "Hide" : "Show"}
+            </button>
+          </div>
         </div>
       </div>
 

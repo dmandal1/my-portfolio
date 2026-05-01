@@ -280,6 +280,10 @@
 }
 
 /* Read More — plain text link with arrow */
+.bc-card {
+  cursor: pointer;
+}
+
 .bc-read-btn {
   display: inline-flex;
   align-items: center;
@@ -294,6 +298,13 @@
   white-space: nowrap;
   flex-shrink: 0;
   transition: gap 0.18s ease, opacity 0.18s ease;
+}
+
+.bc-read-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
 }
 
 .bc-read-btn:hover {

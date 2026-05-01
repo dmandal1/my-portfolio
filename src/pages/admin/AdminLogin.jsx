@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { subscribeToAdminPanelSettings } from "../../api/apiService";
 import "./Admin.css";
 
 export default function AdminLogin() {
@@ -9,8 +10,17 @@ export default function AdminLogin() {
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [siteName, setSiteName] = useState("");
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const unsub = subscribeToAdminPanelSettings(
+      (data) => { if (data?.siteName) setSiteName(data.siteName); },
+      () => {}
+    );
+    return unsub;
+  }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -40,7 +50,7 @@ export default function AdminLogin() {
             <span className="aLogin-logo-sl">/</span>
             <span className="aLogin-logo-gt">&gt;</span>
           </div>
-          <h1 className="aLogin-brand-title">Deepak's Portfolio</h1>
+          <h1 className="aLogin-brand-title">{siteName || "My Portfolio"}</h1>
           <p className="aLogin-brand-sub">Admin Dashboard · Portfolio CMS</p>
           <div className="aLogin-brand-divider" />
           <p className="aLogin-brand-quote">
@@ -121,7 +131,7 @@ export default function AdminLogin() {
           </form>
 
           <p className="aLogin-back">
-            <a href="/">← Back to Deepak's Portfolio</a>
+            <a href="/">← Back to {siteName || "My Portfolio"}</a>
           </p>
         </div>
       </div>

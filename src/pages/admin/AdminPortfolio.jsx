@@ -18,7 +18,6 @@ import {
   getExperiences,     createExperience,    updateExperience,    deleteExperience,
   uploadPortfolioAsset,
   getOpenSourceConfig,  saveOpenSourceConfig,
-  getPodcastSection,    savePodcastSection,
   getBlogSectionConfig, saveBlogSectionConfig,
 } from "../../api/apiService";
 import "./Admin.css";
@@ -64,7 +63,6 @@ const TABS = {
 
   // ── Integrations ──────────────────────────────────────────
   openSource:       { icon: "fab fa-github",             label: "GitHub / Open Source" },
-  podcast:          { icon: "fas fa-podcast",            label: "Podcast" },
   blogConfig:       { icon: "fas fa-newspaper",          label: "Blog Section" },
 
 };
@@ -75,7 +73,7 @@ const TAB_GROUPS = [
   { label: "Experience Page", color: "#f59e0b", emoji: "💼", ids: ["experienceHeader", "experience"] },
   { label: "Projects Page",   color: "#10b981", emoji: "🚀", ids: ["projectsHeader", "projects"] },
   { label: "Contact Page",    color: "#06b6d4", emoji: "📬", ids: ["contactPage", "contact", "faq"] },
-  { label: "Integrations",   color: "#6366f1", emoji: "🔌", ids: ["openSource", "podcast", "blogConfig"] },
+  { label: "Integrations",   color: "#6366f1", emoji: "🔌", ids: ["openSource", "blogConfig"] },
 ];
 
 /* ── Reusable primitives ────────────────────────────────────────────────── */
@@ -1578,78 +1576,6 @@ function OpenSourceTab({ toast }) {
   );
 }
 
-/* ── Podcast tab ────────────────────────────────────────────────────────── */
-function PodcastTab({ toast }) {
-  const [form, setForm] = useState({ title: "", subtitle: "" });
-  const [embeds, setEmbeds] = useState([""]);
-  const [saving, setSaving] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const f = (k, v) => setForm(p => ({ ...p, [k]: v }));
-
-  useEffect(() => {
-    getPodcastSection().then(d => {
-      if (d) {
-        setForm({ title: d.title || "", subtitle: d.subtitle || "" });
-        setEmbeds(Array.isArray(d.podcast) && d.podcast.length > 0 ? d.podcast : [""]);
-      }
-      setLoading(false);
-    }).catch(() => setLoading(false));
-  }, []);
-
-  function updateEmbed(i, val) {
-    setEmbeds(prev => prev.map((e, idx) => idx === i ? val : e));
-  }
-  function addEmbed() { setEmbeds(prev => [...prev, ""]); }
-  function removeEmbed(i) { setEmbeds(prev => prev.filter((_, idx) => idx !== i)); }
-
-  async function handleSubmit(e) {
-    e.preventDefault(); setSaving(true);
-    try {
-      const podcast = embeds.map(u => u.trim()).filter(Boolean);
-      await savePodcastSection({ ...form, podcast });
-      toast?.addToast("Podcast section saved.", "success");
-    }
-    catch { toast?.addToast("Failed to save.", "error"); } finally { setSaving(false); }
-  }
-
-  if (loading) return <div className="acat-skel-wrap">{[1,2,3].map(i => <div key={i} className="acat-skel-row"><div className="askel askel-line" style={{ flex: 1, height: 36 }} /></div>)}</div>;
-
-  return (
-    <form onSubmit={handleSubmit} className="acat-form" style={{ maxWidth: 640 }}>
-      <Field label="Section Title"><input className="ainput" value={form.title} onChange={e => f("title", e.target.value)} placeholder="e.g. Podcast" /></Field>
-      <Field label="Subtitle"><textarea className="ainput acat-textarea" rows={2} value={form.subtitle} onChange={e => f("subtitle", e.target.value)} placeholder="Brief description of your podcast…" /></Field>
-      <Field label="Embed URLs" hint="One embed URL per row (e.g. Spotify, Apple Podcasts embed links)">
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {embeds.map((url, i) => (
-            <div key={i} style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <input
-                className="ainput"
-                value={url}
-                onChange={e => updateEmbed(i, e.target.value)}
-                placeholder="https://open.spotify.com/embed/episode/..."
-                style={{ flex: 1 }}
-              />
-              <button
-                type="button"
-                className="abtn abtn-ghost"
-                style={{ flexShrink: 0, height: 42, padding: "0 12px", color: "var(--adanger)" }}
-                onClick={() => removeEmbed(i)}
-                disabled={embeds.length === 1}
-                title="Remove"
-              >
-                <i className="fas fa-times" />
-              </button>
-            </div>
-          ))}
-          <button type="button" className="abtn abtn-ghost" style={{ alignSelf: "flex-start" }} onClick={addEmbed}>
-            <i className="fas fa-plus" /> Add URL
-          </button>
-        </div>
-      </Field>
-      <SaveBtn saving={saving} />
-    </form>
-  );
-}
 
 /* ── Blog Section Config tab ────────────────────────────────────────────── */
 function BlogConfigTab({ toast }) {
@@ -1704,7 +1630,6 @@ export default function AdminPortfolio() {
     projectsHeader:   <ProjectsHeaderTab toast={toast} />,
     skills:           <SkillsTab toast={toast} />,
     openSource:       <OpenSourceTab toast={toast} />,
-    podcast:          <PodcastTab toast={toast} />,
     blogConfig:       <BlogConfigTab toast={toast} />,
   };
 

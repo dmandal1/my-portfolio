@@ -41,7 +41,8 @@ function normalizeBlog(data) {
     slug: storedSlug || `id-${data.id || slugify(data.title || 'post')}`,
     slugStored: Boolean(storedSlug),
     // Map snake_case DB fields to camelCase expected by the UI
-    coverImage:     data.coverImage     || data.cover_image      || '',
+    image:          data.image          || data.coverImage        || data.cover_image || '',
+    coverImage:     data.coverImage     || data.cover_image       || data.image       || '',
     imageAlt:       data.imageAlt       || data.image_alt         || '',
     metaTitle:      data.metaTitle      || data.meta_title        || '',
     metaDescription:data.metaDescription|| data.meta_description || '',
@@ -53,6 +54,13 @@ function normalizeBlog(data) {
     commentsCount:  data.commentsCount  || data.comments_count    || 0,
     createdAt:      data.createdAt      || data.created_at,
     updatedAt:      data.updatedAt      || data.updated_at,
+    scheduledAt:    data.scheduledAt    || data.scheduled_at      || null,
+    categoryIds:    Array.isArray(data.categoryIds)  ? data.categoryIds
+                  : Array.isArray(data.category_ids) ? data.category_ids
+                  : [],
+    tagIds:         Array.isArray(data.tagIds)  ? data.tagIds
+                  : Array.isArray(data.tag_ids) ? data.tag_ids
+                  : [],
   };
 }
 

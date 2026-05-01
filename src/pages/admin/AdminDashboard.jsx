@@ -85,6 +85,100 @@ function StatusBadge({ blog }) {
   return                           <span className="abadge abadge-draft">Draft</span>;
 }
 
+/* ── Per-row actions dropdown ── */
+function PostActionsDropdown({ blog, onQuickEdit, onDelete, onApprove, onReject }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    function onOutside(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    if (open) document.addEventListener("mousedown", onOutside);
+    return () => document.removeEventListener("mousedown", onOutside);
+  }, [open]);
+
+  return (
+    <div className="ahome-edit-actions" ref={ref}>
+      <div className="ahome-edit-split">
+        <Link to={`/admin/post/${blog.id}/edit`} className="ahome-edit-btn">
+          Edit
+        </Link>
+        <button
+          type="button"
+          className="ahome-edit-caret"
+          onClick={() => setOpen((v) => !v)}
+          aria-label="More edit options"
+        >
+          <i className="fas fa-chevron-down" />
+        </button>
+      </div>
+
+      {open && (
+        <div className="ahome-edit-dropdown">
+          <Link
+            to={`/admin/post/${blog.id}/edit`}
+            className="ahome-edit-dd-item"
+            onClick={() => setOpen(false)}
+          >
+            <i className="fas fa-pen" /> Edit
+          </Link>
+          <button
+            type="button"
+            className="ahome-edit-dd-item"
+            onClick={() => { setOpen(false); onQuickEdit(blog); }}
+          >
+            <i className="far fa-edit" /> Quick Edit
+          </button>
+          {blog.published && blog.slug ? (
+            <a
+              href={`/#/blogs/${blog.slug}`}
+              className="ahome-edit-dd-item"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setOpen(false)}
+            >
+              <i className="fas fa-eye" /> View
+            </a>
+          ) : (
+            <span className="ahome-edit-dd-item ahome-edit-dd-item--disabled">
+              <i className="fas fa-eye" /> View
+            </span>
+          )}
+          {blog.pendingReview && !blog.published && (
+            <>
+              <button
+                type="button"
+                className="ahome-edit-dd-item"
+                style={{ color: "#16a34a" }}
+                onClick={() => { setOpen(false); onApprove(blog); }}
+              >
+                <i className="fas fa-check" /> Approve
+              </button>
+              <button
+                type="button"
+                className="ahome-edit-dd-item"
+                style={{ color: "#e67e22" }}
+                onClick={() => { setOpen(false); onReject(blog); }}
+              >
+                <i className="fas fa-times" /> Reject
+              </button>
+            </>
+          )}
+          <div className="ahome-edit-dd-divider" />
+          <button
+            type="button"
+            className="ahome-edit-dd-item ahome-edit-dd-item--danger"
+            onClick={() => { setOpen(false); onDelete(blog); }}
+          >
+            <i className="fas fa-trash" /> Delete
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const toast = useToast();
   const adminSettings = useAdminSettings();
@@ -103,7 +197,6 @@ export default function AdminDashboard() {
   const [sort, setSort]               = useState({ field: "createdAt", dir: "desc" });
   const [selected, setSelected]       = useState(new Set());
   const [modal, setModal]             = useState(null);
-  const [openDropdown, setOpenDropdown] = useState(null); // blog.id | null
   const [quickEditId, setQuickEditId] = useState(null);
   const [quickSaving, setQuickSaving] = useState(false);
   const [quickCategoryOpen, setQuickCategoryOpen] = useState(false);
@@ -124,7 +217,6 @@ export default function AdminDashboard() {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [visibleCols, setVisibleCols] = useState(defaultVisibleCols);
   const [colToggleOpen, setColToggleOpen] = useState(false);
-  const dropdownRef = useRef(null);
   const quickCategoryRef = useRef(null);
   const quickTagRef = useRef(null);
   const colToggleRef = useRef(null);
@@ -140,19 +232,6 @@ export default function AdminDashboard() {
     adminSettings.dashboardShowViewsColumn,
     adminSettings.dashboardShowDateColumn,
   ]);
-
-  /* ── Close dropdown on outside click ── */
-  useEffect(() => {
-    function onClickOutside(e) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setOpenDropdown(null);
-      }
-    }
-    if (openDropdown !== null) {
-      document.addEventListener("mousedown", onClickOutside);
-    }
-    return () => document.removeEventListener("mousedown", onClickOutside);
-  }, [openDropdown]);
 
   /* ── Real-time blog subscription ── */
   const loadBlogs = useCallback(() => {
@@ -359,7 +438,6 @@ export default function AdminDashboard() {
   }
 
   async function handleApprove(blog) {
-    setOpenDropdown(null);
     try {
       await approvePendingPost(blog.id);
       setBlogs((prev) =>
@@ -372,7 +450,6 @@ export default function AdminDashboard() {
   }
 
   async function handleReject(blog) {
-    setOpenDropdown(null);
     try {
       await rejectPendingPost(blog.id);
       setBlogs((prev) =>
@@ -844,7 +921,14 @@ export default function AdminDashboard() {
                               </div>
                             )}
                             <div style={{ minWidth: 0 }}>
-                              <div className="atable-title">{blog.title}</div>
+                              <div className="atable-title">
+                                {blog.title}
+                                {blog.featured && (
+                                  <span className="afeatured-badge" title="Featured Post">
+                                    <i className="fas fa-star" />
+                                  </span>
+                                )}
+                              </div>
                               {blog.subtitle && (
                                 <div className="atable-sub">{blog.subtitle}</div>
                               )}
@@ -875,99 +959,13 @@ export default function AdminDashboard() {
                           </td>
                         )}
                         <td>
-                          <div
-                            className="atable-actions"
-                            ref={openDropdown === blog.id ? dropdownRef : null}
-                            style={{ position: "relative" }}
-                          >
-                            {/* Split Edit button */}
-                            <div className="asplit-btn">
-                              <Link
-                                to={`/admin/post/${blog.id}/edit`}
-                                className="asplit-btn__main"
-                              >
-                                Edit
-                              </Link>
-                              <button
-                                className="asplit-btn__caret"
-                                title="More actions"
-                                onClick={() =>
-                                  setOpenDropdown((prev) => prev === blog.id ? null : blog.id)
-                                }
-                              >
-                                <i className="fas fa-chevron-down" />
-                              </button>
-                            </div>
-
-                            {/* Dropdown menu */}
-                            {openDropdown === blog.id && (
-                              <div className="arow-dropdown">
-                                <Link
-                                  to={`/admin/post/${blog.id}/edit`}
-                                  className="arow-dropdown__item"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  <i className="fas fa-pen arow-dropdown__icon" />
-                                  Edit
-                                </Link>
-                                <button
-                                  className="arow-dropdown__item"
-                                  onClick={() => {
-                                    setOpenDropdown(null);
-                                    openQuickEdit(blog);
-                                  }}
-                                >
-                                  <i className="far fa-edit arow-dropdown__icon" />
-                                  Quick Edit
-                                </button>
-                                {blog.published && blog.slug ? (
-                                  <a
-                                    href={`/#/blogs/${blog.slug}`}
-                                    className="arow-dropdown__item"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    onClick={() => setOpenDropdown(null)}
-                                  >
-                                    <i className="fas fa-eye arow-dropdown__icon" />
-                                    View
-                                  </a>
-                                ) : (
-                                  <span className="arow-dropdown__item arow-dropdown__item--disabled">
-                                    <i className="fas fa-eye arow-dropdown__icon" />
-                                    View
-                                  </span>
-                                )}
-                                {blog.pendingReview && !blog.published && (
-                                  <>
-                                    <button
-                                      className="arow-dropdown__item arow-dropdown__item--approve"
-                                      onClick={() => handleApprove(blog)}
-                                    >
-                                      <i className="fas fa-check arow-dropdown__icon" />
-                                      Approve
-                                    </button>
-                                    <button
-                                      className="arow-dropdown__item arow-dropdown__item--reject"
-                                      onClick={() => handleReject(blog)}
-                                    >
-                                      <i className="fas fa-times arow-dropdown__icon" />
-                                      Reject
-                                    </button>
-                                  </>
-                                )}
-                                <button
-                                  className="arow-dropdown__item arow-dropdown__item--danger"
-                                  onClick={() => {
-                                    setOpenDropdown(null);
-                                    setModal({ mode: "single", id: blog.id, title: blog.title });
-                                  }}
-                                >
-                                  <i className="fas fa-trash arow-dropdown__icon" />
-                                  Delete
-                                </button>
-                              </div>
-                            )}
-                          </div>
+                          <PostActionsDropdown
+                            blog={blog}
+                            onQuickEdit={openQuickEdit}
+                            onDelete={(b) => setModal({ mode: "single", id: b.id, title: b.title })}
+                            onApprove={handleApprove}
+                            onReject={handleReject}
+                          />
                         </td>
                       </tr>
 
