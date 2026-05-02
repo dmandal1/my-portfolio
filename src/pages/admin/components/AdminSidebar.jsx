@@ -331,8 +331,11 @@ export default function AdminSidebar() {
   async function handleLogout() {
     setLoggingOut(true);
     setUserMenuOpen(false);
-    await logout();
-    navigate("/admin/login");
+    // Artificial delay for premium feel
+    setTimeout(async () => {
+      await logout();
+      navigate("/admin/login");
+    }, 1500);
   }
 
   async function handleDarkModeToggle() {
@@ -391,6 +394,21 @@ export default function AdminSidebar() {
 
   return (
     <>
+      {loggingOut && (
+        <div className="aLogout-overlay">
+          <div className="aLogout-content">
+            <div className="aLogout-icon">
+              <i className="fas fa-sign-out-alt" />
+            </div>
+            <h2 className="aLogout-title">Signing Out...</h2>
+            <p className="aLogout-sub">Thank you for your hard work today!</p>
+            <div className="aLogout-loader">
+              <div className="aLogout-loader-fill" />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ══ FULL-WIDTH TOP HEADER ══════════════════════════════ */}
       <header className="aadminbar">
 

@@ -455,6 +455,88 @@
   animation: aLoginStepIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* Premium Forgot Step Indicator */
+.aLogin-forgot-steps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  padding: 0 10px;
+}
+
+.aLogin-fstep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  z-index: 2;
+}
+
+.aLogin-fstep-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  border: 2px solid #e5e7eb;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.aLogin-fstep span {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #9ca3af;
+  transition: all 0.4s ease;
+}
+
+.aLogin-fstep--active .aLogin-fstep-num {
+  background: var(--ap);
+  border-color: var(--ap);
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15), 0 4px 10px rgba(37, 99, 235, 0.3);
+  transform: scale(1.1);
+}
+
+.aLogin-fstep--active span {
+  color: var(--ap);
+}
+
+.aLogin-fstep-line {
+  flex: 1;
+  height: 2px;
+  background: #e5e7eb;
+  margin: 0 12px;
+  margin-top: -20px; /* Align with circles */
+  position: relative;
+  overflow: hidden;
+}
+
+.aLogin-fstep--active + .aLogin-fstep-line {
+  background: rgba(37, 99, 235, 0.2);
+}
+
+.aLogin-fstep--active + .aLogin-fstep-line::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 100%;
+  background: var(--ap);
+  transform: translateX(-100%);
+  animation: aLoginStepLine 0.8s forwards ease-out;
+}
+
+@keyframes aLoginStepLine {
+  to { transform: translateX(0); }
+}
+
 .aLogin-pw-requirements {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -558,6 +640,18 @@
 .aLogin-form {
   display: flex;
   flex-direction: column;
+  transition: all 0.4s ease;
+}
+
+.aLogin-panel--form.is-processing .aLogin-form-inner > *:not(.aLogin-success-overlay) {
+  pointer-events: none;
+  filter: blur(2px);
+  opacity: 0.7;
+}
+
+.aLogin-panel--form.is-processing .aLogin-btn {
+  transform: scale(0.98);
+  box-shadow: 0 4px 12px rgba(21, 101, 192, 0.2);
 }
 
 .aLogin-reset-success {
@@ -1248,6 +1342,157 @@
     border-color var(--t),
     box-shadow var(--t),
     background var(--t);
+}
+
+/* ── Success Transition Overlay ────────────────────────────── */
+.aLogin-success-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: aLoginOverlayIn 0.5s ease-out both;
+}
+
+.aLogin-success-content {
+  text-align: center;
+  animation: aLoginSuccessPop 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.aLogin-success-icon {
+  font-size: 64px;
+  color: #10b981;
+  margin-bottom: 24px;
+  filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.3));
+}
+
+.aLogin-success-title {
+  font-size: 32px;
+  font-weight: 850;
+  color: #fff;
+  margin-bottom: 12px;
+  letter-spacing: -1px;
+}
+
+.aLogin-success-sub {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 32px;
+  font-weight: 500;
+}
+
+.aLogin-success-loader {
+  width: 240px;
+  height: 6px;
+  background: #f3f4f6;
+  border-radius: 10px;
+  margin: 0 auto;
+  overflow: hidden;
+  position: relative;
+}
+
+.aLogin-success-loader-fill {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  background: linear-gradient(to right, #10b981, #34d399);
+  width: 100%;
+  transform: translateX(-100%);
+  animation: aLoginSuccessLoad 1.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+@keyframes aLoginOverlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes aLoginSuccessPop {
+  from { opacity: 0; transform: scale(0.8) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes aLoginSuccessLoad {
+  to { transform: translateX(0); }
+}
+
+/* Page level transition */
+.aLogin-page.is-redirecting {
+  pointer-events: none;
+}
+
+/* ── Logout Transition Overlay ────────────────────────────── */
+.aLogout-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: aLogoutFadeIn 0.5s ease-out both;
+}
+
+.aLogout-content {
+  text-align: center;
+  animation: aLogoutScaleUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.aLogout-icon {
+  font-size: 56px;
+  color: var(--ap-l);
+  margin-bottom: 24px;
+  filter: drop-shadow(0 0 20px rgba(66, 165, 245, 0.4));
+}
+
+.aLogout-title {
+  font-size: 32px;
+  font-weight: 850;
+  color: #fff;
+  margin-bottom: 12px;
+  letter-spacing: -1px;
+}
+
+.aLogout-sub {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 32px;
+  font-weight: 500;
+}
+
+.aLogout-loader {
+  width: 200px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  margin: 0 auto;
+  overflow: hidden;
+  position: relative;
+}
+
+.aLogout-loader-fill {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  background: var(--ap-l);
+  width: 100%;
+  transform: translateX(-100%);
+  animation: aLogoutLoad 1.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+@keyframes aLogoutFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes aLogoutScaleUp {
+  from { opacity: 0; transform: scale(0.9) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes aLogoutLoad {
+  to { transform: translateX(0); }
 }
 .abar-user-btn:hover,
 .abar-user-btn.is-open {

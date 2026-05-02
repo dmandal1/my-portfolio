@@ -26,7 +26,7 @@ export default function AdminLogin() {
   const [showConfirmPw, setShowConfirmPw] = useState(false);
   const [showSentSuccess, setShowSentSuccess] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
-
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const { login, verify2FA } = useAuth();
   const navigate = useNavigate();
 
@@ -54,13 +54,18 @@ export default function AdminLogin() {
       const res = await login(email, password);
       if (res.requires_2fa) {
         setStep("2fa");
+        setLoading(false);
       } else {
-        navigate("/admin/home");
+        // Premium transition effect
+        setIsRedirecting(true);
+        setTimeout(() => {
+          navigate("/admin/home");
+        }, 1500);
       }
     } catch (err) {
       setError(err?.message || "Invalid email or password. Please try again.");
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   async function handle2FAVerify(e) {
@@ -69,11 +74,14 @@ export default function AdminLogin() {
     setLoading(true);
     try {
       await verify2FA(twoFactorCode);
-      navigate("/admin/home");
+      setIsRedirecting(true);
+      setTimeout(() => {
+        navigate("/admin/home");
+      }, 1500);
     } catch (err) {
       setError(err?.message || "Invalid verification code.");
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   async function handleForgotSubmit(e) {
@@ -123,6 +131,7 @@ export default function AdminLogin() {
     if (resetOtp.length !== 6) { setError("Please enter 6-digit OTP."); return; }
     setError("");
     setLoading(true);
+    const start = Date.now();
     try {
       const response = await fetch('/api/forgot_password.php?action=verify-otp', {
         method: 'POST',
@@ -130,6 +139,11 @@ export default function AdminLogin() {
         body: JSON.stringify({ otp: resetOtp })
       });
       const data = await response.json();
+      
+      // Artificial delay for premium "Validating..." feel
+      const elapsed = Date.now() - start;
+      if (elapsed < 1200) await new Promise(r => setTimeout(r, 1200 - elapsed));
+
       if (!response.ok) throw new Error(data.error || "Invalid OTP");
       setForgotStep(3);
     } catch (err) {
@@ -215,7 +229,22 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="aLogin-page">
+    <div className={`aLogin-page ${isRedirecting ? 'is-redirecting' : ''}`}>
+      
+      {isRedirecting && (
+        <div className="aLogin-success-overlay">
+          <div className="aLogin-success-content">
+            <div className="aLogin-success-icon">
+              <i className="fas fa-check-circle" />
+            </div>
+            <h2 className="aLogin-success-title">Welcome Back!</h2>
+            <p className="aLogin-success-sub">Securely redirecting to your dashboard...</p>
+            <div className="aLogin-success-loader">
+              <div className="aLogin-success-loader-fill" />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Left: Branded panel ───────────────────────────────── */}
       <div className="aLogin-panel aLogin-panel--brand">
@@ -253,7 +282,7 @@ export default function AdminLogin() {
       </div>
 
       {/* ── Right: Form panel ────────────────────────────────── */}
-      <div className="aLogin-panel aLogin-panel--form">
+      <div className={`aLogin-panel aLogin-panel--form ${loading ? 'is-processing' : ''}`}>
         <div className="aLogin-form-inner">
 
           <h2 className="aLogin-form-title">
@@ -383,6 +412,24 @@ export default function AdminLogin() {
               </form>
             ) : (
               <div className="aLogin-form">
+                {/* Premium Step Indicator */}
+                <div className="aLogin-forgot-steps">
+                  <div className={`aLogin-fstep ${forgotStep >= 1 ? 'aLogin-fstep--active' : ''}`}>
+                    <div className="aLogin-fstep-num">{forgotStep > 1 ? <i className="fas fa-check" /> : "1"}</div>
+                    <span>Identity</span>
+                  </div>
+                  <div className="aLogin-fstep-line" />
+                  <div className={`aLogin-fstep ${forgotStep >= 2 ? 'aLogin-fstep--active' : ''}`}>
+                    <div className="aLogin-fstep-num">{forgotStep > 2 ? <i className="fas fa-check" /> : "2"}</div>
+                    <span>Verify</span>
+                  </div>
+                  <div className="aLogin-fstep-line" />
+                  <div className={`aLogin-fstep ${forgotStep >= 3 ? 'aLogin-fstep--active' : ''}`}>
+                    <div className="aLogin-fstep-num">{forgotStep > 3 ? <i className="fas fa-check" /> : "3"}</div>
+                    <span>Reset</span>
+                  </div>
+                </div>
+
                 <div className="aLogin-forgot-wrapper" key={forgotStep}>
                    {resetSent ? (
                      <div className="aLogin-reset-success">
@@ -452,7 +499,11 @@ export default function AdminLogin() {
                          className={`aLogin-btn otp-loading-btn ${loading ? 'otp-loading-btn--active' : ''}`} 
                          disabled={loading || resetOtp.length !== 6}
                        >
-                         {loading ? "Verifying…" : "Verify Account"}
+                         {loading ? (
+                           <><span className="aLogin-spinner" /> Validating OTP…</>
+                         ) : (
+                           "Verify OTP"
+                         )}
                        </button>
 
                        <div style={{ textAlign: 'center' }}>

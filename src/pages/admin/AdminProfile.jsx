@@ -38,19 +38,22 @@ export default function AdminProfile() {
   const [pwForm, setPwForm]     = useState({ old: '', next: '', confirm: '' });
   const [pwSaving, setPwSaving] = useState(false);
   const [pwError, setPwError]   = useState('');
+  const [showOldPw, setShowOldPw] = useState(false);
+  const [showNextPw, setShowNextPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
 
   // Profile fields
   const [profileForm, setProfileForm] = useState({
     displayName: '',
     bio: '',
-    social: { linkedin: '', github: '', twitter: '', website: '' }
+    social: { facebook: '', twitter: '', instagram: '', linkedin: '', email: '', github: '', website: '' }
   });
   const [profileSaving, setProfileSaving] = useState(false);
 
   // Sync profile fields from currentUser
   useEffect(() => {
     if (currentUser) {
-      let social = { linkedin: '', github: '', twitter: '', website: '' };
+      let social = { facebook: '', twitter: '', instagram: '', linkedin: '', email: '', github: '', website: '' };
       try {
         if (currentUser.social_links) {
           const parsed = typeof currentUser.social_links === 'string' 
@@ -227,10 +230,10 @@ export default function AdminProfile() {
                    <i className="fas fa-external-link-alt" />
                    <span>Visit Site</span>
                 </a>
-                <div className="aprof-premium-badge">
+                <button className="aprof-premium-btn">
                    <i className="fas fa-crown" />
                    <span>Premium Admin</span>
-                </div>
+                </button>
             </div>
           </div>
 
@@ -283,14 +286,34 @@ export default function AdminProfile() {
                 </div>
               </div>
 
-              <div className="aprof-card" style={{ padding: 24, background: 'linear-gradient(135deg, #1e293b, #0f172a)', color: '#fff', border: 'none' }}>
-                 <h4 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 700 }}>Security Insight</h4>
-                 <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', lineHeight: 1.5, margin: 0 }}>
+              <div className="aprof-card" style={{ padding: '24px 20px' }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                   <div style={{ width: 32, height: 32, background: 'rgba(59,130,246,0.1)', color: '#3b82f6', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>
+                     <i className="fas fa-shield-alt" />
+                   </div>
+                   <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'var(--atxt)' }}>Security Insight</h4>
+                 </div>
+                 <p style={{ fontSize: 12, color: 'var(--atxt2)', lineHeight: 1.5, margin: 0, paddingLeft: 4 }}>
                     Your account is protected with enterprise-grade encryption. We recommend rotating your password regularly.
                  </p>
-                 <Link to="/admin/audit" className="abtn abtn-sm" style={{ display: 'inline-block', marginTop: 16, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}>
-                   View Logs
-                 </Link>
+                 <Link 
+                    to="/admin/audit" 
+                    className="abtn abtn-sm abtn-ghost" 
+                    style={{ 
+                      display: 'inline-flex', 
+                      alignItems: 'center',
+                      gap: 8,
+                      marginTop: 16,
+                      marginLeft: 4,
+                      fontSize: 11,
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      color: 'var(--ap)'
+                    }}
+                  >
+                    <i className="fas fa-history" /> View Audit Log
+                  </Link>
               </div>
             </aside>
 
@@ -304,7 +327,7 @@ export default function AdminProfile() {
                   <h3 className="aprof-section-title">Account Information</h3>
                 </div>
 
-                <div className="aprof-info-grid">
+                <div className="aprof-info-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
                   {/* Editable: Display Name */}
                   <div className="aprof-info-box" style={{ gridColumn: 'span 1', position: 'relative' }}>
                     <div className="aprof-info-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -314,7 +337,17 @@ export default function AdminProfile() {
                     <div style={{ position: 'relative', marginTop: 8 }}>
                       <input
                         className="aprof-input"
-                        style={{ height: 42, fontSize: 14, fontWeight: 700, paddingRight: 36, border: '1.5px solid var(--abdr)' }}
+                        style={{ 
+                          width: '100%',
+                          height: 42, 
+                          fontSize: 14, 
+                          fontWeight: 700, 
+                          paddingRight: 40, 
+                          border: '1.5px solid var(--abdr)',
+                          background: 'var(--acard)',
+                          borderRadius: 10,
+                          paddingLeft: 12
+                        }}
                         value={profileForm.displayName}
                         onChange={e => setProfileForm(f => ({ ...f, displayName: e.target.value }))}
                         placeholder="Your display name"
@@ -375,46 +408,52 @@ export default function AdminProfile() {
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20 }}>
                       <div className="aprof-input-group">
-                        <label className="aprof-label"><i className="fab fa-linkedin" style={{ color: '#0077b5' }} /> LinkedIn</label>
-                        <input className="aprof-input" value={profileForm.social.linkedin} onChange={e => setProfileForm(f => ({ ...f, social: { ...f.social, linkedin: e.target.value } }))} placeholder="https://linkedin.com/in/..." />
+                        <label className="aprof-label"><i className="fab fa-facebook" /> Facebook</label>
+                        <input className="aprof-input" value={profileForm.social.facebook} onChange={e => setProfileForm(f => ({ ...f, social: { ...f.social, facebook: e.target.value } }))} placeholder="https://facebook.com/..." />
                       </div>
                       <div className="aprof-input-group">
-                        <label className="aprof-label"><i className="fab fa-github" style={{ color: '#333' }} /> GitHub</label>
-                        <input className="aprof-input" value={profileForm.social.github} onChange={e => setProfileForm(f => ({ ...f, social: { ...f.social, github: e.target.value } }))} placeholder="https://github.com/..." />
-                      </div>
-                      <div className="aprof-input-group">
-                        <label className="aprof-label"><i className="fab fa-twitter" style={{ color: '#1da1f2' }} /> Twitter / X</label>
+                        <label className="aprof-label"><i className="fab fa-twitter" /> Twitter / X</label>
                         <input className="aprof-input" value={profileForm.social.twitter} onChange={e => setProfileForm(f => ({ ...f, social: { ...f.social, twitter: e.target.value } }))} placeholder="https://x.com/..." />
                       </div>
                       <div className="aprof-input-group">
-                        <label className="aprof-label"><i className="fas fa-globe" style={{ color: 'var(--ap)' }} /> Website</label>
+                        <label className="aprof-label"><i className="fab fa-instagram" /> Instagram</label>
+                        <input className="aprof-input" value={profileForm.social.instagram} onChange={e => setProfileForm(f => ({ ...f, social: { ...f.social, instagram: e.target.value } }))} placeholder="https://instagram.com/..." />
+                      </div>
+                      <div className="aprof-input-group">
+                        <label className="aprof-label"><i className="fab fa-linkedin" /> LinkedIn</label>
+                        <input className="aprof-input" value={profileForm.social.linkedin} onChange={e => setProfileForm(f => ({ ...f, social: { ...f.social, linkedin: e.target.value } }))} placeholder="https://linkedin.com/in/..." />
+                      </div>
+                      <div className="aprof-input-group">
+                        <label className="aprof-label"><i className="fab fa-google" /> Email</label>
+                        <input className="aprof-input" value={profileForm.social.email} onChange={e => setProfileForm(f => ({ ...f, social: { ...f.social, email: e.target.value } }))} placeholder="mailto:..." />
+                      </div>
+                      <div className="aprof-input-group">
+                        <label className="aprof-label"><i className="fab fa-github" /> GitHub</label>
+                        <input className="aprof-input" value={profileForm.social.github} onChange={e => setProfileForm(f => ({ ...f, social: { ...f.social, github: e.target.value } }))} placeholder="https://github.com/..." />
+                      </div>
+                      <div className="aprof-input-group">
+                        <label className="aprof-label"><i className="fas fa-globe" /> Website</label>
                         <input className="aprof-input" value={profileForm.social.website} onChange={e => setProfileForm(f => ({ ...f, social: { ...f.social, website: e.target.value } }))} placeholder="https://..." />
                       </div>
                     </div>
 
                     <div style={{ marginTop: 32, display: 'flex', justifyContent: 'flex-end' }}>
                       <button 
-                        className="abtn" 
+                        className="abtn abtn-primary" 
                         onClick={handleUpdateProfile} 
                         disabled={profileSaving}
                         style={{
                           height: 48,
                           padding: '0 32px',
-                          background: 'linear-gradient(135deg, var(--ap), #4f46e5)',
-                          color: '#fff',
                           borderRadius: 14,
                           fontWeight: 700,
                           fontSize: 14,
-                          border: 'none',
-                          boxShadow: '0 8px 20px rgba(59, 130, 246, 0.25)',
                           display: 'flex',
                           alignItems: 'center',
                           gap: 10,
                           transition: 'all 0.3s ease',
                           cursor: profileSaving ? 'not-allowed' : 'pointer'
                         }}
-                        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 24px rgba(59, 130, 246, 0.35)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(59, 130, 246, 0.25)'; }}
                       >
                         {profileSaving ? (
                           <><i className="fas fa-spinner fa-spin" /> Saving Changes...</>
@@ -444,7 +483,23 @@ export default function AdminProfile() {
                   <div className="aprof-input-group">
                     <label className="aprof-label" htmlFor="old_pw">Current Password</label>
                     <div className="aprof-input-wrap">
-                      <input className="aprof-input" id="old_pw" name="old_pw" type="password" placeholder="••••••••" value={pwForm.old} onChange={e => setPwForm(f => ({ ...f, old: e.target.value }))} autoComplete="current-password" />
+                      <input 
+                        className="aprof-input" 
+                        id="old_pw" 
+                        name="old_pw" 
+                        type={showOldPw ? "text" : "password"} 
+                        placeholder="••••••••" 
+                        value={pwForm.old} 
+                        onChange={e => setPwForm(f => ({ ...f, old: e.target.value }))} 
+                        autoComplete="current-password" 
+                      />
+                      <button 
+                        type="button" 
+                        className="aprof-pw-toggle" 
+                        onClick={() => setShowOldPw(!showOldPw)}
+                      >
+                        {showOldPw ? "Hide" : "Show"}
+                      </button>
                     </div>
                   </div>
 
@@ -452,7 +507,23 @@ export default function AdminProfile() {
                     <div className="aprof-input-group">
                       <label className="aprof-label" htmlFor="new_pw">New Password</label>
                       <div className="aprof-input-wrap">
-                        <input className="aprof-input" id="new_pw" name="new_pw" type="password" placeholder="Min. 8 characters" value={pwForm.next} onChange={e => setPwForm(f => ({ ...f, next: e.target.value }))} autoComplete="new-password" />
+                        <input 
+                          className="aprof-input" 
+                          id="new_pw" 
+                          name="new_pw" 
+                          type={showNextPw ? "text" : "password"} 
+                          placeholder="Min. 8 characters" 
+                          value={pwForm.next} 
+                          onChange={e => setPwForm(f => ({ ...f, next: e.target.value }))} 
+                          autoComplete="new-password" 
+                        />
+                        <button 
+                          type="button" 
+                          className="aprof-pw-toggle" 
+                          onClick={() => setShowNextPw(!showNextPw)}
+                        >
+                          {showNextPw ? "Hide" : "Show"}
+                        </button>
                       </div>
                       {pwForm.next && (
                         <div className="aprof-pw-strength">
@@ -467,9 +538,24 @@ export default function AdminProfile() {
                     <div className="aprof-input-group">
                       <label className="aprof-label" htmlFor="confirm_pw">Confirm Password</label>
                       <div className="aprof-input-wrap">
-                        <input className="aprof-input" id="confirm_pw" name="confirm_pw" type="password" placeholder="Repeat new password" value={pwForm.confirm} onChange={e => setPwForm(f => ({ ...f, confirm: e.target.value }))} autoComplete="new-password"
+                        <input 
+                          className="aprof-input" 
+                          id="confirm_pw" 
+                          name="confirm_pw" 
+                          type={showConfirmPw ? "text" : "password"} 
+                          placeholder="Repeat new password" 
+                          value={pwForm.confirm} 
+                          onChange={e => setPwForm(f => ({ ...f, confirm: e.target.value }))} 
+                          autoComplete="new-password"
                           style={{ borderColor: pwForm.confirm && pwForm.next !== pwForm.confirm ? '#ef4444' : '' }}
                         />
+                        <button 
+                          type="button" 
+                          className="aprof-pw-toggle" 
+                          onClick={() => setShowConfirmPw(!showConfirmPw)}
+                        >
+                          {showConfirmPw ? "Hide" : "Show"}
+                        </button>
                       </div>
                       {pwForm.confirm && pwForm.next !== pwForm.confirm && (
                         <div style={{ fontSize: 12, color: '#ef4444', fontWeight: 600, marginTop: 4 }}>Passwords do not match</div>
@@ -493,7 +579,7 @@ export default function AdminProfile() {
                     <p style={{ margin: 0, fontSize: 13, color: 'var(--atxt2)' }}>Add an extra layer of security to your account.</p>
                   </div>
                   {currentUser?.twoFactorEnabled ? (
-                    <button className="abtn abtn-sm" style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }} onClick={handleDisable2FA} disabled={twoFactorLoading}>
+                    <button className="abtn abtn-sm abtn-danger" onClick={handleDisable2FA} disabled={twoFactorLoading}>
                       {twoFactorLoading ? <i className="fas fa-spinner fa-spin" /> : 'Disable 2FA'}
                     </button>
                   ) : (
@@ -654,19 +740,36 @@ export default function AdminProfile() {
           box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         }
 
-        .aprof-premium-badge {
+        .aprof-premium-btn {
+          height: 40px;
+          padding: 0 20px;
+          border-radius: 12px;
+          background: linear-gradient(135deg, #f59e0b, #d97706);
+          color: #fff !important;
+          border: none;
+          font-weight: 800;
+          font-size: 13px;
+          box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
           display: flex;
           align-items: center;
-          gap: 8px;
-          padding: 8px 18px;
-          background: linear-gradient(135deg, #f59e0b, #d97706);
-          color: #fff;
-          border-radius: 14px;
-          font-size: 13px;
-          font-weight: 700;
-          box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-          animation: aprofPulse 2s infinite;
-          height: 40px;
+          gap: 8,
+          cursor: default;
+          position: relative;
+          overflow: hidden;
+        }
+        .aprof-premium-btn::after {
+          content: "";
+          position: absolute;
+          top: -50%; left: -50%;
+          width: 200%; height: 200%;
+          background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+          transform: rotate(45deg);
+          animation: aprofShine 3s infinite;
+        }
+        @keyframes aprofShine {
+          0% { left: -100%; }
+          20% { left: 100%; }
+          100% { left: 100%; }
         }
         @keyframes aprofPulse {
           0% { transform: scale(1); }
@@ -741,8 +844,8 @@ export default function AdminProfile() {
         }
         .aprof-input-2fa {
           width: 100%;
-          background: var(--bg);
-          border: 2px solid var(--abdr);
+          background: var(--acard-alt);
+          border: 1.5px solid var(--abdr);
           border-radius: 12px;
           padding: 12px 16px;
           color: var(--atxt);

@@ -336,6 +336,13 @@ function StepEmail({ data, onChange, onNext, onBack }) {
     setTesting(false);
   }
 
+  function handleSmtpChange(field, value) {
+    setTestResult(null);
+    // Auto-clean: remove invisible spaces and trim
+    const cleanValue = value.replace(/\s+/g, (m) => m === ' ' ? ' ' : '').trim();
+    onChange({ ...data, [field]: value.trim() });
+  }
+
   return (
     <>
       <div className="ins-fields-grid">
@@ -364,7 +371,7 @@ function StepEmail({ data, onChange, onNext, onBack }) {
               <input 
                 className="ins-input" type="text"
                 value={data.host} 
-                onChange={(e) => { setTestResult(null); onChange({ ...data, host: e.target.value }); }} 
+                onChange={(e) => handleSmtpChange('host', e.target.value)} 
                 placeholder="e.g. smtp.gmail.com"
               />
             </div>
@@ -373,7 +380,7 @@ function StepEmail({ data, onChange, onNext, onBack }) {
               <input 
                 className="ins-input" type="text"
                 value={data.port} 
-                onChange={(e) => { setTestResult(null); onChange({ ...data, port: e.target.value }); }} 
+                onChange={(e) => handleSmtpChange('port', e.target.value)} 
                 placeholder="587"
               />
             </div>
@@ -394,7 +401,7 @@ function StepEmail({ data, onChange, onNext, onBack }) {
               <input 
                 className="ins-input" type="text"
                 value={data.user} 
-                onChange={(e) => { setTestResult(null); onChange({ ...data, user: e.target.value }); }} 
+                onChange={(e) => handleSmtpChange('user', e.target.value)} 
                 placeholder="you@domain.com"
               />
             </div>
@@ -405,7 +412,7 @@ function StepEmail({ data, onChange, onNext, onBack }) {
                   className="ins-input" 
                   type={showPass ? "text" : "password"}
                   value={data.pass} 
-                  onChange={(e) => { setTestResult(null); onChange({ ...data, pass: e.target.value }); }} 
+                  onChange={(e) => handleSmtpChange('pass', e.target.value)} 
                   placeholder="••••••••••••••••"
                   autoComplete="new-password"
                 />

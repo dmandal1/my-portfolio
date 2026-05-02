@@ -39,10 +39,14 @@ function sendMail($to, $subject, $message) {
  * Lightweight Native SMTP Client with Detailed Diagnostics
  */
 function sendNativeSMTP($to, $subject, $message, $fromEmail, $fromName, $overrides = [], &$errorOut = null) {
-    $smtpHost = $overrides['host'] ?? (defined('SMTP_HOST') ? SMTP_HOST : '');
+    $smtpHost = trim($overrides['host'] ?? (defined('SMTP_HOST') ? SMTP_HOST : ''));
     $smtpPort = (int)($overrides['port'] ?? (defined('SMTP_PORT') ? SMTP_PORT : 587));
-    $smtpUser = $overrides['user'] ?? (defined('SMTP_USER') ? SMTP_USER : '');
-    $smtpPass = $overrides['pass'] ?? (defined('SMTP_PASS') ? SMTP_PASS : '');
+    $smtpUser = trim($overrides['user'] ?? (defined('SMTP_USER') ? SMTP_USER : ''));
+    
+    // Clean SMTP Password: trim and remove invisible Unicode characters often added by Notes apps
+    $rawPass  = $overrides['pass'] ?? (defined('SMTP_PASS') ? SMTP_PASS : '');
+    $smtpPass = trim(str_replace("\xc2\xa0", " ", $rawPass)); // Handle &nbsp;
+    
     $smtpEnc  = strtolower($overrides['enc']  ?? (defined('SMTP_ENC')  ? SMTP_ENC : 'tls'));
 
     $log = [];
