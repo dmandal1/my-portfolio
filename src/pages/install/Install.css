@@ -778,3 +778,113 @@
   .ins-step-panel { padding: 14px 12px 20px; }
   .ins-step-label { display: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   PREMIUM ERROR CARD (COMPACT & GLASSMORPHIC)
+   ═══════════════════════════════════════════════════════════════════ */
+.ins-premium-error {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: rgba(255, 235, 238, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(229, 57, 53, 0.2);
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(229, 57, 53, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.ins-error-glare {
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 100%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 50%);
+  pointer-events: none;
+}
+
+.ins-error-icon-box {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #ef5350 0%, #c62828 100%);
+  color: white;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(229, 57, 53, 0.3);
+  position: relative;
+  z-index: 1;
+}
+
+.ins-error-body {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+  padding-top: 2px;
+}
+
+.ins-error-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #b71c1c;
+  margin-bottom: 4px;
+  letter-spacing: -0.2px;
+}
+
+.ins-error-desc {
+  font-size: 13px;
+  color: #455a64;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.ins-error-desc strong {
+  color: #c62828;
+}
+
+.ins-error-details {
+  font-size: 12px;
+}
+
+.ins-error-details summary {
+  cursor: pointer;
+  color: #e53935;
+  font-weight: 600;
+  outline: none;
+  transition: color 0.2s;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+
+.ins-error-details summary:hover {
+  color: #b71c1c;
+}
+
+.ins-error-code {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px dashed rgba(229, 57, 53, 0.3);
+  border-radius: 8px;
+  padding: 10px;
+  font-family: "JetBrains Mono", "Menlo", monospace;
+  color: #c62828;
+  word-break: break-word;
+  font-size: 11px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SCROLLBAR HIDING (APP-LIKE FEEL)
+   ═══════════════════════════════════════════════════════════════════ */
+.ins-root, .ins-content {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.ins-root::-webkit-scrollbar, .ins-content::-webkit-scrollbar {
+  display: none;
+}
+

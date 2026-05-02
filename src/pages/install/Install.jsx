@@ -247,11 +247,22 @@ function StepDatabase({ db, setDb, onNext, onBack }) {
       </div>
 
       {testResult === "err" && (
-        <div className="ins-alert ins-alert--err" style={{ animation: 'ins-shake 0.4s ease' }}>
-          <div style={{ fontWeight: 700, marginBottom: 4 }}>Oops! {testMsg}</div>
-          <div style={{ fontSize: 13, opacity: 0.9 }}>
-            We couldn't reach your database. Please double-check your <strong>Host</strong>, <strong>Name</strong>, <strong>Username</strong>, and <strong>Password</strong>. 
-            Commonly, host should be <code>localhost</code> unless specified by your provider.
+        <div className="ins-premium-error" style={{ animation: 'ins-shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both' }}>
+          <div className="ins-error-glare"></div>
+          <div className="ins-error-icon-box">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <div className="ins-error-body">
+            <h4 className="ins-error-title">Connection Unsuccessful</h4>
+            <p className="ins-error-desc">
+              We couldn't connect to your database. Please verify your <strong>Password</strong>, <strong>Username</strong>, and <strong>Database Name</strong>.
+            </p>
+            <details className="ins-error-details">
+              <summary>View technical details</summary>
+              <div className="ins-error-code">{testMsg.replace('Database connection failed: ', '')}</div>
+            </details>
           </div>
         </div>
       )}
