@@ -16,6 +16,18 @@ function out($data, $code = 200): never {
     exit;
 }
 
+function testConnection(string $host, string $name, string $user, string $pass): PDO|string {
+    try {
+        return new PDO(
+            "mysql:host=$host;dbname=$name;charset=utf8mb4",
+            $user, $pass,
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_TIMEOUT => 5]
+        );
+    } catch (PDOException $e) {
+        return $e->getMessage();
+    }
+}
+
 // Already installed guard
 if (file_exists($lockPath) && file_exists($configPath)) {
     out(['error' => 'Already installed. Delete installed.lock from public_html to reinstall.'], 403);
@@ -29,38 +41,68 @@ $dbName = trim($body['db_name'] ?? '');
 $dbUser = trim($body['db_user'] ?? '');
 $dbPass = $body['db_pass'] ?? '';
 
-if (!$dbName || !$dbUser) {
-    out(['error' => 'Database name and username are required.'], 400);
-}
-
-// ── Test DB connection ─────────────────────────────────────────────────────
-function testConnection(string $host, string $name, string $user, string $pass): PDO|string {
-    try {
-        return new PDO(
-            "mysql:host=$host;dbname=$name;charset=utf8mb4",
-            $user, $pass,
-            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_TIMEOUT => 5]
-        );
-    } catch (PDOException $e) {
-        return $e->getMessage();
-    }
-}
-
-$pdo = testConnection($dbHost, $dbName, $dbUser, $dbPass);
-if (is_string($pdo)) {
-    out(['error' => 'Database connection failed: ' . $pdo], 400);
-}
-
 // Test-only mode — just verify credentials
 if ($action === 'test_db') {
+    if (!$dbName || !$dbUser) {
+        out(['error' => 'Database name and username are required.'], 400);
+    }
+    $pdo = testConnection($dbHost, $dbName, $dbUser, $dbPass);
+    if (is_string($pdo)) {
+        out(['error' => 'Database connection failed: ' . $pdo], 400);
+    }
     out(['ok' => true, 'message' => 'Connection successful!']);
+}
+
+if ($action === 'test_email') {
+    require_once __DIR__ . '/mail_helper.php';
+    $mUser = trim($body['smtp_user'] ?? '');
+    $mPass = $body['smtp_pass'] ?? '';
+    $mHost = trim($body['smtp_host'] ?? '');
+    $mPort = trim($body['smtp_port'] ?? '587');
+    $mEnc  = trim($body['smtp_enc']  ?? 'tls');
+
+    if (!$mUser || !$mPass || !$mHost) {
+        out(['error' => 'SMTP User, Password, and Host are required for testing.'], 400);
+    }
+
+    $smtpError = "";
+    $success = sendNativeSMTP(
+        $mUser, 
+        "SMTP Connection Test", 
+        "<h1>It Works!</h1><p>Your SMTP settings are correct.</p>", 
+        $mUser, 
+        "Setup Wizard",
+        ['host' => $mHost, 'port' => $mPort, 'user' => $mUser, 'pass' => $mPass, 'enc' => $mEnc],
+        $smtpError
+    );
+
+    if ($success) {
+        out(['ok' => true, 'message' => 'Test email sent successfully! Check your inbox.']);
+    } else {
+        out(['ok' => false, 'error' => $smtpError ?: 'Mail failed to connect.'], 200);
+    }
 }
 
 // ── Full install ───────────────────────────────────────────────────────────
 $adminEmail = trim($body['admin_email']    ?? '');
 $adminPass  = trim($body['admin_password'] ?? '');
 $siteName   = trim($body['site_name']      ?? 'My Portfolio');
+
+// Email Config
+$mailDriver = trim($body['email_driver'] ?? 'mail');
+$smtpHost   = trim($body['smtp_host']   ?? '');
+$smtpPort   = trim($body['smtp_port']   ?? '587');
+$smtpUser   = trim($body['smtp_user']   ?? '');
+$smtpPass   = $body['smtp_pass']        ?? '';
+$smtpEnc    = trim($body['smtp_enc']    ?? 'tls');
+
 $jwtSecret  = bin2hex(random_bytes(32));
+
+if ($action === 'install') {
+    if (!$dbName || !$dbUser) out(['error' => 'Database name and username are required.'], 400);
+    $pdo = testConnection($dbHost, $dbName, $dbUser, $dbPass);
+    if (is_string($pdo)) out(['error' => 'Database connection failed: ' . $pdo], 400);
+}
 
 if (!$adminEmail) out(['error' => 'Admin email is required.'], 400);
 if (!filter_var($adminEmail, FILTER_VALIDATE_EMAIL)) out(['error' => 'Invalid admin email address.'], 400);
@@ -80,6 +122,9 @@ $statements = [
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
+    profile_image VARCHAR(500) DEFAULT '',
+    two_factor_secret VARCHAR(100) DEFAULT '',
+    two_factor_enabled TINYINT(1) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
 
@@ -239,12 +284,27 @@ $escapedUser  = addslashes($dbUser);
 $escapedPass  = addslashes($dbPass);
 $escapedSite  = addslashes($siteName);
 
+$eDriver = addslashes($mailDriver);
+$eHost   = addslashes($smtpHost);
+$ePort   = addslashes($smtpPort);
+$eUser   = addslashes($smtpUser);
+$ePass   = addslashes($smtpPass);
+$eEnc    = addslashes($smtpEnc);
+
 $configContent = <<<PHP
 <?php
 define('DB_HOST', '$escapedHost');
 define('DB_NAME', '$escapedName');
 define('DB_USER', '$escapedUser');
 define('DB_PASS', '$escapedPass');
+
+// Email Settings
+define('MAIL_DRIVER', '$eDriver');
+define('SMTP_HOST',   '$eHost');
+define('SMTP_PORT',   '$ePort');
+define('SMTP_USER',   '$eUser');
+define('SMTP_PASS',   '$ePass');
+define('SMTP_ENC',    '$eEnc');
 
 define('JWT_SECRET', '$jwtSecret');
 define('JWT_TTL', 86400 * 7); // 7 days

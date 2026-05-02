@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { apiFetch, setToken, clearToken, getToken } from "../api/config";
+import { getCurrentUser, verify2FALogin } from "../api/apiService";
 
 const AuthContext = createContext(null);
 
@@ -15,7 +16,11 @@ export function AuthProvider({ children }) {
     return Promise.resolve();
   }, []);
 
-  const checkTokenAndSetup = useCallback(() => {
+  const updateUser = useCallback((newData) => {
+    setCurrentUser(prev => prev ? { ...prev, ...newData } : null);
+  }, []);
+
+  const checkTokenAndSetup = useCallback(async () => {
     const token = getToken();
     if (token) {
       try {
@@ -24,11 +29,29 @@ export function AuthProvider({ children }) {
         const timeToLive = expirationTime - Date.now();
 
         if (timeToLive > 0) {
-          setCurrentUser({
-            email: payload.email,
-            uid: String(payload.sub),
-            createdAt: payload.created_at
-          });
+          // Fetch full user data from backend (including profile image)
+          try {
+            const fullUser = await getCurrentUser();
+            setCurrentUser({
+              email: fullUser.email,
+              uid: String(fullUser.id),
+              createdAt: fullUser.created_at,
+              profileImage: fullUser.profile_image,
+              twoFactorEnabled: fullUser.two_factor_enabled,
+              display_name: fullUser.display_name,
+              bio: fullUser.bio,
+              social_links: fullUser.social_links
+            });
+          } catch (err) {
+            console.error("Failed to fetch full user profile:", err);
+            // Fallback to JWT payload
+            setCurrentUser({
+              email: payload.email,
+              uid: String(payload.sub),
+              createdAt: payload.created_at
+            });
+          }
+
           // Auto logout when token expires
           const timeoutId = setTimeout(() => {
             console.log("Token expired, logging out...");
@@ -47,10 +70,14 @@ export function AuthProvider({ children }) {
   }, [logout]);
 
   useEffect(() => {
-    const cleanup = checkTokenAndSetup();
-    setLoading(false);
+    const initAuth = async () => {
+      const cleanup = await checkTokenAndSetup();
+      setLoading(false);
+      return cleanup;
+    };
+    const cleanupPromise = initAuth();
     return () => {
-      if (cleanup) cleanup();
+      cleanupPromise.then(cleanup => { if (cleanup) cleanup(); });
     };
   }, [checkTokenAndSetup]);
 
@@ -96,13 +123,26 @@ export function AuthProvider({ children }) {
       method: "POST",
       body: JSON.stringify({ email, password }),
     });
+    
+    if (res.requires_2fa) {
+      setToken(res.temp_token);
+      return res;
+    }
+    
     setToken(res.token);
-    checkTokenAndSetup();
+    await checkTokenAndSetup();
+    return res;
+  }
+
+  async function verify2FA(code) {
+    const res = await verify2FALogin(code);
+    setToken(res.token);
+    await checkTokenAndSetup();
     return res;
   }
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout }}>
+    <AuthContext.Provider value={{ currentUser, login, logout, updateUser, verify2FA }}>
       {!loading && children}
     </AuthContext.Provider>
   );

@@ -7,6 +7,7 @@ const API = import.meta.env.VITE_API_URL || "/api";
 const STEPS = [
   { id: "requirements", label: "Requirements", sub: "System checks"      },
   { id: "database",     label: "Database",      sub: "Connection details" },
+  { id: "email",        label: "Email",         sub: "SMTP configuration" },
   { id: "account",      label: "Admin Account", sub: "Login credentials"  },
   { id: "install",      label: "Install",        sub: "Set up your site"  },
 ];
@@ -32,6 +33,15 @@ const STEP_META = [
         <ellipse cx="12" cy="5" rx="9" ry="3" stroke="white" strokeWidth="2"/>
         <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5" stroke="white" strokeWidth="2"/>
         <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"   stroke="white" strokeWidth="2"/>
+      </svg>
+    ),
+  },
+  {
+    title: "Email Service",
+    sub:   "Choose between standard PHP mail() or reliable SMTP.",
+    icon: (
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+        <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
   },
@@ -247,21 +257,20 @@ function StepDatabase({ db, setDb, onNext, onBack }) {
       </div>
 
       {testResult === "err" && (
-        <div className="ins-premium-error" style={{ animation: 'ins-shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both' }}>
-          <div className="ins-error-glare"></div>
-          <div className="ins-error-icon-box">
+        <div className="ins-premium-alert" style={{ animation: 'ins-popIn 0.3s ease-out both' }}>
+          <div className="ins-premium-alert-icon">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
               <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <div className="ins-error-body">
-            <h4 className="ins-error-title">Connection Unsuccessful</h4>
-            <p className="ins-error-desc">
-              We couldn't connect to your database. Please verify your <strong>Password</strong>, <strong>Username</strong>, and <strong>Database Name</strong>.
+          <div className="ins-premium-alert-content">
+            <h4>Connection Unsuccessful</h4>
+            <p>
+              We couldn't reach your database. This usually means the <strong>username</strong> or <strong>password</strong> doesn't match your hosting panel, or the database hasn't been created yet.
             </p>
-            <details className="ins-error-details">
-              <summary>View technical details</summary>
-              <div className="ins-error-code">{testMsg.replace('Database connection failed: ', '')}</div>
+            <details>
+              <summary>View technical error details</summary>
+              <div>{testMsg.replace('Database connection failed: ', '')}</div>
             </details>
           </div>
         </div>
@@ -273,6 +282,212 @@ function StepDatabase({ db, setDb, onNext, onBack }) {
           className="ins-btn ins-btn--primary"
           disabled={testResult !== "ok"}
           onClick={onNext}
+        >
+          Continue →
+        </button>
+      </div>
+    </>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Step 3 — Email Configuration
+   ══════════════════════════════════════════════════════════════ */
+function StepEmail({ data, onChange, onNext, onBack }) {
+  const [showPass, setShowPass]   = useState(false);
+  const [testing, setTesting]       = useState(false);
+  const [testResult, setTestResult] = useState(null);
+  const [testMsg, setTestMsg]       = useState("");
+
+  async function testSmtp() {
+    setTesting(true);
+    setTestResult(null);
+    const start = Date.now();
+    try {
+      const res = await fetch(`${API}/install.php`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          action: "test_email", 
+          email_driver: data.driver,
+          smtp_host: data.host,
+          smtp_port: data.port,
+          smtp_user: data.user,
+          smtp_pass: data.pass,
+          smtp_enc: data.encryption
+        }),
+      });
+      const resData = await res.json();
+      
+      const elapsed = Date.now() - start;
+      if (elapsed < 1500) await new Promise(r => setTimeout(r, 1500 - elapsed));
+
+      if (resData.ok) {
+        setTestResult("ok");
+        setTestMsg(resData.message);
+      } else {
+        setTestResult("err");
+        setTestMsg(resData.error || "SMTP connection failed");
+      }
+    } catch {
+      setTestResult("err");
+      setTestMsg("Could not reach the API.");
+    }
+    setTesting(false);
+  }
+
+  return (
+    <>
+      <div className="ins-fields-grid">
+        <div className="ins-field" style={{ gridColumn: 'span 2' }}>
+          <label className="ins-field-label">Email Driver</label>
+          <select 
+            className="ins-input"
+            value={data.driver} 
+            onChange={(e) => {
+              setTestResult(null);
+              onChange({ ...data, driver: e.target.value });
+            }}
+          >
+            <option value="mail">PHP mail() (Built-in)</option>
+            <option value="smtp">SMTP (Professional / External)</option>
+          </select>
+          <p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 8 }}>
+            SMTP is highly recommended for Gmail, Outlook, or Hostinger email to ensure OTP delivery.
+          </p>
+        </div>
+
+        {data.driver === "smtp" && (
+          <>
+            <div className="ins-field" style={{ gridColumn: 'span 2' }}>
+              <label className="ins-field-label">SMTP Host</label>
+              <input 
+                className="ins-input" type="text"
+                value={data.host} 
+                onChange={(e) => { setTestResult(null); onChange({ ...data, host: e.target.value }); }} 
+                placeholder="e.g. smtp.gmail.com"
+              />
+            </div>
+            <div className="ins-field">
+              <label className="ins-field-label">SMTP Port</label>
+              <input 
+                className="ins-input" type="text"
+                value={data.port} 
+                onChange={(e) => { setTestResult(null); onChange({ ...data, port: e.target.value }); }} 
+                placeholder="587"
+              />
+            </div>
+            <div className="ins-field">
+              <label className="ins-field-label">Encryption</label>
+              <select 
+                className="ins-input"
+                value={data.encryption} 
+                onChange={(e) => { setTestResult(null); onChange({ ...data, encryption: e.target.value }); }}
+              >
+                <option value="tls">TLS (Standard)</option>
+                <option value="ssl">SSL</option>
+                <option value="none">None</option>
+              </select>
+            </div>
+            <div className="ins-field">
+              <label className="ins-field-label">Username</label>
+              <input 
+                className="ins-input" type="text"
+                value={data.user} 
+                onChange={(e) => { setTestResult(null); onChange({ ...data, user: e.target.value }); }} 
+                placeholder="you@domain.com"
+              />
+            </div>
+            <div className="ins-field">
+              <label className="ins-field-label">App Password</label>
+              <div className="ins-pw-wrap">
+                <input 
+                  className="ins-input" 
+                  type={showPass ? "text" : "password"}
+                  value={data.pass} 
+                  onChange={(e) => { setTestResult(null); onChange({ ...data, pass: e.target.value }); }} 
+                  placeholder="••••••••••••••••"
+                  autoComplete="new-password"
+                />
+                <button 
+                  type="button" 
+                  className="ins-pw-toggle" 
+                  onClick={() => setShowPass(!showPass)}
+                >
+                  {showPass ? "Hide" : "Show"}
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      {data.driver === "smtp" && (
+        <div className="ins-test-row">
+          <button
+            className="ins-btn ins-btn--ghost ins-btn--sm"
+            onClick={testSmtp}
+            disabled={testing || !data.host || !data.user || !data.pass}
+          >
+            {testing
+              ? <><span className="ins-spin-sm ins-spin-sm--blue" /> Connecting to SMTP...</>
+              : <><i className="fas fa-paper-plane" style={{ marginRight: 6 }} /> Test SMTP Connection</>}
+          </button>
+          
+          {testResult === "ok" && (
+            <div className="ins-badge ins-badge--ok" style={{ animation: 'ins-popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}>
+              <i className="fas fa-check-circle" style={{ marginRight: 6 }} />
+              Success! Test mail sent.
+            </div>
+          )}
+          
+          {testResult === "err" && (
+            <span style={{ fontSize: 13, color: "var(--err)", fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6, animation: 'ins-shake 0.4s ease' }}>
+              <i className="fas fa-exclamation-triangle" /> {testMsg.includes("Authentication Denied") ? "Login Failed" : "Connection failed"}
+            </span>
+          )}
+        </div>
+      )}
+
+      {testResult === "err" && (
+        <div className="ins-premium-alert" style={{ animation: 'ins-popIn 0.3s ease-out both', marginTop: 20 }}>
+          <div className="ins-premium-alert-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <div className="ins-premium-alert-content">
+            <h4>Mail Configuration Error</h4>
+            <p>
+              {testMsg.includes("Authentication Denied") 
+                ? "Gmail and Outlook require an 'App Password' if you have 2FA enabled. Using your normal login password will fail."
+                : "The server couldn't connect to the SMTP host. This often happens if your hosting provider blocks Port 587. Try using Port 465 with SSL encryption instead."}
+            </p>
+            {testMsg.includes("Authentication Denied") ? (
+              <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noreferrer" style={{ color: 'var(--ap)', fontSize: 13, fontWeight: 700 }}>
+                Get a Google App Password →
+              </a>
+            ) : (
+              <div style={{ marginTop: 10, display: 'flex', gap: 10 }}>
+                 <button 
+                   className="ins-btn ins-btn--ghost ins-btn--sm" 
+                   style={{ fontSize: 11, padding: '4px 10px' }}
+                   onClick={() => onChange({ ...data, port: "465", encryption: "ssl" })}
+                 >
+                   Switch to Port 465 / SSL
+                 </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="ins-btn-row">
+        <button className="ins-btn ins-btn--ghost" onClick={onBack}>← Back</button>
+        <button 
+          className="ins-btn ins-btn--primary" 
+          onClick={onNext}
+          disabled={data.driver === "smtp" && testResult !== "ok"}
         >
           Continue →
         </button>
@@ -394,7 +609,7 @@ const PROG_STEPS = [
   "Finalizing",
 ];
 
-function StepInstall({ db, account, onBack }) {
+function StepInstall({ db, email, account, onBack }) {
   const navigate = useNavigate();
   const [phase,    setPhase]    = useState("review");
   const [progress, setProgress] = useState(-1);
@@ -418,6 +633,12 @@ function StepInstall({ db, account, onBack }) {
         admin_email:    account.admin_email,
         admin_password: account.admin_password,
         site_name:      account.site_name,
+        email_driver:   email.driver,
+        smtp_host:      email.host,
+        smtp_port:      email.port,
+        smtp_user:      email.user,
+        smtp_pass:      email.pass,
+        smtp_enc:       email.encryption,
       }),
     })
       .then((r) => r.json())
@@ -463,36 +684,68 @@ function StepInstall({ db, account, onBack }) {
     return (
       <>
         <div className="ins-review-grid">
-          <div>
-            <p className="ins-section-label">Database</p>
-            <div className="ins-review-box">
-              <div className="ins-review-box-header">Connection</div>
-              <ReviewRow label="Host"     value={db.db_host} />
-              <ReviewRow label="Name"     value={db.db_name} />
-              <ReviewRow label="Username" value={db.db_user} />
-              <ReviewRow label="Password" value="••••••••" />
+          {/* Database Card */}
+          <div className="ins-premium-card">
+            <div className="ins-premium-card-header">
+              <div className="ins-pcard-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m-16 0v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7m-16 0c0 2.21 3.582 4 8 4s8-1.79 8-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <h3 className="ins-pcard-title">Database</h3>
+            </div>
+            <div className="ins-pcard-list">
+              <PremiumRow label="Host" value={db.db_host} />
+              <PremiumRow label="Name" value={db.db_name} />
+              <PremiumRow label="User" value={db.db_user} />
             </div>
           </div>
-          <div>
-            <p className="ins-section-label">Site &amp; Admin</p>
-            <div className="ins-review-box">
-              <div className="ins-review-box-header">Account</div>
-              <ReviewRow label="Site"     value={account.site_name} />
-              <ReviewRow label="Email"    value={account.admin_email} />
-              <ReviewRow label="Password" value="••••••••" />
-            </div>
-          </div>
-        </div>
 
-        <div className="ins-alert ins-alert--info">
-          The installer will create all tables, write <code>config.php</code>, and set up
-          the <code>uploads/</code> folder structure automatically.
+          {/* Email Card */}
+          <div className="ins-premium-card">
+            <div className="ins-premium-card-header">
+              <div className="ins-pcard-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <h3 className="ins-pcard-title">Email</h3>
+            </div>
+            <div className="ins-pcard-list">
+              <PremiumRow label="Driver" value={email.driver.toUpperCase()} />
+              {email.driver === 'smtp' ? (
+                <>
+                  <PremiumRow label="Host" value={email.host} />
+                  <PremiumRow label="User" value={email.user} />
+                </>
+              ) : (
+                <div className="ins-pcard-footer-note">Standard PHP mail() enabled.</div>
+              )}
+            </div>
+          </div>
+
+          {/* Account Card */}
+          <div className="ins-premium-card">
+            <div className="ins-premium-card-header">
+              <div className="ins-pcard-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M8.5 7a4 4 0 100-8 4 4 0 000 8zm10 0h4m-2-2v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <h3 className="ins-pcard-title">Admin</h3>
+            </div>
+            <div className="ins-pcard-list">
+              <PremiumRow label="Site" value={account.site_name} />
+              <PremiumRow label="Email" value={account.admin_email} />
+              <PremiumRow label="Pass" value="••••••••" />
+            </div>
+          </div>
         </div>
 
         <div className="ins-btn-row">
           <button className="ins-btn ins-btn--ghost" onClick={onBack}>← Back</button>
           <button className="ins-btn ins-btn--primary ins-btn--lg" onClick={runInstall}>
-            🚀 Install Now
+            🚀 Start Installation
           </button>
         </div>
       </>
@@ -569,6 +822,15 @@ function StepInstall({ db, account, onBack }) {
   );
 }
 
+function PremiumRow({ label, value }) {
+  return (
+    <div className="ins-pcard-row">
+      <span className="ins-pcard-label">{label}</span>
+      <span className="ins-pcard-value">{value}</span>
+    </div>
+  );
+}
+
 function ReviewRow({ label, value }) {
   return (
     <div className="ins-review-row">
@@ -590,6 +852,15 @@ export default function Install() {
     db_name: "",
     db_user: "",
     db_pass: "",
+  });
+
+  const [email, setEmail] = useState({
+    driver: "mail",
+    host: "",
+    port: "587",
+    user: "",
+    pass: "",
+    encryption: "tls"
   });
 
   const [account, setAccount] = useState({
@@ -693,8 +964,9 @@ export default function Install() {
             <div className="ins-step-panel" key={step}>
               {step === 0 && <StepRequirements onNext={next} />}
               {step === 1 && <StepDatabase db={db} setDb={setDb} onNext={next} onBack={back} />}
-              {step === 2 && <StepAccount   account={account} setAccount={setAccount} onNext={next} onBack={back} />}
-              {step === 3 && <StepInstall   db={db} account={account} onBack={back} />}
+              {step === 2 && <StepEmail    data={email} onChange={setEmail} onNext={next} onBack={back} />}
+              {step === 3 && <StepAccount  account={account} setAccount={setAccount} onNext={next} onBack={back} />}
+              {step === 4 && <StepInstall  db={db} email={email} account={account} onBack={back} />}
             </div>
 
           </div>

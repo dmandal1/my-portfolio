@@ -37,6 +37,7 @@ import AdminRevisions from "../pages/admin/AdminRevisions";
 import AdminProfile from "../pages/admin/AdminProfile";
 import AdminModerationQueue from "../pages/admin/AdminModerationQueue";
 import AdminImportExport from "../pages/admin/AdminImportExport";
+import AdminResetPassword from "../pages/admin/AdminResetPassword";
 import ProtectedRoute from "../components/protectedRoute/ProtectedRoute";
 import { AuthProvider } from "../contexts/AuthContext";
 import { ToastProvider } from "../pages/admin/components/AdminToast";
@@ -115,6 +116,7 @@ const commonRoutes = (theme, onToggle) => (
 
     {/* Admin routes */}
     <Route path="/admin/login" element={<AdminLogin />} />
+    <Route path="/admin/reset-password" element={<AdminResetPassword />} />
     <Route
       path="/admin/home"
       element={

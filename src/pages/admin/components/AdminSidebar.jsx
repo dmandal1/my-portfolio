@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
-import { getAllBlogsAdmin, saveAdminPanelSettings, getContactMessages } from "../../../api/apiService";
+import { getAllBlogsAdmin, saveAdminPanelSettings, getContactMessages, uploadAvatar, updateAdminProfile } from "../../../api/apiService";
 import { useAdminSettings } from "./useAdminSettings";
+import { usePortfolioData } from "../../../contexts/PortfolioDataContext";
 import {
   ADMIN_SETTINGS_UPDATED_EVENT,
   applyAdminTheme,
@@ -104,7 +105,8 @@ function latestPostTime(posts) {
 }
 
 export default function AdminSidebar() {
-  const { currentUser, logout } = useAuth();
+  const { currentUser, logout, updateUser } = useAuth();
+  const { profile, siteName } = usePortfolioData();
   const navigate = useNavigate();
   const adminSettings = useAdminSettings();
   const [loggingOut, setLoggingOut]     = useState(false);
@@ -122,6 +124,25 @@ export default function AdminSidebar() {
   const [darkMode, setDarkMode]         = useState(
     () => isDarkThemeSetting(loadAdminSettings().theme)
   );
+  const [navAvatarUploading, setNavAvatarUploading] = useState(false);
+  const navAvatarInputRef = useRef(null);
+
+  async function handleNavAvatarUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) return;
+    setNavAvatarUploading(true);
+    try {
+      const url = await uploadAvatar(file);
+      await updateAdminProfile({ profile_image: url });
+      updateUser({ profileImage: url });
+    } catch (err) {
+      console.error('Avatar upload failed:', err);
+    } finally {
+      setNavAvatarUploading(false);
+      if (navAvatarInputRef.current) navAvatarInputRef.current.value = '';
+    }
+  }
 
   /* ── Dark mode effect ── */
   useEffect(() => {
@@ -357,7 +378,16 @@ export default function AdminSidebar() {
     }
   }
 
-  const initials = currentUser?.email?.slice(0, 2).toUpperCase() ?? "AD";
+  const initials = (() => {
+    const name = currentUser?.display_name;
+    if (name && name.trim()) {
+      const parts = name.trim().split(/\s+/);
+      if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    return currentUser?.email?.slice(0, 2).toUpperCase() ?? "AD";
+  })();
+  const profileImage = currentUser?.profileImage || "";
 
   return (
     <>
@@ -554,14 +584,38 @@ export default function AdminSidebar() {
           {/* User menu */}
           {currentUser && (
             <div className="abar-user-wrap" ref={userMenuRef}>
+              {/* Hidden file input for navbar avatar upload */}
+              <input
+                type="file"
+                accept="image/*"
+                ref={navAvatarInputRef}
+                onChange={handleNavAvatarUpload}
+                style={{ display: 'none' }}
+              />
               <button
                 className={`abar-user-btn${userMenuOpen ? " is-open" : ""}`}
                 onClick={() => setUserMenuOpen((v) => !v)}
                 aria-haspopup="menu"
                 aria-expanded={userMenuOpen}
               >
-                <div className="abar-av">{initials}</div>
-                <span className="abar-uname">Admin</span>
+                <div
+                  className="abar-av abar-av-upload"
+                  onClick={(e) => { e.stopPropagation(); navAvatarInputRef.current?.click(); }}
+                  title="Click to change profile picture"
+                  style={{ cursor: 'pointer', position: 'relative' }}
+                >
+                  {navAvatarUploading ? (
+                    <i className="fas fa-spinner fa-spin" style={{ fontSize: 12 }} />
+                  ) : profileImage ? (
+                    <img src={profileImage} alt="Profile" className="abar-av-img" />
+                  ) : (
+                    initials
+                  )}
+                  {!navAvatarUploading && (
+                    <span className="abar-av-cam"><i className="fas fa-camera" /></span>
+                  )}
+                </div>
+                <span className="abar-uname">{currentUser?.display_name || 'Admin'}</span>
                 <i className="fas fa-chevron-down abar-caret" />
               </button>
 
@@ -570,9 +624,15 @@ export default function AdminSidebar() {
 
                   {/* ── Header: avatar + name + email ── */}
                   <div className="abar-um-header">
-                    <div className="abar-av abar-av-lg">{initials}</div>
+                    <div className="abar-av abar-av-lg">
+                      {profileImage ? (
+                        <img src={profileImage} alt="Profile" className="abar-av-img" />
+                      ) : (
+                        initials
+                      )}
+                    </div>
                     <div className="abar-um-info">
-                      <span className="abar-um-name">Admin</span>
+                      <span className="abar-um-name">{currentUser?.display_name || 'Admin'}</span>
                       <span className="abar-um-email">{currentUser.email}</span>
                     </div>
                   </div>

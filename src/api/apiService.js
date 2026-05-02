@@ -204,6 +204,18 @@ export function uploadCoverImage(file, onProgress, _oldUrl) {
   });
 }
 
+export function uploadAvatar(file) {
+  return new Promise((resolve, reject) => {
+    const form = new FormData();
+    form.append('file', file);
+    form.append('folder', 'avatars');
+
+    apiUpload('/media.php', form)
+      .then((res) => resolve(res.url))
+      .catch(reject);
+  });
+}
+
 export function uploadPortfolioAsset(file, onProgress) {
   return new Promise((resolve, reject) => {
     const form = new FormData();
@@ -564,6 +576,14 @@ export const changeAdminPassword = (oldPassword, newPassword) =>
     body: JSON.stringify({ oldPassword, newPassword }),
   });
 
+export const getCurrentUser = () => apiFetch('/me.php');
+
+export const updateAdminProfile = (data) =>
+  apiFetch('/update_profile.php', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
 // ── Contact Messages ──────────────────────────────────────────────────────
 export const getContactMessages = () => apiFetch('/messages.php');
 export const submitContactMessage = (data) => 
@@ -578,6 +598,36 @@ export const subscribeNewsletter = (email) =>
   apiFetch('/newsletter.php', { method: 'POST', body: JSON.stringify({ email }) });
 export const getAuditLogs = (q = '', limit = 50, offset = 0) => 
   apiFetch(`/database.php?action=audit&q=${encodeURIComponent(q)}&limit=${limit}&offset=${offset}`);
+
+// ── Two-Factor Authentication ──────────────────────────────────────────────
+export const generate2FASecret = () => apiFetch('/2fa.php?action=generate');
+
+export const enable2FA = (secret, code) =>
+  apiFetch('/2fa.php?action=enable', {
+    method: 'POST',
+    body: JSON.stringify({ secret, code }),
+  });
+
+export const disable2FA = () =>
+  apiFetch('/2fa.php?action=disable', { method: 'POST' });
+
+export const verify2FALogin = (code) =>
+  apiFetch('/verify_2fa.php', {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  });
+
+export const requestPasswordReset = (email) =>
+  apiFetch('/forgot_password.php?action=request', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+
+export const resetPassword = (token, password) =>
+  apiFetch('/forgot_password.php?action=reset', {
+    method: 'POST',
+    body: JSON.stringify({ token, password }),
+  });
 
 export const getSystemHealth = () => apiFetch('/status.php?action=health');
 

@@ -31,7 +31,7 @@ function verifyJwt(string $token): ?array {
 
 function requireAuth(): array {
     $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-    if (!str_starts_with($authHeader, 'Bearer ')) {
+    if (strpos($authHeader, 'Bearer ') !== 0) {
         errorResponse('Unauthorized', 401);
     }
     $token   = substr($authHeader, 7);
