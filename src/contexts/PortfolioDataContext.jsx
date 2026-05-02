@@ -33,6 +33,7 @@ import {
   getOpenSourceConfig,
   getPodcastSection,
   getBlogSectionConfig,
+  getMenuLinks,
 } from "../api/apiService";
 
 const PortfolioDataContext = createContext(null);
@@ -71,7 +72,7 @@ export function PortfolioDataProvider({ children }) {
           degrees, competitive, projects, skills,
           certifications, experiences, experienceHeader,
           contactPageData, projectsHeader,
-          openSource, podcastSection, blogSectionConfig,
+          openSource, podcastSection, blogSectionConfig, menuLinks,
         ] = await Promise.all([
           getPortfolioProfile(),
           getPortfolioSeo(),
@@ -89,6 +90,7 @@ export function PortfolioDataProvider({ children }) {
           getOpenSourceConfig(),
           getPodcastSection(),
           getBlogSectionConfig(),
+          getMenuLinks(),
         ]);
 
         // Build experience sections from flat array
@@ -103,6 +105,16 @@ export function PortfolioDataProvider({ children }) {
           });
           expSections = EXP_ORDER.filter((s) => map[s]?.length > 0).map((s) => ({ title: s, experiences: map[s] }));
         }
+
+        const defaultMenuLinks = [
+          { to: "/home",       label: "Home" },
+          { to: "/education",  label: "Education" },
+          { to: "/experience", label: "Experience" },
+          { to: "/projects",   label: "Projects" },
+          { to: "/blogs",      label: "Blogs" },
+          { to: "/opensource", label: "Open Source" },
+          { to: "/contact",    label: "Contact Me" },
+        ];
 
         setData({
           profile:         profile         || defaultProfile,
@@ -125,6 +137,7 @@ export function PortfolioDataProvider({ children }) {
           openSource:       openSource       || defaultOpenSource,
           podcastSection:   podcastSection   || defaultPodcastSection,
           blogSectionConfig: blogSectionConfig || defaultBlogSection,
+          menuLinks:        menuLinks?.length > 0 ? menuLinks : defaultMenuLinks,
         });
       } catch { /* keep portfolio.js defaults on any error */ }
     }

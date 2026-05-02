@@ -23,10 +23,20 @@ import AdminSettings from "../pages/admin/AdminSettings";
 import AdminAnalytics from "../pages/admin/AdminAnalytics";
 import AdminPortfolio from "../pages/admin/AdminPortfolio";
 import AdminDatabase from "../pages/admin/AdminDatabase";
+import AdminInbox from "../pages/admin/AdminInbox";
+import AdminNewsletter from "../pages/admin/AdminNewsletter";
+import AdminAudit from "../pages/admin/AdminAudit";
+import AdminSystem from "../pages/admin/AdminSystem";
 import Install from "../pages/install/Install";
 import { PortfolioDataProvider } from "../contexts/PortfolioDataContext";
 import AdminContentAudit from "../pages/admin/AdminContentAudit";
 import AdminEditorialPlanner from "../pages/admin/AdminEditorialPlanner";
+import AdminSEO from "../pages/admin/AdminSEO";
+import AdminRedirects from "../pages/admin/AdminRedirects";
+import AdminRevisions from "../pages/admin/AdminRevisions";
+import AdminProfile from "../pages/admin/AdminProfile";
+import AdminModerationQueue from "../pages/admin/AdminModerationQueue";
+import AdminImportExport from "../pages/admin/AdminImportExport";
 import ProtectedRoute from "../components/protectedRoute/ProtectedRoute";
 import { AuthProvider } from "../contexts/AuthContext";
 import { ToastProvider } from "../pages/admin/components/AdminToast";
@@ -222,11 +232,52 @@ const commonRoutes = (theme, onToggle) => (
     />
 
     <Route
+      path="/admin/audit"
+      element={
+        <ProtectedRoute>
+          <ToastProvider>
+            <AdminAudit />
+          </ToastProvider>
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/admin/system"
+      element={
+        <ProtectedRoute>
+          <ToastProvider>
+            <AdminSystem />
+          </ToastProvider>
+        </ProtectedRoute>
+      }
+    />
+    <Route
       path="/admin/database"
       element={
         <ProtectedRoute>
           <ToastProvider>
             <AdminDatabase />
+          </ToastProvider>
+        </ProtectedRoute>
+      }
+    />
+
+    <Route
+      path="/admin/inbox"
+      element={
+        <ProtectedRoute>
+          <ToastProvider>
+            <AdminInbox />
+          </ToastProvider>
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/admin/subscribers"
+      element={
+        <ProtectedRoute>
+          <ToastProvider>
+            <AdminNewsletter />
           </ToastProvider>
         </ProtectedRoute>
       }
@@ -249,6 +300,72 @@ const commonRoutes = (theme, onToggle) => (
         <ProtectedRoute>
           <ToastProvider>
             <AdminPortfolio />
+          </ToastProvider>
+        </ProtectedRoute>
+      }
+    />
+
+    <Route
+      path="/admin/seo"
+      element={
+        <ProtectedRoute>
+          <ToastProvider>
+            <AdminSEO />
+          </ToastProvider>
+        </ProtectedRoute>
+      }
+    />
+
+    <Route
+      path="/admin/redirects"
+      element={
+        <ProtectedRoute>
+          <ToastProvider>
+            <AdminRedirects />
+          </ToastProvider>
+        </ProtectedRoute>
+      }
+    />
+
+    <Route
+      path="/admin/post/:id/revisions"
+      element={
+        <ProtectedRoute>
+          <ToastProvider>
+            <AdminRevisions />
+          </ToastProvider>
+        </ProtectedRoute>
+      }
+    />
+
+    <Route
+      path="/admin/profile"
+      element={
+        <ProtectedRoute>
+          <ToastProvider>
+            <AdminProfile />
+          </ToastProvider>
+        </ProtectedRoute>
+      }
+    />
+
+    <Route
+      path="/admin/moderation"
+      element={
+        <ProtectedRoute>
+          <ToastProvider>
+            <AdminModerationQueue />
+          </ToastProvider>
+        </ProtectedRoute>
+      }
+    />
+
+    <Route
+      path="/admin/import-export"
+      element={
+        <ProtectedRoute>
+          <ToastProvider>
+            <AdminImportExport />
           </ToastProvider>
         </ProtectedRoute>
       }

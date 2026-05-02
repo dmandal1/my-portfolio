@@ -769,9 +769,10 @@ function AboutAuthor({ totalPosts = 0, authorName = "", authorRole = "", authorB
       {/* avatar ring */}
       <div className="bp-author-avatar-ring">
         <img
-          src={authorPhoto}
-          alt={profile.logo_name}
+          src={profile.authorImage || authorPhoto}
+          alt={authorName || profile.logo_name}
           className="bp-author-avatar-photo"
+          onError={(e) => { e.target.src = authorPhoto; }}
         />
       </div>
 
@@ -1666,7 +1667,7 @@ const portfolioCtx = usePortfolioData();
               totalPosts={allBlogs.length}
               authorName={authorName}
               authorRole={profileData.job_profile}
-              authorBio={profileData.subTitle}
+              authorBio={profileData.authorBio || profileData.subTitle}
             />
             {maintenance.settings.publicBlogShowCategoryWidget !== false && (
               <SidebarCategories blogs={allBlogs} allCategories={allCategories} limit={categoryLimit} />

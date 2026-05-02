@@ -1,4 +1,5 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import AdminSidebar from "./components/AdminSidebar";
 import { useToast } from "./components/AdminToast";
 import {
@@ -20,6 +21,7 @@ import {
   getOpenSourceConfig,  saveOpenSourceConfig,
   getBlogSectionConfig, saveBlogSectionConfig,
 } from "../../api/apiService";
+import { PhoneInput } from "./components/PhoneInput";
 import "./Admin.css";
 
 const TABS = {
@@ -54,10 +56,7 @@ const TABS = {
   projects:         { icon: "fas fa-project-diagram",    label: "Big Projects" },
 
   // ── Contact page (/contact) ───────────────────────────────
-  // 1. Top hero sections (contact intro, blog section, address block)
-  contactPage:      { icon: "fas fa-address-card",       label: "Page Sections" },
-  // 2. Quick Contact + form (email, phone, address details)
-  contact:          { icon: "fas fa-envelope",           label: "Contact Details" },
+  contact:          { icon: "fas fa-address-card",       label: "Contact Page" },
   // 3. FAQ accordion (bottom of page)
   faq:              { icon: "fas fa-question-circle",    label: "FAQ" },
 
@@ -72,15 +71,15 @@ const TAB_GROUPS = [
   { label: "Education Page",  color: "#8b5cf6", emoji: "🎓", ids: ["competitive", "education", "certifications"] },
   { label: "Experience Page", color: "#f59e0b", emoji: "💼", ids: ["experienceHeader", "experience"] },
   { label: "Projects Page",   color: "#10b981", emoji: "🚀", ids: ["projectsHeader", "projects"] },
-  { label: "Contact Page",    color: "#06b6d4", emoji: "📬", ids: ["contactPage", "contact", "faq"] },
+  { label: "Contact Page",    color: "#06b6d4", emoji: "📬", ids: ["contact", "faq"] },
   { label: "Integrations",   color: "#6366f1", emoji: "🔌", ids: ["openSource", "blogConfig"] },
 ];
 
 /* ── Reusable primitives ────────────────────────────────────────────────── */
-function Field({ label, children, hint }) {
+function Field({ label, children, hint, htmlFor }) {
   return (
     <div className="acat-field">
-      <label className="acat-label">{label}</label>
+      <label className="acat-label" htmlFor={htmlFor}>{label}</label>
       {children}
       {hint && <p className="acat-hint">{hint}</p>}
     </div>
@@ -175,9 +174,11 @@ const ImageUploadField = forwardRef(function ImageUploadField(
 
   return (
     <div className="acat-field">
-      <label className="acat-label">{label}</label>
+      <label className="acat-label" htmlFor="portfolio-asset-upload">{label}</label>
       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
         <input
+          id="portfolio-asset-upload"
+          name="portfolio-asset-upload"
           className="ainput"
           value={value}
           onChange={(e) => { discardPending(); onChange(e.target.value); }}
@@ -242,20 +243,22 @@ const ImageUploadField = forwardRef(function ImageUploadField(
 
 /* ── Profile tab ────────────────────────────────────────────────────────── */
 function ProfileTab({ toast }) {
-  const [form, setForm] = useState({ title: "", logo_name: "", nickname: "", job_profile: "", subTitle: "", resumeLink: "", githubProfile: "", portfolio_repository: "", roles: "" });
+  const [form, setForm] = useState({ title: "", logo_name: "", nickname: "", job_profile: "", subTitle: "", authorImage: "", authorBio: "", resumeLink: "", githubProfile: "", portfolio_repository: "", roles: "" });
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const authorImgRef = useRef(null);
   const f = (k, v) => setForm((p) => ({ ...p, [k]: v }));
 
   useEffect(() => {
-    getPortfolioProfile().then((d) => { if (d) setForm({ title: d.title || "", logo_name: d.logo_name || "", nickname: d.nickname || "", job_profile: d.job_profile || "", subTitle: d.subTitle || "", resumeLink: d.resumeLink || "", githubProfile: d.githubProfile || "", portfolio_repository: d.portfolio_repository || "", roles: Array.isArray(d.roles) ? d.roles.join("\n") : (d.roles || "") }); setLoading(false); }).catch(() => setLoading(false));
+    getPortfolioProfile().then((d) => { if (d) setForm({ title: d.title || "", logo_name: d.logo_name || "", nickname: d.nickname || "", job_profile: d.job_profile || "", subTitle: d.subTitle || "", authorImage: d.authorImage || "", authorBio: d.authorBio || "", resumeLink: d.resumeLink || "", githubProfile: d.githubProfile || "", portfolio_repository: d.portfolio_repository || "", roles: Array.isArray(d.roles) ? d.roles.join("\n") : (d.roles || "") }); setLoading(false); }).catch(() => setLoading(false));
   }, []);
 
   async function handleSubmit(e) {
     e.preventDefault(); setSaving(true);
     try {
+      const finalAuthorImg = await authorImgRef.current?.resolveUpload();
       const roles = form.roles.split("\n").map(s => s.trim()).filter(Boolean);
-      await savePortfolioProfile({ ...form, roles });
+      await savePortfolioProfile({ ...form, authorImage: finalAuthorImg, roles });
       toast?.addToast("Profile saved.", "success");
     }
     catch { toast?.addToast("Failed to save profile.", "error"); }
@@ -266,15 +269,23 @@ function ProfileTab({ toast }) {
 
   return (
     <form onSubmit={handleSubmit} className="acat-form" style={{ maxWidth: 640 }}>
-      <Field label="Full Name"><input className="ainput" value={form.title} onChange={e => f("title", e.target.value)} placeholder="e.g. Deepak Mandal" /></Field>
-      <Field label="Logo / Display Name"><input className="ainput" value={form.logo_name} onChange={e => f("logo_name", e.target.value)} placeholder="e.g. Deepak Mandal" /></Field>
-      <Field label="Nickname"><input className="ainput" value={form.nickname} onChange={e => f("nickname", e.target.value)} placeholder="e.g. dmandal" /></Field>
-      <Field label="Job Profile / Title"><input className="ainput" value={form.job_profile} onChange={e => f("job_profile", e.target.value)} placeholder="e.g. Full Stack Developer | Programmer" /></Field>
-      <Field label="Typing Roles" hint="One role per line — shown as typewriter animation on the home page"><textarea className="ainput acat-textarea" rows={5} value={form.roles} onChange={e => f("roles", e.target.value)} placeholder={"Node.js Developer\nReact Engineer\nJavaScript Enthusiast\nFull Stack Developer"} /></Field>
-      <Field label="Subtitle / Bio"><textarea className="ainput acat-textarea" rows={3} value={form.subTitle} onChange={e => f("subTitle", e.target.value)} /></Field>
-      <Field label="Resume Link"><input className="ainput" type="url" value={form.resumeLink} onChange={e => f("resumeLink", e.target.value)} placeholder="https://drive.google.com/..." /></Field>
-      <Field label="GitHub Profile URL"><input className="ainput" type="url" value={form.githubProfile} onChange={e => f("githubProfile", e.target.value)} placeholder="https://github.com/..." /></Field>
-      <Field label="Portfolio Repository URL"><input className="ainput" type="url" value={form.portfolio_repository} onChange={e => f("portfolio_repository", e.target.value)} placeholder="https://github.com/..." /></Field>
+      <Field label="Full Name" htmlFor="profile-title"><input id="profile-title" name="title" className="ainput" value={form.title} onChange={e => f("title", e.target.value)} placeholder="e.g. Deepak Mandal" /></Field>
+      <Field label="Logo / Display Name" htmlFor="profile-logo-name"><input id="profile-logo-name" name="logo_name" className="ainput" value={form.logo_name} onChange={e => f("logo_name", e.target.value)} placeholder="e.g. Deepak Mandal" /></Field>
+      <Field label="Nickname" htmlFor="profile-nickname"><input id="profile-nickname" name="nickname" className="ainput" value={form.nickname} onChange={e => f("nickname", e.target.value)} placeholder="e.g. dmandal" /></Field>
+      <Field label="Job Profile / Title" htmlFor="profile-job-profile"><input id="profile-job-profile" name="job_profile" className="ainput" value={form.job_profile} onChange={e => f("job_profile", e.target.value)} placeholder="e.g. Full Stack Developer | Programmer" /></Field>
+      <Field label="Typing Roles" htmlFor="profile-roles" hint="One role per line — shown as typewriter animation on the home page"><textarea id="profile-roles" name="roles" className="ainput acat-textarea" rows={5} value={form.roles} onChange={e => f("roles", e.target.value)} placeholder={"Node.js Developer\nReact Engineer\nJavaScript Enthusiast\nFull Stack Developer"} /></Field>
+      <Field label="Subtitle / Bio" htmlFor="profile-subtitle" hint="Shown on the homepage greeting section"><textarea id="profile-subtitle" name="subTitle" className="ainput acat-textarea" rows={3} value={form.subTitle} onChange={e => f("subTitle", e.target.value)} /></Field>
+      <Field label="Author Bio (Blog)" htmlFor="profile-authorBio" hint="Specifically for the sidebar on blog posts. If empty, Subtitle/Bio will be used."><textarea id="profile-authorBio" name="authorBio" className="ainput acat-textarea" rows={3} value={form.authorBio} onChange={e => f("authorBio", e.target.value)} /></Field>
+      <ImageUploadField 
+        ref={authorImgRef}
+        label="Author Photo (Blog Sidebar)" 
+        value={form.authorImage} 
+        onChange={v => f("authorImage", v)}
+        hint="Used in the blog sidebar author card. Recommended: 1:1 ratio (square)."
+      />
+      <Field label="Resume Link" htmlFor="profile-resume"><input id="profile-resume" name="resumeLink" className="ainput" type="url" value={form.resumeLink} onChange={e => f("resumeLink", e.target.value)} placeholder="https://drive.google.com/..." /></Field>
+      <Field label="GitHub Profile URL" htmlFor="profile-github"><input id="profile-github" name="githubProfile" className="ainput" type="url" value={form.githubProfile} onChange={e => f("githubProfile", e.target.value)} placeholder="https://github.com/..." /></Field>
+      <Field label="Portfolio Repository URL" htmlFor="profile-repo"><input id="profile-repo" name="portfolio_repository" className="ainput" type="url" value={form.portfolio_repository} onChange={e => f("portfolio_repository", e.target.value)} placeholder="https://github.com/..." /></Field>
       <SaveBtn saving={saving} />
     </form>
   );
@@ -317,16 +328,16 @@ function SocialTab({ toast }) {
       <div className="acat-form-card">
         <div className="acat-form-head"><span className="acat-form-head-icon"><i className={`fas ${editId ? "fa-pencil-alt" : "fa-plus"}`} /></span><div><h2 className="acat-card-title">{editId ? "Edit Link" : "Add Social Link"}</h2></div></div>
         <form onSubmit={handleSubmit} className="acat-form">
-          <Field label="Platform Name *"><input className="ainput" value={form.name} onChange={e => f("name", e.target.value)} placeholder="e.g. LinkedIn" required /></Field>
-          <Field label="URL *"><input className="ainput" type="url" value={form.link} onChange={e => f("link", e.target.value)} placeholder="https://..." required /></Field>
-          <Field label="Font Awesome Icon" hint="e.g. fa-linkedin-in (without 'fab ')"><input className="ainput" value={form.fontAwesomeIcon} onChange={e => f("fontAwesomeIcon", e.target.value)} placeholder="fa-linkedin-in" /></Field>
-          <Field label="Background Color">
+          <Field label="Platform Name *" htmlFor="social-name"><input id="social-name" name="name" className="ainput" value={form.name} onChange={e => f("name", e.target.value)} placeholder="e.g. LinkedIn" required /></Field>
+          <Field label="URL *" htmlFor="social-link"><input id="social-link" name="link" className="ainput" type="url" value={form.link} onChange={e => f("link", e.target.value)} placeholder="https://..." required /></Field>
+          <Field label="Font Awesome Icon" htmlFor="social-icon" hint="e.g. fa-linkedin-in (without 'fab ')"><input id="social-icon" name="fontAwesomeIcon" className="ainput" value={form.fontAwesomeIcon} onChange={e => f("fontAwesomeIcon", e.target.value)} placeholder="fa-linkedin-in" /></Field>
+          <Field label="Background Color" htmlFor="social-bgcolor-text">
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <input type="color" value={form.backgroundColor.slice(0,7)} onChange={e => f("backgroundColor", e.target.value)} style={{ width: 38, height: 34, padding: 2, borderRadius: 6, border: "1px solid var(--ab-border)", cursor: "pointer" }} />
-              <input className="ainput" value={form.backgroundColor} onChange={e => f("backgroundColor", e.target.value)} maxLength={9} style={{ flex: 1 }} />
+              <input id="social-bgcolor-picker" name="backgroundColor" type="color" value={form.backgroundColor.slice(0,7)} onChange={e => f("backgroundColor", e.target.value)} style={{ width: 38, height: 34, padding: 2, borderRadius: 6, border: "1px solid var(--ab-border)", cursor: "pointer" }} />
+              <input id="social-bgcolor-text" name="backgroundColor-text" className="ainput" value={form.backgroundColor} onChange={e => f("backgroundColor", e.target.value)} maxLength={9} style={{ flex: 1 }} />
             </div>
           </Field>
-          <Field label="Order"><input className="ainput" type="number" min={0} value={form.order} onChange={e => f("order", e.target.value)} /></Field>
+          <Field label="Order" htmlFor="social-order"><input id="social-order" name="order" className="ainput" type="number" min={0} value={form.order} onChange={e => f("order", e.target.value)} /></Field>
           <div className="acat-form-actions">
             <SaveBtn saving={saving} label={editId ? "Update" : "Add Link"} />
             {editId && <button type="button" className="abtn abtn-ghost" onClick={() => { setEditId(null); setForm(EMPTY_SOCIAL); }}>Cancel</button>}
@@ -358,33 +369,111 @@ function SocialTab({ toast }) {
   );
 }
 
-/* ── Contact tab ────────────────────────────────────────────────────────── */
+/* ── Contact Details tab ────────────────────────────────────────────────── */
 function ContactTab({ toast }) {
-  const [form, setForm] = useState({ title: "", subtitle: "", number: "", email_address: "", address: "" });
+  const [coreForm, setCoreForm] = useState({ title: "", subtitle: "", number: "", email_address: "", address: "" });
+  const [pageForm, setPageForm] = useState({ blog_title: "", blog_subtitle: "", blog_link: "", addr_title: "", addr_map_link: "", phone_title: "" });
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
-  const f = (k, v) => setForm(p => ({ ...p, [k]: v }));
+
+  const fc = (k, v) => setCoreForm(p => ({ ...p, [k]: v }));
+  const fp = (k, v) => setPageForm(p => ({ ...p, [k]: v }));
 
   useEffect(() => {
-    getPortfolioContact().then(d => { if (d) setForm({ title: d.title || "", subtitle: d.subtitle || "", number: d.number || "", email_address: d.email_address || "", address: d.address || "" }); setLoading(false); }).catch(() => setLoading(false));
+    Promise.all([getPortfolioContact(), getContactPageData()])
+      .then(([core, page]) => {
+        if (core) setCoreForm({ title: core.title || "", subtitle: core.subtitle || "", number: core.number || "", email_address: core.email_address || "", address: core.address || "" });
+        if (page) setPageForm({
+          blog_title:    page.blogSection?.title          || "",
+          blog_subtitle: page.blogSection?.subtitle       || "",
+          blog_link:     page.blogSection?.link           || "/#/blogs",
+          addr_title:    page.addressSection?.title       || "",
+          addr_map_link: page.addressSection?.location_map_link || "",
+          phone_title:   page.phoneSection?.title         || "",
+        });
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   async function handleSubmit(e) {
-    e.preventDefault(); setSaving(true);
-    try { await savePortfolioContact(form); toast?.addToast("Contact info saved.", "success"); }
-    catch { toast?.addToast("Failed to save.", "error"); } finally { setSaving(false); }
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const currentPageData = await getContactPageData() || {};
+      await Promise.all([
+        savePortfolioContact(coreForm),
+        saveContactPageData({
+          ...currentPageData,
+          blogSection:    { ...currentPageData.blogSection, title: pageForm.blog_title, subtitle: pageForm.blog_subtitle, link: pageForm.blog_link },
+          addressSection: { ...currentPageData.addressSection, title: pageForm.addr_title, location_map_link: pageForm.addr_map_link },
+          phoneSection:   { ...currentPageData.phoneSection, title: pageForm.phone_title },
+        })
+      ]);
+      toast?.addToast("Contact page configuration saved.", "success");
+    } catch {
+      toast?.addToast("Failed to save some changes.", "error");
+    } finally {
+      setSaving(false);
+    }
   }
 
-  if (loading) return <div className="acat-skel-wrap">{[1,2,3].map(i => <div key={i} className="acat-skel-row"><div className="askel askel-line" style={{ flex: 1, height: 36 }} /></div>)}</div>;
+  if (loading) return <div className="acat-skel-wrap">{[1,2,3,4,5,6].map(i => <div key={i} className="acat-skel-row"><div className="askel askel-line" style={{ flex: 1, height: 36 }} /></div>)}</div>;
 
   return (
-    <form onSubmit={handleSubmit} className="acat-form" style={{ maxWidth: 640 }}>
-      <Field label="Section Title"><input className="ainput" value={form.title} onChange={e => f("title", e.target.value)} placeholder="e.g. Contact Me" /></Field>
-      <Field label="Subtitle"><textarea className="ainput acat-textarea" rows={2} value={form.subtitle} onChange={e => f("subtitle", e.target.value)} /></Field>
-      <Field label="Phone Number"><input className="ainput" value={form.number} onChange={e => f("number", e.target.value)} placeholder="+91-..." /></Field>
-      <Field label="Email Address"><input className="ainput" type="email" value={form.email_address} onChange={e => f("email_address", e.target.value)} /></Field>
-      <Field label="Address"><input className="ainput" value={form.address} onChange={e => f("address", e.target.value)} placeholder="City, State, Country" /></Field>
-      <SaveBtn saving={saving} />
+    <form onSubmit={handleSubmit} className="acat-form" style={{ maxWidth: 720 }}>
+      {/* 1. Hero Section */}
+      <div className="acat-form-section">
+        <h3 className="acat-section-title"><i className="fas fa-star" /> Hero Section</h3>
+        <p className="acat-section-desc">The top-most part of your Contact page.</p>
+        <Field label="Main Heading" htmlFor="contact-hero-title"><input id="contact-hero-title" name="hero_title" className="ainput" value={coreForm.title} onChange={e => fc("title", e.target.value)} placeholder="e.g. Contact Me" /></Field>
+        <Field label="Subtitle / Intro" htmlFor="contact-hero-subtitle"><textarea id="contact-hero-subtitle" name="hero_subtitle" className="ainput acat-textarea" rows={3} value={coreForm.subtitle} onChange={e => fc("subtitle", e.target.value)} /></Field>
+      </div>
+
+      {/* 2. Blog Section */}
+      <div className="acat-form-section">
+        <h3 className="acat-section-title"><i className="fas fa-newspaper" /> Blog Section</h3>
+        <p className="acat-section-desc">Customize the blog-related block on your contact page.</p>
+        <div className="acat-nested-fields">
+          <Field label="Section Label" htmlFor="contact-blog-title"><input id="contact-blog-title" name="blog_title" className="ainput" value={pageForm.blog_title} onChange={e => fp("blog_title", e.target.value)} /></Field>
+          <Field label="Section Subtitle" htmlFor="contact-blog-subtitle"><textarea id="contact-blog-subtitle" name="blog_subtitle" className="ainput acat-textarea" rows={2} value={pageForm.blog_subtitle} onChange={e => fp("blog_subtitle", e.target.value)} /></Field>
+          <Field label="External Link" htmlFor="contact-blog-link"><input id="contact-blog-link" name="blog_link" className="ainput" value={pageForm.blog_link} onChange={e => fp("blog_link", e.target.value)} placeholder="/#/blogs" /></Field>
+        </div>
+      </div>
+
+      {/* 3. Address Section */}
+      <div className="acat-form-section">
+        <h3 className="acat-section-title"><i className="fas fa-map-marker-alt" /> Address Section</h3>
+        <p className="acat-section-desc">Configure your location display and Google Maps integration.</p>
+        <div className="acat-nested-fields">
+          <Field label="Section Label" htmlFor="contact-addr-title"><input id="contact-addr-title" name="addr_title" className="ainput" value={pageForm.addr_title} onChange={e => fp("addr_title", e.target.value)} /></Field>
+          <Field label="Google Maps URL" htmlFor="contact-addr-map"><input id="contact-addr-map" name="addr_map_link" className="ainput" type="url" value={pageForm.addr_map_link} onChange={e => fp("addr_map_link", e.target.value)} placeholder="https://goo.gl/maps/..." /></Field>
+          <Field label="Physical Address / City" htmlFor="contact-addr-text" hint="Shown in contact cards"><input id="contact-addr-text" name="address" className="ainput" value={coreForm.address} onChange={e => fc("address", e.target.value)} placeholder="City, State, Country" /></Field>
+        </div>
+      </div>
+
+      {/* 4. Phone Section */}
+      <div className="acat-form-section">
+        <h3 className="acat-section-title"><i className="fas fa-phone" /> Phone Section</h3>
+        <p className="acat-section-desc">Manage your phone number and its section heading.</p>
+        <div className="acat-nested-fields">
+          <Field label="Section Label" htmlFor="contact-phone-title"><input id="contact-phone-title" name="phone_title" className="ainput" value={pageForm.phone_title} onChange={e => fp("phone_title", e.target.value)} /></Field>
+          <Field label="Phone Number" htmlFor="contact-phone-input" hint="Shown in contact cards and phone section">
+            <PhoneInput id="contact-phone-input" value={coreForm.number} onChange={v => fc("number", v)} placeholder="555 000-0000" />
+          </Field>
+        </div>
+      </div>
+
+      {/* 5. General Contact */}
+      <div className="acat-form-section">
+        <h3 className="acat-section-title"><i className="fas fa-envelope" /> General Contact</h3>
+        <p className="acat-section-desc">Primary contact methods.</p>
+        <Field label="Email Address" htmlFor="contact-email"><input id="contact-email" name="email_address" className="ainput" type="email" value={coreForm.email_address} onChange={e => fc("email_address", e.target.value)} /></Field>
+      </div>
+
+      <div style={{ marginTop: 32, position: "sticky", bottom: 0, background: "var(--ab-surface)", padding: "16px 0", borderTop: "1px solid var(--ab-border)", zIndex: 10 }}>
+        <SaveBtn saving={saving} label="Save Contact Configuration" />
+      </div>
     </form>
   );
 }
@@ -410,11 +499,11 @@ function SeoTab({ toast }) {
 
   return (
     <form onSubmit={handleSubmit} className="acat-form" style={{ maxWidth: 640 }}>
-      <Field label="Page Title" hint="Shown in browser tab and search results"><input className="ainput" value={form.title} onChange={e => f("title", e.target.value)} placeholder="Your Name - Software Developer" /></Field>
-      <Field label="Meta Description" hint="Shown in Google search snippets (150–160 chars)"><textarea className="ainput acat-textarea" rows={3} value={form.description} onChange={e => f("description", e.target.value)} /></Field>
-      <Field label="OG Title" hint="Open Graph title for social shares"><input className="ainput" value={form.ogTitle} onChange={e => f("ogTitle", e.target.value)} /></Field>
-      <Field label="OG Type"><input className="ainput" value={form.ogType} onChange={e => f("ogType", e.target.value)} placeholder="website" /></Field>
-      <Field label="OG URL"><input className="ainput" type="url" value={form.ogUrl} onChange={e => f("ogUrl", e.target.value)} placeholder="https://yourdomain.dev/" /></Field>
+      <Field label="Page Title" htmlFor="seo-title" hint="Shown in browser tab and search results"><input id="seo-title" name="title" className="ainput" value={form.title} onChange={e => f("title", e.target.value)} placeholder="Your Name - Software Developer" /></Field>
+      <Field label="Meta Description" htmlFor="seo-description" hint="Shown in Google search snippets (150–160 chars)"><textarea id="seo-description" name="description" className="ainput acat-textarea" rows={3} value={form.description} onChange={e => f("description", e.target.value)} /></Field>
+      <Field label="OG Title" htmlFor="seo-og-title" hint="Open Graph title for social shares"><input id="seo-og-title" name="ogTitle" className="ainput" value={form.ogTitle} onChange={e => f("ogTitle", e.target.value)} /></Field>
+      <Field label="OG Type" htmlFor="seo-og-type"><input id="seo-og-type" name="ogType" className="ainput" value={form.ogType} onChange={e => f("ogType", e.target.value)} placeholder="website" /></Field>
+      <Field label="OG URL" htmlFor="seo-og-url"><input id="seo-og-url" name="ogUrl" className="ainput" type="url" value={form.ogUrl} onChange={e => f("ogUrl", e.target.value)} placeholder="https://yourdomain.dev/" /></Field>
       <SaveBtn saving={saving} />
     </form>
   );
@@ -461,14 +550,14 @@ function EducationTab({ toast }) {
       <div className="acat-form-card">
         <div className="acat-form-head"><span className="acat-form-head-icon"><i className={`fas ${editId ? "fa-pencil-alt" : "fa-graduation-cap"}`} /></span><div><h2 className="acat-card-title">{editId ? "Edit Degree" : "Add Degree"}</h2></div></div>
         <form onSubmit={handleSubmit} className="acat-form">
-          <Field label="University / Institution *"><input className="ainput" value={form.title} onChange={e => f("title", e.target.value)} placeholder="e.g. Dr. A.P.J. Abdul Kalam Technical University" required /></Field>
-          <Field label="Degree / Subtitle"><input className="ainput" value={form.subtitle} onChange={e => f("subtitle", e.target.value)} placeholder="e.g. B.Tech. in Computer Engineering" /></Field>
-          <Field label="Duration"><input className="ainput" value={form.duration} onChange={e => f("duration", e.target.value)} placeholder="e.g. 2016 - 2020" /></Field>
-          <Field label="Alt Name"><input className="ainput" value={form.alt_name} onChange={e => f("alt_name", e.target.value)} placeholder="e.g. AKTU University" /></Field>
+          <Field label="University / Institution *" htmlFor="edu-title"><input id="edu-title" name="edu-title" className="ainput" value={form.title} onChange={e => f("title", e.target.value)} placeholder="e.g. Dr. A.P.J. Abdul Kalam Technical University" required /></Field>
+          <Field label="Degree / Subtitle" htmlFor="edu-subtitle"><input id="edu-subtitle" name="edu-subtitle" className="ainput" value={form.subtitle} onChange={e => f("subtitle", e.target.value)} placeholder="e.g. B.Tech. in Computer Engineering" /></Field>
+          <Field label="Duration" htmlFor="edu-duration"><input id="edu-duration" name="edu-duration" className="ainput" value={form.duration} onChange={e => f("duration", e.target.value)} placeholder="e.g. 2016 - 2020" /></Field>
+          <Field label="Alt Name" htmlFor="edu-alt-name"><input id="edu-alt-name" name="edu-alt-name" className="ainput" value={form.alt_name} onChange={e => f("alt_name", e.target.value)} placeholder="e.g. AKTU University" /></Field>
           <ImageUploadField ref={imageRef} label="Logo / Image" hint="Upload a file or enter a filename from public assets" value={form.logo_path} onChange={v => f("logo_path", v)} />
-          <Field label="Website Link"><input className="ainput" type="url" value={form.website_link} onChange={e => f("website_link", e.target.value)} placeholder="https://..." /></Field>
-          <Field label="Descriptions" hint="One bullet per line — e.g. ⚡ CGPA: 7.08/10"><textarea className="ainput acat-textarea" rows={5} value={form.descriptions} onChange={e => f("descriptions", e.target.value)} placeholder={"⚡ CGPA: 7.08/10\n⚡ Studied core subjects..."} /></Field>
-          <Field label="Order"><input className="ainput" type="number" min={0} value={form.order} onChange={e => f("order", e.target.value)} /></Field>
+          <Field label="Website Link" htmlFor="edu-website"><input id="edu-website" name="edu-website" className="ainput" type="url" value={form.website_link} onChange={e => f("website_link", e.target.value)} placeholder="https://..." /></Field>
+          <Field label="Descriptions" htmlFor="edu-desc" hint="One bullet per line — e.g. ⚡ CGPA: 7.08/10"><textarea id="edu-desc" name="edu-desc" className="ainput acat-textarea" rows={5} value={form.descriptions} onChange={e => f("descriptions", e.target.value)} placeholder={"⚡ CGPA: 7.08/10\n⚡ Studied core subjects..."} /></Field>
+          <Field label="Order" htmlFor="edu-order"><input id="edu-order" name="edu-order" className="ainput" type="number" min={0} value={form.order} onChange={e => f("order", e.target.value)} /></Field>
           <div className="acat-form-actions">
             <SaveBtn saving={saving} label={editId ? "Update" : "Add Degree"} />
             {editId && <button type="button" className="abtn abtn-ghost" onClick={() => { imageRef.current?.clearPending(); setEditId(null); setForm(EMPTY_DEG); }}>Cancel</button>}
@@ -535,16 +624,16 @@ function CompetitiveTab({ toast }) {
       <div className="acat-form-card">
         <div className="acat-form-head"><span className="acat-form-head-icon"><i className={`fas ${editId ? "fa-pencil-alt" : "fa-code"}`} /></span><div><h2 className="acat-card-title">{editId ? "Edit Site" : "Add Competitive Site"}</h2></div></div>
         <form onSubmit={handleSubmit} className="acat-form">
-          <Field label="Site Name *"><input className="ainput" value={form.siteName} onChange={e => f("siteName", e.target.value)} placeholder="e.g. HackerRank" required /></Field>
-          <Field label="Iconify Class" hint="e.g. simple-icons:hackerrank"><input className="ainput" value={form.iconifyClassname} onChange={e => f("iconifyClassname", e.target.value)} placeholder="simple-icons:hackerrank" /></Field>
-          <Field label="Icon Color">
+          <Field label="Site Name *" htmlFor="comp-name"><input id="comp-name" name="comp-name" className="ainput" value={form.siteName} onChange={e => f("siteName", e.target.value)} placeholder="e.g. HackerRank" required /></Field>
+          <Field label="Iconify Class" htmlFor="comp-icon" hint="e.g. simple-icons:hackerrank"><input id="comp-icon" name="comp-icon" className="ainput" value={form.iconifyClassname} onChange={e => f("iconifyClassname", e.target.value)} placeholder="simple-icons:hackerrank" /></Field>
+          <Field label="Icon Color" htmlFor="comp-color-text">
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <input type="color" value={form.color.slice(0,7)} onChange={e => f("color", e.target.value)} style={{ width: 38, height: 34, padding: 2, borderRadius: 6, border: "1px solid var(--ab-border)", cursor: "pointer" }} />
-              <input className="ainput" value={form.color} onChange={e => f("color", e.target.value)} maxLength={9} style={{ flex: 1 }} />
+              <input id="comp-color-picker" name="comp-color-picker" type="color" value={form.color.slice(0,7)} onChange={e => f("color", e.target.value)} style={{ width: 38, height: 34, padding: 2, borderRadius: 6, border: "1px solid var(--ab-border)", cursor: "pointer" }} />
+              <input id="comp-color-text" name="comp-color-text" className="ainput" value={form.color} onChange={e => f("color", e.target.value)} maxLength={9} style={{ flex: 1 }} />
             </div>
           </Field>
-          <Field label="Profile Link"><input className="ainput" type="url" value={form.profileLink} onChange={e => f("profileLink", e.target.value)} placeholder="https://..." /></Field>
-          <Field label="Order"><input className="ainput" type="number" min={0} value={form.order} onChange={e => f("order", e.target.value)} /></Field>
+          <Field label="Profile Link" htmlFor="comp-link"><input id="comp-link" name="comp-link" className="ainput" type="url" value={form.profileLink} onChange={e => f("profileLink", e.target.value)} placeholder="https://..." /></Field>
+          <Field label="Order" htmlFor="comp-order"><input id="comp-order" name="comp-order" className="ainput" type="number" min={0} value={form.order} onChange={e => f("order", e.target.value)} /></Field>
           <div className="acat-form-actions">
             <SaveBtn saving={saving} label={editId ? "Update" : "Add Site"} />
             {editId && <button type="button" className="abtn abtn-ghost" onClick={() => { setEditId(null); setForm(EMPTY_COMP); }}>Cancel</button>}
@@ -614,11 +703,11 @@ function ProjectsTab({ toast }) {
       <div className="acat-form-card">
         <div className="acat-form-head"><span className="acat-form-head-icon"><i className={`fas ${editId ? "fa-pencil-alt" : "fa-project-diagram"}`} /></span><div><h2 className="acat-card-title">{editId ? "Edit Project" : "Add Project"}</h2></div></div>
         <form onSubmit={handleSubmit} className="acat-form">
-          <Field label="Project Title *"><input className="ainput" value={form.title} onChange={e => f("title", e.target.value)} placeholder="e.g. My SaaS App" required /></Field>
-          <Field label="Description"><textarea className="ainput acat-textarea" rows={3} value={form.description} onChange={e => f("description", e.target.value)} /></Field>
+          <Field label="Project Title *" htmlFor="proj-title"><input id="proj-title" name="proj-title" className="ainput" value={form.title} onChange={e => f("title", e.target.value)} placeholder="e.g. My SaaS App" required /></Field>
+          <Field label="Description" htmlFor="proj-desc"><textarea id="proj-desc" name="proj-desc" className="ainput acat-textarea" rows={3} value={form.description} onChange={e => f("description", e.target.value)} /></Field>
           <ImageUploadField ref={imageRef} label="Project Image" hint="Upload a screenshot/logo or paste a direct URL" value={form.image} onChange={v => f("image", v)} />
-          <Field label="Project Link"><input className="ainput" type="url" value={form.link} onChange={e => f("link", e.target.value)} placeholder="https://..." /></Field>
-          <Field label="Order"><input className="ainput" type="number" min={0} value={form.order} onChange={e => f("order", e.target.value)} /></Field>
+          <Field label="Project Link"><input id="proj-link" name="proj-link" className="ainput" type="url" value={form.link} onChange={e => f("link", e.target.value)} placeholder="https://..." /></Field>
+          <Field label="Order"><input id="proj-order" name="proj-order" className="ainput" type="number" min={0} value={form.order} onChange={e => f("order", e.target.value)} /></Field>
           <div className="acat-form-actions">
             <SaveBtn saving={saving} label={editId ? "Update" : "Add Project"} />
             {editId && <button type="button" className="abtn abtn-ghost" onClick={() => { imageRef.current?.clearPending(); setEditId(null); setForm(EMPTY_PROJ); }}>Cancel</button>}
@@ -794,18 +883,18 @@ function SkillsTab({ toast }) {
         </div>
 
         <form onSubmit={handleSubmit} className="acat-form">
-          <Field label="Group Title *">
-            <input className="ainput" value={form.title} onChange={e => fg("title", e.target.value)} placeholder="e.g. Full Stack Development" required />
+          <Field label="Group Title *" htmlFor="skill-group-title">
+            <input id="skill-group-title" name="skill_group_title" className="ainput" value={form.title} onChange={e => fg("title", e.target.value)} placeholder="e.g. Full Stack Development" autoComplete="off" required />
           </Field>
 
-          <Field label="Illustration Image">
-            <select className="ainput" value={form.fileName} onChange={e => fg("fileName", e.target.value)}>
+          <Field label="Illustration Image" htmlFor="skill-illustration">
+            <select id="skill-illustration" name="skill_illustration" className="ainput" value={form.fileName} onChange={e => fg("fileName", e.target.value)}>
               {SKILL_IMAGES.map(img => <option key={img.value} value={img.value}>{img.label} ({img.value})</option>)}
             </select>
           </Field>
 
-          <Field label="Bullet Points" hint="One point per line. Tip: start with ⚡ for style.">
-            <textarea className="ainput acat-textarea" rows={4} value={form.skills}
+          <Field label="Bullet Points" htmlFor="skill-bullets" hint="One point per line. Tip: start with ⚡ for style.">
+            <textarea id="skill-bullets" name="skill_bullets" className="ainput acat-textarea" rows={4} value={form.skills}
               onChange={e => fg("skills", e.target.value)}
               placeholder={"⚡ Building responsive UIs with React\n⚡ Designing RESTful APIs with Node.js"}
             />
@@ -813,12 +902,12 @@ function SkillsTab({ toast }) {
 
           {/* ── Software Skills builder ── */}
           <div className="acat-field">
-            <label className="acat-label">
+            <div className="acat-label">
               Software Skills
               {form.softwareSkills.length > 0 && (
                 <span className="acat-count-badge" style={{ marginLeft: 6 }}>{form.softwareSkills.length}</span>
               )}
-            </label>
+            </div>
 
             {/* Added skills list */}
             {form.softwareSkills.length > 0 && (
@@ -855,8 +944,10 @@ function SkillsTab({ toast }) {
               {/* Row 1: Skill Name + Icon ID — top-aligned grid */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, alignItems: "start" }}>
                 <div>
-                  <label className="acat-label" style={{ fontSize: 11 }}>Skill Name *</label>
+                  <label htmlFor="sw-skill-name" className="acat-label" style={{ fontSize: 11 }}>Skill Name *</label>
                   <input
+                    id="sw-skill-name"
+                    name="sw_skill_name"
                     className="ainput"
                     value={swForm.skillName}
                     onChange={e => fsw("skillName", e.target.value)}
@@ -864,8 +955,10 @@ function SkillsTab({ toast }) {
                   />
                 </div>
                 <div>
-                  <label className="acat-label" style={{ fontSize: 11 }}>Icon ID *</label>
+                  <label htmlFor="sw-icon-id" className="acat-label" style={{ fontSize: 11 }}>Icon ID *</label>
                   <input
+                    id="sw-icon-id"
+                    name="sw_icon_id"
                     className="ainput"
                     value={swForm.fontAwesomeClassname}
                     onChange={e => fsw("fontAwesomeClassname", e.target.value)}
@@ -878,15 +971,19 @@ function SkillsTab({ toast }) {
               <div style={{ display: "flex", gap: 16, marginTop: 10, alignItems: "flex-start", flexWrap: "wrap" }}>
                 {/* Icon color */}
                 <div>
-                  <label className="acat-label" style={{ fontSize: 11 }}>Icon Color</label>
+                  <label htmlFor="sw-icon-color-text" className="acat-label" style={{ fontSize: 11 }}>Icon Color</label>
                   <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                     <input
+                      id="sw-icon-color-picker"
+                      name="sw_icon_color_picker"
                       type="color"
                       value={swForm.color}
                       onChange={e => fsw("color", e.target.value)}
                       style={{ width: 36, height: 34, padding: 2, borderRadius: 6, border: "1px solid var(--ab-border)", cursor: "pointer", flexShrink: 0 }}
                     />
                     <input
+                      id="sw-icon-color-text"
+                      name="sw_icon_color_text"
                       className="ainput"
                       value={swForm.color}
                       onChange={e => fsw("color", e.target.value)}
@@ -906,12 +1003,16 @@ function SkillsTab({ toast }) {
                   {swForm.hasBg ? (
                     <div style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 4 }}>
                       <input
+                        id="sw-bg-color-picker"
+                        name="sw_bg_color_picker"
                         type="color"
                         value={swForm.bgColor}
                         onChange={e => fsw("bgColor", e.target.value)}
                         style={{ width: 36, height: 34, padding: 2, borderRadius: 6, border: "1px solid var(--ab-border)", cursor: "pointer", flexShrink: 0 }}
                       />
                       <input
+                        id="sw-bg-color-text"
+                        name="sw_bg_color_text"
                         className="ainput"
                         value={swForm.bgColor}
                         onChange={e => fsw("bgColor", e.target.value)}
@@ -937,47 +1038,38 @@ function SkillsTab({ toast }) {
                       boxShadow: "0 2px 6px rgba(0,0,0,.08)",
                     }}>
                       <span style={{ fontSize: 11, fontWeight: 800, color: swForm.color, lineHeight: 1, textAlign: "center" }}>
-                        {swForm.skillName.slice(0, 3).toUpperCase()}
+                        {swForm.skillName.slice(0, 2).toUpperCase()}
                       </span>
                     </div>
-                    <span style={{ fontSize: 11, fontWeight: 600, maxWidth: 70, textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {swForm.skillName}
-                    </span>
                   </div>
                 )}
               </div>
 
-              {/* Row 3: Actions */}
-              <div style={{ display: "flex", gap: 8, marginTop: 12, alignItems: "center" }}>
-                <button type="button" className="abtn abtn-primary" style={{ fontSize: 13, padding: "7px 16px" }} onClick={handleAddSw}>
-                  {swEditIdx !== null ? <><i className="fas fa-check" /> Update Skill</> : <><i className="fas fa-plus" /> Add Skill</>}
+              {/* Action buttons for software skill */}
+              <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+                <button
+                  type="button"
+                  className="abtn abtn-sm abtn-secondary"
+                  style={{ flex: 1 }}
+                  onClick={handleAddSw}
+                >
+                  {swEditIdx !== null ? "Update Skill" : "Add to List"}
                 </button>
                 {swEditIdx !== null && (
-                  <button type="button" className="abtn abtn-ghost" style={{ fontSize: 13, padding: "7px 12px" }}
-                    onClick={() => { setSwEditIdx(null); setSwForm(EMPTY_SW_SKILL); }}>
+                  <button
+                    type="button"
+                    className="abtn abtn-sm abtn-ghost"
+                    onClick={() => { setSwEditIdx(null); setSwForm(EMPTY_SW_SKILL); }}
+                  >
                     Cancel
                   </button>
                 )}
-                <a
-                  href="https://icon-sets.iconify.design"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ marginLeft: "auto", fontSize: 12, color: "var(--aprimary)", display: "flex", alignItems: "center", gap: 4 }}
-                >
-                  <i className="fas fa-search" style={{ fontSize: 10 }} />
-                  Browse icons
-                  <i className="fas fa-external-link-alt" style={{ fontSize: 9 }} />
-                </a>
               </div>
             </div>
-
-            <p className="acat-hint" style={{ marginTop: 6 }}>
-              Icon examples: <code>simple-icons:react</code>, <code>logos:nodejs</code>, <code>mdi:language-python</code>
-            </p>
           </div>
 
-          <Field label="Order">
-            <input className="ainput" type="number" min={0} value={form.order} onChange={e => fg("order", e.target.value)} style={{ width: 90 }} />
+          <Field label="Order" htmlFor="skill-group-order">
+            <input id="skill-group-order" name="group-order" className="ainput" type="number" min={0} value={form.order} onChange={e => fg("order", e.target.value)} style={{ width: 90 }} />
           </Field>
 
           <div className="acat-form-actions">
@@ -1106,18 +1198,18 @@ function CertificationsTab({ toast }) {
       <div className="acat-form-card">
         <div className="acat-form-head"><span className="acat-form-head-icon"><i className={`fas ${editId ? "fa-pencil-alt" : "fa-certificate"}`} /></span><div><h2 className="acat-card-title">{editId ? "Edit Certification" : "Add Certification"}</h2></div></div>
         <form onSubmit={handleSubmit} className="acat-form">
-          <Field label="Title *"><input ref={titleRef} className="ainput" value={form.title} onChange={e => f("title", e.target.value)} placeholder="e.g. JavaScript (Basic) Certificate" required /></Field>
-          <Field label="Subtitle"><input className="ainput" value={form.subtitle} onChange={e => f("subtitle", e.target.value)} placeholder="e.g. - HackerRank" /></Field>
-          <Field label="Issuer / Alt Name"><input className="ainput" value={form.alt_name} onChange={e => f("alt_name", e.target.value)} placeholder="e.g. HackerRank" /></Field>
-          <Field label="Certificate Link"><input className="ainput" type="url" value={form.certificate_link} onChange={e => f("certificate_link", e.target.value)} placeholder="https://..." /></Field>
+          <Field label="Title *" htmlFor="cert-title"><input id="cert-title" ref={titleRef} className="ainput" value={form.title} onChange={e => f("title", e.target.value)} placeholder="e.g. JavaScript (Basic) Certificate" required /></Field>
+          <Field label="Subtitle" htmlFor="cert-sub"><input id="cert-sub" className="ainput" value={form.subtitle} onChange={e => f("subtitle", e.target.value)} placeholder="e.g. - HackerRank" /></Field>
+          <Field label="Issuer / Alt Name" htmlFor="cert-alt"><input id="cert-alt" className="ainput" value={form.alt_name} onChange={e => f("alt_name", e.target.value)} placeholder="e.g. HackerRank" /></Field>
+          <Field label="Certificate Link" htmlFor="cert-link"><input id="cert-link" className="ainput" type="url" value={form.certificate_link} onChange={e => f("certificate_link", e.target.value)} placeholder="https://..." /></Field>
           <ImageUploadField ref={imageRef} label="Logo / Image" hint="Upload a file or enter a filename from public assets" value={form.logo_path} onChange={v => f("logo_path", v)} />
-          <Field label="Background Color">
+          <Field label="Background Color" htmlFor="cert-color">
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <input type="color" value={form.color_code.slice(0,7)} onChange={e => f("color_code", e.target.value)} style={{ width: 38, height: 34, padding: 2, borderRadius: 6, border: "1px solid var(--ab-border)", cursor: "pointer" }} />
-              <input className="ainput" value={form.color_code} onChange={e => f("color_code", e.target.value)} maxLength={9} style={{ flex: 1 }} />
+              <input id="cert-color-pick" type="color" value={form.color_code.slice(0,7)} onChange={e => f("color_code", e.target.value)} style={{ width: 38, height: 34, padding: 2, borderRadius: 6, border: "1px solid var(--ab-border)", cursor: "pointer" }} />
+              <input id="cert-color" className="ainput" value={form.color_code} onChange={e => f("color_code", e.target.value)} maxLength={9} style={{ flex: 1 }} />
             </div>
           </Field>
-          <Field label="Order"><input className="ainput" type="number" min={0} value={form.order} onChange={e => f("order", e.target.value)} /></Field>
+          <Field label="Order" htmlFor="cert-order"><input id="cert-order" className="ainput" type="number" min={0} value={form.order} onChange={e => f("order", e.target.value)} /></Field>
           <div className="acat-form-actions">
             <SaveBtn saving={saving} label={editId ? "Update" : "Add Certification"} />
             {editId && <button type="button" className="abtn abtn-ghost" onClick={() => { imageRef.current?.clearPending(); setEditId(null); setForm(EMPTY_CERT); }}>Cancel</button>}
@@ -1129,7 +1221,8 @@ function CertificationsTab({ toast }) {
           <div className="acat-table-header-left"><h2 className="acat-card-title">Certifications</h2>{!loading && <span className="acat-count-badge">{filtered.length === items.length ? items.length : `${filtered.length} of ${items.length}`}</span>}</div>
           <div className="acat-search-wrap">
             <i className="fas fa-search acat-search-icon" />
-            <input className="acat-search-input" placeholder="Search…" value={search} onChange={e => setSearch(e.target.value)} />
+            <label htmlFor="cert-tab-search" className="sr-only">Search certifications</label>
+            <input id="cert-tab-search" name="cert_tab_search" className="acat-search-input" placeholder="Search…" value={search} onChange={e => setSearch(e.target.value)} autoComplete="off" />
             {search && <button type="button" className="acat-search-clear" onClick={() => setSearch("")}><i className="fas fa-times" /></button>}
           </div>
         </div>
@@ -1210,25 +1303,17 @@ function ExperienceTab({ toast }) {
       <div className="acat-form-card">
         <div className="acat-form-head"><span className="acat-form-head-icon"><i className={`fas ${editId ? "fa-pencil-alt" : "fa-briefcase"}`} /></span><div><h2 className="acat-card-title">{editId ? "Edit Experience" : "Add Experience"}</h2></div></div>
         <form onSubmit={handleSubmit} className="acat-form">
-          <Field label="Section *">
-            <select className="ainput" value={form.section} onChange={e => f("section", e.target.value)}>
-              {EXP_SECTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
-          </Field>
-          <Field label="Job Title *"><input ref={titleRef} className="ainput" value={form.title} onChange={e => f("title", e.target.value)} placeholder="e.g. Senior Associate Consultant" required /></Field>
-          <Field label="Company *"><input className="ainput" value={form.company} onChange={e => f("company", e.target.value)} placeholder="e.g. Infosys Ltd." required /></Field>
-          <Field label="Company URL"><input className="ainput" type="url" value={form.company_url} onChange={e => f("company_url", e.target.value)} placeholder="https://..." /></Field>
-          <Field label="Duration"><input className="ainput" value={form.duration} onChange={e => f("duration", e.target.value)} placeholder="e.g. Apr 2026 - Present" /></Field>
-          <Field label="Location"><input className="ainput" value={form.location} onChange={e => f("location", e.target.value)} placeholder="e.g. Noida, India" /></Field>
+          <Field label="Duration" htmlFor="exp-duration"><input id="exp-duration" name="exp_duration" className="ainput" value={form.duration} onChange={e => f("duration", e.target.value)} placeholder="e.g. Apr 2026 - Present" autoComplete="off" /></Field>
+          <Field label="Location" htmlFor="exp-location"><input id="exp-location" name="exp_location" className="ainput" value={form.location} onChange={e => f("location", e.target.value)} placeholder="e.g. Noida, India" autoComplete="off" /></Field>
           <ImageUploadField ref={imageRef} label="Logo / Image" hint="Upload a file or enter a filename from public assets" value={form.logo_path} onChange={v => f("logo_path", v)} />
-          <Field label="Description"><textarea className="ainput acat-textarea" rows={4} value={form.description} onChange={e => f("description", e.target.value)} placeholder="Describe your role and responsibilities…" /></Field>
-          <Field label="Card Color">
+          <Field label="Description" htmlFor="exp-description"><textarea id="exp-description" name="exp_description" className="ainput acat-textarea" rows={4} value={form.description} onChange={e => f("description", e.target.value)} placeholder="Describe your role and responsibilities…" /></Field>
+          <Field label="Card Color" htmlFor="exp-color-text">
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <input type="color" value={form.color.slice(0,7)} onChange={e => f("color", e.target.value)} style={{ width: 38, height: 34, padding: 2, borderRadius: 6, border: "1px solid var(--ab-border)", cursor: "pointer" }} />
-              <input className="ainput" value={form.color} onChange={e => f("color", e.target.value)} maxLength={9} style={{ flex: 1 }} />
+              <input id="exp-color-picker" name="exp_color_picker" type="color" value={form.color.slice(0,7)} onChange={e => f("color", e.target.value)} style={{ width: 38, height: 34, padding: 2, borderRadius: 6, border: "1px solid var(--ab-border)", cursor: "pointer" }} />
+              <input id="exp-color-text" name="exp_color_text" className="ainput" value={form.color} onChange={e => f("color", e.target.value)} maxLength={9} autoComplete="off" style={{ flex: 1 }} />
             </div>
           </Field>
-          <Field label="Order"><input className="ainput" type="number" min={0} value={form.order} onChange={e => f("order", e.target.value)} /></Field>
+          <Field label="Order" htmlFor="exp-order"><input id="exp-order" name="exp_order" className="ainput" type="number" min={0} value={form.order} onChange={e => f("order", e.target.value)} /></Field>
           <div className="acat-form-actions">
             <SaveBtn saving={saving} label={editId ? "Update" : "Add Experience"} />
             {editId && <button type="button" className="abtn abtn-ghost" onClick={() => { imageRef.current?.clearPending(); setEditId(null); setForm(EMPTY_EXP); }}>Cancel</button>}
@@ -1239,13 +1324,15 @@ function ExperienceTab({ toast }) {
         <div className="acat-table-header">
           <div className="acat-table-header-left"><h2 className="acat-card-title">Experience</h2>{!loading && <span className="acat-count-badge">{filtered.length === items.length ? items.length : `${filtered.length} of ${items.length}`}</span>}</div>
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-            <select className="ainput" style={{ width: "auto", padding: "6px 10px", fontSize: 13 }} value={filterSection} onChange={e => setFilterSection(e.target.value)}>
+            <label htmlFor="exp-section-filter" className="sr-only">Filter by section</label>
+            <select id="exp-section-filter" name="exp_section_filter" className="ainput" style={{ width: "auto", padding: "6px 10px", fontSize: 13 }} value={filterSection} onChange={e => setFilterSection(e.target.value)}>
               <option value="All">All Sections</option>
               {EXP_SECTIONS.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
             <div className="acat-search-wrap">
               <i className="fas fa-search acat-search-icon" />
-              <input className="acat-search-input" placeholder="Search…" value={search} onChange={e => setSearch(e.target.value)} />
+              <label htmlFor="exp-search" className="sr-only">Search experience</label>
+              <input id="exp-search" name="exp_search" className="acat-search-input" placeholder="Search…" value={search} onChange={e => setSearch(e.target.value)} autoComplete="off" />
               {search && <button type="button" className="acat-search-clear" onClick={() => setSearch("")}><i className="fas fa-times" /></button>}
             </div>
           </div>
@@ -1314,87 +1401,17 @@ function ExperienceHeaderTab({ toast }) {
 
   return (
     <form onSubmit={handleSubmit} className="acat-form" style={{ maxWidth: 640 }}>
-      <Field label="Page Title"><input className="ainput" value={form.title} onChange={e => f("title", e.target.value)} placeholder="e.g. Experience" /></Field>
-      <Field label="Badge / Subtitle"><input className="ainput" value={form.subtitle} onChange={e => f("subtitle", e.target.value)} placeholder="e.g. Work, Internship and Volunteership" /></Field>
-      <Field label="Description"><textarea className="ainput acat-textarea" rows={4} value={form.description} onChange={e => f("description", e.target.value)} placeholder="Brief paragraph about your experience..." /></Field>
-      <Field label="Stats" hint={'One per line: value|label — e.g. "4+|Years Experience"'}>
-        <textarea className="ainput acat-textarea" rows={4} value={form.stats} onChange={e => f("stats", e.target.value)} placeholder={"4+|Years Experience\n3+|Companies\n10+|Projects Built"} />
+      <Field label="Page Title" htmlFor="exp-head-title"><input id="exp-head-title" name="exp_head_title" className="ainput" value={form.title} onChange={e => f("title", e.target.value)} placeholder="e.g. Experience" /></Field>
+      <Field label="Badge / Subtitle" htmlFor="exp-head-subtitle"><input id="exp-head-subtitle" name="exp_head_subtitle" className="ainput" value={form.subtitle} onChange={e => f("subtitle", e.target.value)} placeholder="e.g. Work, Internship and Volunteership" /></Field>
+      <Field label="Main Description" htmlFor="exp-head-desc"><textarea id="exp-head-desc" name="exp_head_desc" className="ainput acat-textarea" rows={4} value={form.description} onChange={e => f("description", e.target.value)} placeholder="Brief paragraph about your experience..." /></Field>
+      <Field label="Stats" htmlFor="exp-header-stats" hint={'One per line: value|label — e.g. "4+|Years Experience"'}>
+        <textarea id="exp-header-stats" name="exp_header_stats" className="ainput acat-textarea" rows={4} value={form.stats} onChange={e => f("stats", e.target.value)} placeholder={"4+|Years Experience\n3+|Companies\n10+|Projects Built"} />
       </Field>
       <SaveBtn saving={saving} />
     </form>
   );
 }
 
-/* ── Contact Page Sections tab ──────────────────────────────────────────── */
-const EMPTY_CPD = {
-  cs_title: "Contact Me", cs_description: "",
-  blog_title: "Blogs", blog_subtitle: "", blog_link: "/#/blogs",
-  addr_title: "Address", addr_subtitle: "", addr_map_link: "",
-  phone_title: "Phone Number", phone_subtitle: "",
-};
-function ContactPageTab({ toast }) {
-  const [form, setForm] = useState(EMPTY_CPD);
-  const [saving, setSaving] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const f = (k, v) => setForm(p => ({ ...p, [k]: v }));
-
-  useEffect(() => {
-    getContactPageData().then(d => {
-      if (d) setForm({
-        cs_title:       d.contactSection?.title       || "",
-        cs_description: d.contactSection?.description || "",
-        blog_title:     d.blogSection?.title          || "",
-        blog_subtitle:  d.blogSection?.subtitle       || "",
-        blog_link:      d.blogSection?.link           || "/#/blogs",
-        addr_title:     d.addressSection?.title       || "",
-        addr_subtitle:  d.addressSection?.subtitle    || "",
-        addr_map_link:  d.addressSection?.location_map_link || "",
-        phone_title:    d.phoneSection?.title         || "",
-        phone_subtitle: d.phoneSection?.subtitle      || "",
-      });
-      setLoading(false);
-    }).catch(() => setLoading(false));
-  }, []);
-
-  async function handleSubmit(e) {
-    e.preventDefault(); setSaving(true);
-    try {
-      await saveContactPageData({
-        contactSection: { title: form.cs_title, description: form.cs_description },
-        blogSection:    { title: form.blog_title, subtitle: form.blog_subtitle, link: form.blog_link },
-        addressSection: { title: form.addr_title, subtitle: form.addr_subtitle, location_map_link: form.addr_map_link },
-        phoneSection:   { title: form.phone_title, subtitle: form.phone_subtitle },
-      });
-      toast?.addToast("Contact page saved.", "success");
-    } catch { toast?.addToast("Failed to save.", "error"); } finally { setSaving(false); }
-  }
-
-  if (loading) return <div className="acat-skel-wrap">{[1,2,3].map(i => <div key={i} className="acat-skel-row"><div className="askel askel-line" style={{ flex: 1, height: 36 }} /></div>)}</div>;
-
-  return (
-    <form onSubmit={handleSubmit} className="acat-form" style={{ maxWidth: 640 }}>
-      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--ab-text-muted)", paddingBottom: 4, borderBottom: "1px solid var(--ab-border)", marginBottom: 4 }}>Contact Section</div>
-      <Field label="Heading"><input className="ainput" value={form.cs_title} onChange={e => f("cs_title", e.target.value)} /></Field>
-      <Field label="Description"><textarea className="ainput acat-textarea" rows={3} value={form.cs_description} onChange={e => f("cs_description", e.target.value)} /></Field>
-
-      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--ab-text-muted)", paddingBottom: 4, borderBottom: "1px solid var(--ab-border)", marginTop: 12, marginBottom: 4 }}>Blog Section</div>
-      <Field label="Title"><input className="ainput" value={form.blog_title} onChange={e => f("blog_title", e.target.value)} /></Field>
-      <Field label="Subtitle"><textarea className="ainput acat-textarea" rows={2} value={form.blog_subtitle} onChange={e => f("blog_subtitle", e.target.value)} /></Field>
-      <Field label="Blog Link"><input className="ainput" value={form.blog_link} onChange={e => f("blog_link", e.target.value)} placeholder="/#/blogs" /></Field>
-
-      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--ab-text-muted)", paddingBottom: 4, borderBottom: "1px solid var(--ab-border)", marginTop: 12, marginBottom: 4 }}>Address Section</div>
-      <Field label="Title"><input className="ainput" value={form.addr_title} onChange={e => f("addr_title", e.target.value)} /></Field>
-      <Field label="Address Subtitle"><input className="ainput" value={form.addr_subtitle} onChange={e => f("addr_subtitle", e.target.value)} placeholder="e.g. Noida, UP, India - 201301" /></Field>
-      <Field label="Google Maps Link"><input className="ainput" type="url" value={form.addr_map_link} onChange={e => f("addr_map_link", e.target.value)} placeholder="https://goo.gl/maps/..." /></Field>
-
-      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--ab-text-muted)", paddingBottom: 4, borderBottom: "1px solid var(--ab-border)", marginTop: 12, marginBottom: 4 }}>Phone Section</div>
-      <Field label="Title"><input className="ainput" value={form.phone_title} onChange={e => f("phone_title", e.target.value)} /></Field>
-      <Field label="Phone Number"><input className="ainput" value={form.phone_subtitle} onChange={e => f("phone_subtitle", e.target.value)} placeholder="+91-XXXXXXXXXX" /></Field>
-
-      <SaveBtn saving={saving} />
-    </form>
-  );
-}
 
 /* ── Projects Header tab ────────────────────────────────────────────────── */
 const EMPTY_PH = { title: "Projects", description: "" };
@@ -1421,12 +1438,13 @@ function ProjectsHeaderTab({ toast }) {
 
   return (
     <form onSubmit={handleSubmit} className="acat-form" style={{ maxWidth: 640 }}>
-      <Field label="Page Title"><input className="ainput" value={form.title} onChange={e => f("title", e.target.value)} placeholder="e.g. Projects" /></Field>
-      <Field label="Description"><textarea className="ainput acat-textarea" rows={4} value={form.description} onChange={e => f("description", e.target.value)} placeholder="Brief description shown at the top of the Projects page..." /></Field>
+      <Field label="Page Title" htmlFor="proj-head-title"><input id="proj-head-title" name="proj_head_title" className="ainput" value={form.title} onChange={e => f("title", e.target.value)} placeholder="e.g. Projects" /></Field>
+      <Field label="Main Description" htmlFor="proj-head-desc"><textarea id="proj-head-desc" name="proj_head_desc" className="ainput acat-textarea" rows={4} value={form.description} onChange={e => f("description", e.target.value)} placeholder="Brief description shown at the top of the Projects page..." /></Field>
       <SaveBtn saving={saving} />
     </form>
   );
 }
+
 
 /* ── FAQ tab ────────────────────────────────────────────────────────────── */
 function FaqTab({ toast }) {
@@ -1434,7 +1452,7 @@ function FaqTab({ toast }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editIdx, setEditIdx] = useState(null);
-  const [form, setForm] = useState({ q: "", a: "" });
+  const [form, setForm] = useState({ q: "", a: "", order: 0 });
 
   async function load() {
     setLoading(true);
@@ -1460,18 +1478,19 @@ function FaqTab({ toast }) {
 
   function startEdit(i) {
     setEditIdx(i);
-    setForm({ q: faqs[i].q, a: faqs[i].a });
+    setForm({ q: faqs[i].q, a: faqs[i].a, order: faqs[i].order ?? 0 });
   }
 
-  function cancelEdit() { setEditIdx(null); setForm({ q: "", a: "" }); }
+  function cancelEdit() { setEditIdx(null); setForm({ q: "", a: "", order: 0 }); }
 
   async function handleSubmit(e) {
     e.preventDefault();
     if (!form.q.trim() || !form.a.trim()) return toast?.addToast("Question and answer are required.", "error");
-    const entry = { q: form.q.trim(), a: form.a.trim() };
+    const entry = { q: form.q.trim(), a: form.a.trim(), order: Number(form.order) || 0 };
     const updated = editIdx === null
       ? [...faqs, entry]
       : faqs.map((f, i) => i === editIdx ? entry : f);
+    updated.sort((a, b) => a.order - b.order);
     await save(updated);
     cancelEdit();
   }
@@ -1496,13 +1515,10 @@ function FaqTab({ toast }) {
         <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--ab-text-muted)", paddingBottom: 4, borderBottom: "1px solid var(--ab-border)", marginBottom: 8 }}>
           {editIdx !== null ? `Editing FAQ #${editIdx + 1}` : "Add FAQ"}
         </div>
-        <Field label="Question *">
-          <input className="ainput" value={form.q} onChange={e => setForm(p => ({ ...p, q: e.target.value }))} placeholder="e.g. Are you available for remote work?" />
-        </Field>
-        <Field label="Answer *">
-          <textarea className="ainput acat-textarea" rows={3} value={form.a} onChange={e => setForm(p => ({ ...p, a: e.target.value }))} placeholder="Your answer…" />
-        </Field>
-        <div style={{ display: "flex", gap: 8 }}>
+        <Field label="Question *" htmlFor="faq-q"><input id="faq-q" name="question" className="ainput" value={form.q} onChange={e => setForm(p => ({ ...p, q: e.target.value }))} placeholder="e.g. Are you available for remote work?" required /></Field>
+        <Field label="Answer *" htmlFor="faq-a"><textarea id="faq-a" name="answer" className="ainput acat-textarea" rows={4} value={form.a} onChange={e => setForm(p => ({ ...p, a: e.target.value }))} required /></Field>
+        <Field label="Order" htmlFor="faq-order"><input id="faq-order" name="order" className="ainput" type="number" min={0} value={form.order} onChange={e => setForm(p => ({ ...p, order: e.target.value }))} style={{ width: 90 }} /></Field>
+        <div className="acat-form-actions">
           <button type="submit" className="abtn abtn-primary" disabled={saving}>
             {saving ? <><span className="aspin" style={{ borderTopColor: "#fff" }} /> Saving…</> : editIdx !== null ? <><i className="fas fa-check" /> Update</> : <><i className="fas fa-plus" /> Add FAQ</>}
           </button>
@@ -1542,14 +1558,14 @@ function FaqTab({ toast }) {
 
 /* ── Open Source / GitHub tab ───────────────────────────────────────────── */
 function OpenSourceTab({ toast }) {
-  const [form, setForm] = useState({ githubUserName: "", githubConvertedToken: "" });
+  const [form, setForm] = useState({ githubUserName: "", githubConvertedToken: "", showGithubProfile: false });
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const f = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
   useEffect(() => {
     getOpenSourceConfig().then(d => {
-      if (d) setForm({ githubUserName: d.githubUserName || "", githubConvertedToken: d.githubConvertedToken || "" });
+      if (d) setForm({ githubUserName: d.githubUserName || "", githubConvertedToken: d.githubConvertedToken || "", showGithubProfile: !!d.showGithubProfile });
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
@@ -1564,12 +1580,21 @@ function OpenSourceTab({ toast }) {
 
   return (
     <form onSubmit={handleSubmit} className="acat-form" style={{ maxWidth: 640 }}>
-      <Field label="GitHub Username"><input className="ainput" value={form.githubUserName} onChange={e => f("githubUserName", e.target.value)} placeholder="e.g. dmandal1" /></Field>
-      <Field
-        label="GitHub Token (base64 encoded)"
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24, padding: "12px 16px", background: "rgba(16, 185, 129, 0.1)", borderRadius: 12, border: "1px solid rgba(16, 185, 129, 0.2)" }}>
+        <input id="os-show-github" name="show_github" type="checkbox" checked={form.showGithubProfile} onChange={e => f("showGithubProfile", e.target.checked)} style={{ width: 18, height: 18, cursor: "pointer" }} />
+        <label htmlFor="os-show-github" style={{ fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Show GitHub Profile on Education page</label>
+      </div>
+
+      <Field label="GitHub Username" htmlFor="os-gh-user">
+        <input id="os-gh-user" name="github_user" className="ainput" value={form.githubUserName} onChange={e => f("githubUserName", e.target.value)} placeholder="e.g. dmandal1" />
+      </Field>
+      
+      <Field 
+        label="GitHub Token (base64 encoded)" 
+        htmlFor="os-gh-token"
         hint={'Generate a token at github.com/settings/tokens with public_repo scope, then encode it: open browser console and run btoa("your_token_here"), paste the result here.'}
       >
-        <input className="ainput" value={form.githubConvertedToken} onChange={e => f("githubConvertedToken", e.target.value)} placeholder="base64-encoded GitHub PAT" />
+        <input id="os-gh-token" name="github_token" className="ainput" value={form.githubConvertedToken} onChange={e => f("githubConvertedToken", e.target.value)} placeholder="base64-encoded GitHub PAT" />
       </Field>
       <SaveBtn saving={saving} />
     </form>
@@ -1601,8 +1626,8 @@ function BlogConfigTab({ toast }) {
 
   return (
     <form onSubmit={handleSubmit} className="acat-form" style={{ maxWidth: 640 }}>
-      <Field label="Section Title"><input className="ainput" value={form.title} onChange={e => f("title", e.target.value)} placeholder="e.g. Blogs" /></Field>
-      <Field label="Subtitle"><textarea className="ainput acat-textarea" rows={3} value={form.subtitle} onChange={e => f("subtitle", e.target.value)} placeholder="Brief description shown above the blog post list…" /></Field>
+      <Field label="Section Title" htmlFor="blog-sec-title"><input id="blog-sec-title" name="blog_title" className="ainput" value={form.title} onChange={e => f("title", e.target.value)} placeholder="e.g. Blogs" /></Field>
+      <Field label="Subtitle" htmlFor="blog-sec-sub"><textarea id="blog-sec-sub" name="blog_subtitle" className="ainput acat-textarea" rows={3} value={form.subtitle} onChange={e => f("subtitle", e.target.value)} placeholder="Brief description shown above the blog post list…" /></Field>
       <p className="acat-hint" style={{ marginTop: -4 }}>Individual blog posts are managed in the <strong>Blogs</strong> section of the admin panel.</p>
       <SaveBtn saving={saving} />
     </form>
@@ -1618,7 +1643,6 @@ export default function AdminPortfolio() {
     profile:          <ProfileTab toast={toast} />,
     social:           <SocialTab toast={toast} />,
     contact:          <ContactTab toast={toast} />,
-    contactPage:      <ContactPageTab toast={toast} />,
     faq:              <FaqTab toast={toast} />,
     seo:              <SeoTab toast={toast} />,
     education:        <EducationTab toast={toast} />,
@@ -1648,7 +1672,11 @@ export default function AdminPortfolio() {
                 <i className="fas fa-layer-group" />
               </div>
               <div className="apf-banner-text">
-                <p className="apf-banner-kicker">Admin Panel</p>
+                <div className="apage-crumb" style={{ marginBottom: 8 }}>
+                  <Link to="/admin/home" className="apage-crumb-link" style={{ color: "rgba(255,255,255,0.7)" }}>Admin</Link>
+                  <span className="apage-crumb-sep" style={{ color: "rgba(255,255,255,0.4)" }}>/</span>
+                  <span className="apage-crumb-cur" style={{ color: "rgba(255,255,255,0.9)" }}>Portfolio</span>
+                </div>
                 <h1 className="apf-banner-title">Portfolio Content</h1>
                 <p className="apf-banner-sub">Manage all sections of your public portfolio</p>
               </div>

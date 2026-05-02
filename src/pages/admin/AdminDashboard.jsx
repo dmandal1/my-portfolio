@@ -641,6 +641,11 @@ export default function AdminDashboard() {
           {/* ── Page header ── */}
           <div className="apage-topbar">
             <div>
+              <div className="apage-crumb">
+                <Link to="/admin/home" className="apage-crumb-link">Admin</Link>
+                <span className="apage-crumb-sep">/</span>
+                <span className="apage-crumb-cur">Posts</span>
+              </div>
               <h1 className="apage-title">Manage Blog Posts</h1>
               <p className="apage-subtitle">Create, edit, and manage all your articles</p>
             </div>
@@ -689,13 +694,17 @@ export default function AdminDashboard() {
             <div className="afilter-toolbar-right">
               {/* Search */}
               <div className="afilter-search-wrap">
+                <label htmlFor="post-search" className="sr-only">Search posts</label>
                 <i className="fas fa-search afilter-search-icon" />
                 <input
+                  id="post-search"
+                  name="search"
                   type="text"
                   className="afilter-search-input"
                   placeholder="Search posts…"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  autoComplete="off"
                 />
                 {searchQuery && (
                   <button
@@ -711,7 +720,10 @@ export default function AdminDashboard() {
 
               {/* Category filter */}
               <div className="afilter-native-wrap">
+                <label htmlFor="category-filter" className="sr-only">Filter by category</label>
                 <select
+                  id="category-filter"
+                  name="category"
                   className="afilter-native-select"
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
@@ -726,7 +738,10 @@ export default function AdminDashboard() {
 
               {/* Bulk actions */}
               <div className="afilter-native-wrap">
+                <label htmlFor="bulk-actions" className="sr-only">Bulk actions</label>
                 <select
+                  id="bulk-actions"
+                  name="bulk_action"
                   className="afilter-native-select"
                   value=""
                   onChange={(e) => {
@@ -771,8 +786,9 @@ export default function AdminDashboard() {
                   <div className="acol-toggle-panel">
                     <div className="acol-toggle-title">Visible Columns</div>
                     {COLS.map((col) => (
-                      <label key={col.key} className="acol-toggle-item">
+                      <label key={col.key} className="acol-toggle-item" htmlFor={`col-toggle-${col.key}`}>
                         <input
+                          id={`col-toggle-${col.key}`}
                           type="checkbox"
                           checked={visibleCols[col.key]}
                           onChange={() => setVisibleCols((prev) => ({ ...prev, [col.key]: !prev[col.key] }))}
@@ -836,23 +852,25 @@ export default function AdminDashboard() {
           {/* ── Table ── */}
           <div className="atable-card">
             {loading ? (
-              <table className="atable">
-                <thead>
-                  <tr>
-                    <th style={{ width: 40 }} />
-                    <th>Title</th>
-                    <th>Author</th>
-                    <th>Status</th>
-                    <th>Comments</th>
-                    <th>Views</th>
-                    <th>Date</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[...Array(5)].map((_, i) => <SkeletonRow key={i} />)}
-                </tbody>
-              </table>
+              <div className="atable-responsive">
+                <table className="atable">
+                  <thead>
+                    <tr>
+                      <th style={{ width: 40 }} />
+                      <th>Title</th>
+                      <th>Author</th>
+                      <th>Status</th>
+                      <th>Comments</th>
+                      <th>Views</th>
+                      <th>Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...Array(5)].map((_, i) => <SkeletonRow key={i} />)}
+                  </tbody>
+                </table>
+              </div>
             ) : filtered.length === 0 ? (
               <div className="aempty">
                 <div className="aempty-icon">📭</div>
@@ -871,330 +889,358 @@ export default function AdminDashboard() {
                 )}
               </div>
             ) : (
-              <table className="atable">
-                <thead>
-                  <tr>
-                    <th style={{ width: 40 }}>
-                      <input
-                        type="checkbox"
-                        className="achk"
-                        checked={allSelected}
-                        onChange={toggleAll}
-                      />
-                    </th>
-                    <th className="sortable" onClick={() => toggleSort("title")}>
-                      Title <SortIcon field="title" sort={sort} />
-                    </th>
-                    {visibleCols.author && <th>Author</th>}
-                    <th className="sortable" onClick={() => toggleSort("published")}>
-                      Status <SortIcon field="published" sort={sort} />
-                    </th>
-                    {visibleCols.comments && <th>Comments</th>}
-                    {visibleCols.views && <th>Views</th>}
-                    {visibleCols.date && (
-                      <th className="sortable" onClick={() => toggleSort("createdAt")}>
-                        Date <SortIcon field="createdAt" sort={sort} />
-                      </th>
-                    )}
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginated.map((blog) => (
-                    <Fragment key={blog.id}>
-                      <tr key={blog.id} className={selected.has(blog.id) ? "selected" : ""}>
-                        <td>
+              <div className="atable-responsive">
+                <table className="atable">
+                  <thead>
+                    <tr>
+                      <th style={{ width: 40 }}>
+                        <div style={{ display: "flex", alignItems: "center" }}>
                           <input
+                            id="bulk-select-all"
                             type="checkbox"
                             className="achk"
-                            checked={selected.has(blog.id)}
-                            onChange={() => toggleOne(blog.id)}
+                            checked={allSelected}
+                            onChange={toggleAll}
                           />
-                        </td>
-                        <td>
-                          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                            {blog.image ? (
-                              <img src={blog.image} alt="" className="atable-thumb" />
-                            ) : (
-                              <div className="atable-thumb-placeholder">
-                                <i className="fas fa-image" />
-                              </div>
-                            )}
-                            <div style={{ minWidth: 0 }}>
-                              <div className="atable-title">
-                                {blog.title}
-                                {blog.featured && (
-                                  <span className="afeatured-badge" title="Featured Post">
-                                    <i className="fas fa-star" />
-                                  </span>
+                          <label htmlFor="bulk-select-all" className="sr-only">Select all posts</label>
+                        </div>
+                      </th>
+                      <th className="sortable" onClick={() => toggleSort("title")}>
+                        Title <SortIcon field="title" sort={sort} />
+                      </th>
+                      {visibleCols.author && <th>Author</th>}
+                      <th className="sortable" onClick={() => toggleSort("published")}>
+                        Status <SortIcon field="published" sort={sort} />
+                      </th>
+                      {visibleCols.comments && <th>Comments</th>}
+                      {visibleCols.views && <th>Views</th>}
+                      {visibleCols.date && (
+                        <th className="sortable" onClick={() => toggleSort("createdAt")}>
+                          Date <SortIcon field="createdAt" sort={sort} />
+                        </th>
+                      )}
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginated.map((blog) => (
+                      <Fragment key={blog.id}>
+                        <tr className={selected.has(blog.id) ? "selected" : ""}>
+                          <td>
+                            <div style={{ display: "flex", alignItems: "center" }}>
+                              <input
+                                id={`select-post-${blog.id}`}
+                                type="checkbox"
+                                className="achk"
+                                checked={selected.has(blog.id)}
+                                onChange={() => toggleOne(blog.id)}
+                              />
+                              <label htmlFor={`select-post-${blog.id}`} className="sr-only">Select post {blog.title}</label>
+                            </div>
+                          </td>
+                          <td>
+                            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                              {blog.image ? (
+                                <img src={blog.image} alt="" className="atable-thumb" />
+                              ) : (
+                                <div className="atable-thumb-placeholder">
+                                  <i className="fas fa-image" />
+                                </div>
+                              )}
+                              <div style={{ minWidth: 0 }}>
+                                <div className="atable-title">
+                                  {blog.title}
+                                  {blog.featured && (
+                                    <span className="afeatured-badge" title="Featured Post">
+                                      <i className="fas fa-star" />
+                                    </span>
+                                  )}
+                                </div>
+                                {blog.subtitle && (
+                                  <div className="atable-sub">{blog.subtitle}</div>
                                 )}
                               </div>
-                              {blog.subtitle && (
-                                <div className="atable-sub">{blog.subtitle}</div>
-                              )}
                             </div>
-                          </div>
-                        </td>
-                        {visibleCols.author && (
-                          <td><AuthorCell name={blog.author} /></td>
-                        )}
-                        <td>
-                          <StatusBadge blog={blog} />
-                        </td>
-                        {visibleCols.comments && (
-                          <td className="atable-num">{blog.commentCount ?? 0}</td>
-                        )}
-                        {visibleCols.views && (
-                          <td className="atable-num">
-                            {blog.views != null
-                              ? blog.views >= 1000
-                                ? `${(blog.views / 1000).toFixed(1)}k`
-                                : blog.views
-                              : 0}
                           </td>
-                        )}
-                        {visibleCols.date && (
-                          <td style={{ fontSize: 13, color: "var(--atxt2)", whiteSpace: "nowrap" }}>
-                            {formatDate(blog.createdAt)}
+                          {visibleCols.author && (
+                            <td><AuthorCell name={blog.author} /></td>
+                          )}
+                          <td>
+                            <StatusBadge blog={blog} />
                           </td>
-                        )}
-                        <td>
-                          <PostActionsDropdown
-                            blog={blog}
-                            onQuickEdit={openQuickEdit}
-                            onDelete={(b) => setModal({ mode: "single", id: b.id, title: b.title })}
-                            onApprove={handleApprove}
-                            onReject={handleReject}
-                          />
-                        </td>
-                      </tr>
-
-                      {quickEditId === blog.id && (
-                        <tr className="aquick-row">
-                          <td colSpan={colCount}>
-                            <div className="aquick-panel">
-                              <div className="aquick-grid">
-                                <label className="aquick-field">
-                                  <span>Title</span>
-                                  <input
-                                    className="ainput"
-                                    value={quickForm.title}
-                                    onChange={(e) => setQuickForm((f) => ({ ...f, title: e.target.value }))}
-                                  />
-                                </label>
-
-                                <label className="aquick-field">
-                                  <span>Slug</span>
-                                  <input
-                                    className="ainput"
-                                    value={quickForm.slug}
-                                    onChange={(e) => setQuickForm((f) => ({ ...f, slug: slugify(e.target.value) }))}
-                                  />
-                                </label>
-
-                                <label className="aquick-field">
-                                  <span>Category</span>
-                                  <div className="aquick-cat-select" ref={quickCategoryRef}>
-                                    <button
-                                      type="button"
-                                      className={`ainput aquick-cat-trigger${quickCategoryOpen ? " is-open" : ""}`}
-                                      onClick={() => setQuickCategoryOpen((v) => !v)}
-                                    >
-                                      <span>{getCategoryLabel(quickForm.categoryIds)}</span>
-                                      <i className={`fas fa-chevron-${quickCategoryOpen ? "up" : "down"}`} />
-                                    </button>
-
-                                    {quickCategoryOpen && (
-                                      <div className="aquick-cat-menu">
-                                        <button
-                                          type="button"
-                                          className={`aquick-cat-option aquick-cat-option--clear${!quickForm.categoryIds?.length ? " is-active" : ""}`}
-                                          onClick={() => {
-                                            setQuickForm((f) => ({ ...f, categoryIds: [] }));
-                                          }}
-                                        >
-                                          <span className="aquick-cat-option-main">
-                                            <i className="fas fa-times-circle" aria-hidden="true" />
-                                            <span>Clear all categories</span>
-                                          </span>
-                                          {!quickForm.categoryIds?.length && (
-                                            <span className="aquick-cat-selected-mark">
-                                              <i className="fas fa-check" />
-                                              Active
-                                            </span>
-                                          )}
-                                        </button>
-                                        {allCategories.map((cat) => (
-                                          <button
-                                            key={cat.id}
-                                            type="button"
-                                            className={`aquick-cat-option${quickForm.categoryIds?.includes(cat.id) ? " is-active" : ""}`}
-                                            onClick={() => {
-                                              toggleQuickCategory(cat.id);
-                                            }}
-                                          >
-                                            <span className="aquick-cat-option-main">
-                                              <input
-                                                type="checkbox"
-                                                className="aquick-cat-checkbox"
-                                                checked={quickForm.categoryIds?.includes(cat.id)}
-                                                readOnly
-                                                tabIndex={-1}
-                                              />
-                                              <span>{cat.name}</span>
-                                            </span>
-                                          </button>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                </label>
-
-                                <label className="aquick-field">
-                                  <span>Status</span>
-                                  <select
-                                    className="ainput"
-                                    value={quickForm.status}
-                                    onChange={(e) => setQuickForm((f) => ({ ...f, status: e.target.value }))}
-                                  >
-                                    <option value="published">Published</option>
-                                    <option value="scheduled">Scheduled</option>
-                                    <option value="draft">Draft</option>
-                                    <option value="pending">Pending Review</option>
-                                  </select>
-                                </label>
-
-                                <label className="aquick-field">
-                                  <span>Date</span>
-                                  <input
-                                    type="date"
-                                    className="ainput"
-                                    value={quickForm.date}
-                                    onChange={(e) => setQuickForm((f) => ({ ...f, date: e.target.value }))}
-                                  />
-                                </label>
-
-                                <label className="aquick-field">
-                                  <span>Time</span>
-                                  <input
-                                    type="time"
-                                    className="ainput"
-                                    value={quickForm.time}
-                                    onChange={(e) => setQuickForm((f) => ({ ...f, time: e.target.value }))}
-                                  />
-                                </label>
-
-                                <label className="aquick-field aquick-field--wide">
-                                  <span>Tags</span>
-                                  <div className="aquick-cat-select aquick-tag-select" ref={quickTagRef}>
-                                    <button
-                                      type="button"
-                                      className={`ainput aquick-cat-trigger${quickTagOpen ? " is-open" : ""}`}
-                                      onClick={() => setQuickTagOpen((v) => !v)}
-                                    >
-                                      <span>{getTagLabel(quickForm.tags)}</span>
-                                      <i className={`fas fa-chevron-${quickTagOpen ? "up" : "down"}`} />
-                                    </button>
-
-                                    {quickTagOpen && (
-                                      <div className="aquick-cat-menu">
-                                        <button
-                                          type="button"
-                                          className={`aquick-cat-option aquick-cat-option--clear${!quickForm.tags?.length ? " is-active" : ""}`}
-                                          onClick={() => setQuickForm((f) => ({ ...f, tags: [] }))}
-                                        >
-                                          <span className="aquick-cat-option-main">
-                                            <i className="fas fa-times-circle" aria-hidden="true" />
-                                            <span>Clear all tags</span>
-                                          </span>
-                                          {!quickForm.tags?.length && (
-                                            <span className="aquick-cat-selected-mark">
-                                              <i className="fas fa-check" />
-                                              Active
-                                            </span>
-                                          )}
-                                        </button>
-                                        {allTags.map((tag) => (
-                                          <button
-                                            key={tag.id}
-                                            type="button"
-                                            className={`aquick-cat-option${quickForm.tags?.some((t) => normalizeTagName(t) === normalizeTagName(tag.name)) ? " is-active" : ""}`}
-                                            onClick={() => toggleQuickTag(tag.name)}
-                                          >
-                                            <span className="aquick-cat-option-main">
-                                              <input
-                                                type="checkbox"
-                                                className="aquick-cat-checkbox"
-                                                checked={quickForm.tags?.some((t) => normalizeTagName(t) === normalizeTagName(tag.name))}
-                                                readOnly
-                                                tabIndex={-1}
-                                              />
-                                              <span>{tag.name}</span>
-                                            </span>
-                                          </button>
-                                        ))}
-
-                                        <div className="aquick-tag-add-row">
-                                          <input
-                                            className="ainput"
-                                            placeholder="Add new tag"
-                                            value={quickNewTag}
-                                            onChange={(e) => setQuickNewTag(e.target.value)}
-                                            onKeyDown={(e) => {
-                                              if (e.key === "Enter") {
-                                                e.preventDefault();
-                                                handleQuickAddTag();
-                                              }
-                                            }}
-                                          />
-                                          <button
-                                            type="button"
-                                            className="abtn abtn-primary abtn-sm"
-                                            onClick={handleQuickAddTag}
-                                            disabled={!quickNewTag.trim()}
-                                          >
-                                            Add
-                                          </button>
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                </label>
-                              </div>
-
-                              <div className="aquick-actions">
-                                <button
-                                  type="button"
-                                  className="abtn abtn-primary"
-                                  onClick={() => saveQuickEdit(blog)}
-                                  disabled={quickSaving}
-                                >
-                                  {quickSaving
-                                    ? <><span className="aspin" style={{ borderTopColor: "#fff" }} /> Updating…</>
-                                    : "Update"}
-                                </button>
-                                <button
-                                  type="button"
-                                  className="abtn abtn-ghost"
-                                  onClick={() => {
-                                    setQuickCategoryOpen(false);
-                                    setQuickTagOpen(false);
-                                    setQuickNewTag("");
-                                    setQuickEditId(null);
-                                  }}
-                                  disabled={quickSaving}
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            </div>
+                          {visibleCols.comments && (
+                            <td className="atable-num">{blog.commentCount ?? 0}</td>
+                          )}
+                          {visibleCols.views && (
+                            <td className="atable-num">
+                              {blog.views != null
+                                ? blog.views >= 1000
+                                  ? `${(blog.views / 1000).toFixed(1)}k`
+                                  : blog.views
+                                : 0}
+                            </td>
+                          )}
+                          {visibleCols.date && (
+                            <td style={{ fontSize: 13, color: "var(--atxt2)", whiteSpace: "nowrap" }}>
+                              {formatDate(blog.createdAt)}
+                            </td>
+                          )}
+                          <td>
+                            <PostActionsDropdown
+                              blog={blog}
+                              onQuickEdit={openQuickEdit}
+                              onDelete={(b) => setModal({ mode: "single", id: b.id, title: b.title })}
+                              onApprove={handleApprove}
+                              onReject={handleReject}
+                            />
                           </td>
                         </tr>
-                      )}
-                    </Fragment>
-                  ))}
-                </tbody>
-              </table>
+
+                        {quickEditId === blog.id && (
+                          <tr className="aquick-row">
+                            <td colSpan={colCount}>
+                              <div className="aquick-panel">
+                                <div className="aquick-grid">
+                                  <div className="aquick-field">
+                                    <label htmlFor={`qe-title-${blog.id}`}>Title</label>
+                                    <input
+                                      id={`qe-title-${blog.id}`}
+                                      name="title"
+                                      className="ainput"
+                                      value={quickForm.title}
+                                      onChange={(e) => setQuickForm((f) => ({ ...f, title: e.target.value }))}
+                                      autoComplete="off"
+                                    />
+                                  </div>
+
+                                  <div className="aquick-field">
+                                    <label htmlFor={`qe-slug-${blog.id}`}>Slug</label>
+                                    <input
+                                      id={`qe-slug-${blog.id}`}
+                                      name="slug"
+                                      className="ainput"
+                                      value={quickForm.slug}
+                                      onChange={(e) => setQuickForm((f) => ({ ...f, slug: slugify(e.target.value) }))}
+                                      autoComplete="off"
+                                    />
+                                  </div>
+
+                                  <div className="aquick-field">
+                                    <label htmlFor={`qe-cat-trigger-${blog.id}`}>Category</label>
+                                    <div className="aquick-cat-select" ref={quickCategoryRef}>
+                                      <button
+                                        id={`qe-cat-trigger-${blog.id}`}
+                                        type="button"
+                                        className={`ainput aquick-cat-trigger${quickCategoryOpen ? " is-open" : ""}`}
+                                        onClick={() => setQuickCategoryOpen((v) => !v)}
+                                      >
+                                        <span>{getCategoryLabel(quickForm.categoryIds)}</span>
+                                        <i className={`fas fa-chevron-${quickCategoryOpen ? "up" : "down"}`} />
+                                      </button>
+
+                                      {quickCategoryOpen && (
+                                        <div className="aquick-cat-menu">
+                                          <button
+                                            type="button"
+                                            className={`aquick-cat-option aquick-cat-option--clear${!quickForm.categoryIds?.length ? " is-active" : ""}`}
+                                            onClick={() => {
+                                              setQuickForm((f) => ({ ...f, categoryIds: [] }));
+                                            }}
+                                          >
+                                            <span className="aquick-cat-option-main">
+                                              <i className="fas fa-times-circle" aria-hidden="true" />
+                                              <span>Clear all categories</span>
+                                            </span>
+                                            {!quickForm.categoryIds?.length && (
+                                              <span className="aquick-cat-selected-mark">
+                                                <i className="fas fa-check" />
+                                                Active
+                                              </span>
+                                            )}
+                                          </button>
+                                          {allCategories.map((cat) => (
+                                            <button
+                                              key={cat.id}
+                                              type="button"
+                                              className={`aquick-cat-option${quickForm.categoryIds?.includes(cat.id) ? " is-active" : ""}`}
+                                              onClick={() => {
+                                                toggleQuickCategory(cat.id);
+                                              }}
+                                            >
+                                              <label className="aquick-cat-option-main" htmlFor={`qe-cat-${cat.id}`}>
+                                                <input
+                                                  id={`qe-cat-${cat.id}`}
+                                                  type="checkbox"
+                                                  className="aquick-cat-checkbox"
+                                                  checked={quickForm.categoryIds?.includes(cat.id)}
+                                                  readOnly
+                                                  tabIndex={-1}
+                                                />
+                                                <span>{cat.name}</span>
+                                              </label>
+                                            </button>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  <div className="aquick-field">
+                                    <label htmlFor={`qe-status-${blog.id}`}>Status</label>
+                                    <select
+                                      id={`qe-status-${blog.id}`}
+                                      name="status"
+                                      className="ainput"
+                                      value={quickForm.status}
+                                      onChange={(e) => setQuickForm((f) => ({ ...f, status: e.target.value }))}
+                                    >
+                                      <option value="published">Published</option>
+                                      <option value="scheduled">Scheduled</option>
+                                      <option value="draft">Draft</option>
+                                      <option value="pending">Pending Review</option>
+                                    </select>
+                                  </div>
+
+                                  <div className="aquick-field">
+                                    <label htmlFor={`qe-date-${blog.id}`}>Date</label>
+                                    <input
+                                      id={`qe-date-${blog.id}`}
+                                      name="date"
+                                      type="date"
+                                      className="ainput"
+                                      value={quickForm.date}
+                                      onChange={(e) => setQuickForm((f) => ({ ...f, date: e.target.value }))}
+                                    />
+                                  </div>
+
+                                  <div className="aquick-field">
+                                    <label htmlFor={`qe-time-${blog.id}`}>Time</label>
+                                    <input
+                                      id={`qe-time-${blog.id}`}
+                                      name="time"
+                                      type="time"
+                                      className="ainput"
+                                      value={quickForm.time}
+                                      onChange={(e) => setQuickForm((f) => ({ ...f, time: e.target.value }))}
+                                    />
+                                  </div>
+
+                                  <div className="aquick-field aquick-field--wide">
+                                    <label htmlFor={`qe-tag-trigger-${blog.id}`}>Tags</label>
+                                    <div className="aquick-cat-select aquick-tag-select" ref={quickTagRef}>
+                                      <button
+                                        id={`qe-tag-trigger-${blog.id}`}
+                                        type="button"
+                                        className={`ainput aquick-cat-trigger${quickTagOpen ? " is-open" : ""}`}
+                                        onClick={() => setQuickTagOpen((v) => !v)}
+                                      >
+                                        <span>{getTagLabel(quickForm.tags)}</span>
+                                        <i className={`fas fa-chevron-${quickTagOpen ? "up" : "down"}`} />
+                                      </button>
+
+                                      {quickTagOpen && (
+                                        <div className="aquick-cat-menu">
+                                          <button
+                                            type="button"
+                                            className={`aquick-cat-option aquick-cat-option--clear${!quickForm.tags?.length ? " is-active" : ""}`}
+                                            onClick={() => setQuickForm((f) => ({ ...f, tags: [] }))}
+                                          >
+                                            <span className="aquick-cat-option-main">
+                                              <i className="fas fa-times-circle" aria-hidden="true" />
+                                              <span>Clear all tags</span>
+                                            </span>
+                                            {!quickForm.tags?.length && (
+                                              <span className="aquick-cat-selected-mark">
+                                                <i className="fas fa-check" />
+                                                Active
+                                              </span>
+                                            )}
+                                          </button>
+                                          {allTags.map((tag) => (
+                                            <button
+                                              key={tag.id}
+                                              type="button"
+                                              className={`aquick-cat-option${quickForm.tags?.some((t) => normalizeTagName(t) === normalizeTagName(tag.name)) ? " is-active" : ""}`}
+                                              onClick={() => toggleQuickTag(tag.name)}
+                                            >
+                                              <label className="aquick-cat-option-main" htmlFor={`qe-tag-${tag.id}`}>
+                                                <input
+                                                  id={`qe-tag-${tag.id}`}
+                                                  type="checkbox"
+                                                  className="aquick-cat-checkbox"
+                                                  checked={quickForm.tags?.some((t) => normalizeTagName(t) === normalizeTagName(tag.name))}
+                                                  readOnly
+                                                  tabIndex={-1}
+                                                />
+                                                <span>{tag.name}</span>
+                                              </label>
+                                            </button>
+                                          ))}
+
+                                          <div className="aquick-tag-add-row">
+                                            <label htmlFor={`qe-tag-new-${blog.id}`} className="sr-only">New tag name</label>
+                                            <input
+                                              id={`qe-tag-new-${blog.id}`}
+                                              className="ainput"
+                                              placeholder="Add new tag"
+                                              value={quickNewTag}
+                                              onChange={(e) => setQuickNewTag(e.target.value)}
+                                              onKeyDown={(e) => {
+                                                if (e.key === "Enter") {
+                                                  e.preventDefault();
+                                                  handleQuickAddTag();
+                                                }
+                                              }}
+                                            />
+                                            <button
+                                              type="button"
+                                              className="abtn abtn-primary abtn-sm"
+                                              onClick={handleQuickAddTag}
+                                              disabled={!quickNewTag.trim()}
+                                            >
+                                              Add
+                                            </button>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="aquick-actions">
+                                  <button
+                                    type="button"
+                                    className="abtn abtn-primary"
+                                    onClick={() => saveQuickEdit(blog)}
+                                    disabled={quickSaving}
+                                  >
+                                    {quickSaving
+                                      ? <><span className="aspin" style={{ borderTopColor: "#fff" }} /> Updating…</>
+                                      : "Update"}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="abtn abtn-ghost"
+                                    onClick={() => {
+                                      setQuickCategoryOpen(false);
+                                      setQuickTagOpen(false);
+                                      setQuickNewTag("");
+                                      setQuickEditId(null);
+                                    }}
+                                    disabled={quickSaving}
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
 

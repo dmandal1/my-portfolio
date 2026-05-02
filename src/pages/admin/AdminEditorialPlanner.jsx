@@ -176,6 +176,7 @@ export default function AdminEditorialPlanner() {
                 <span className="apage-crumb-cur">Editorial Planner</span>
               </div>
               <h1 className="apage-title">Editorial Planner</h1>
+              <p className="apage-subtitle">Schedule and coordinate your content pipeline</p>
             </div>
             <Link to="/admin/post/new" className="abtn abtn-primary">
               <i className="fas fa-plus" /> New Post
@@ -188,28 +189,36 @@ export default function AdminEditorialPlanner() {
             </div>
           )}
 
-          <section className="aplanner-hero">
-            <div className="aplanner-hero-main">
-              <span className="aplanner-kicker">Publishing workflow</span>
-              <h2>Plan drafts, reviews, and scheduled programming posts</h2>
-              <p>
+          <section className="acard" style={{ marginBottom: 24, padding: "28px 32px", display: "flex", justifyContent: "space-between", alignItems: "center", background: "linear-gradient(135deg, rgba(21, 101, 192, 0.03) 0%, rgba(66, 165, 245, 0.08) 100%)" }}>
+            <div style={{ flex: 1 }}>
+              <span className="aaudit-kicker" style={{ color: "var(--ap)", fontWeight: 800, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.05em" }}>Publishing workflow</span>
+              <h2 style={{ margin: "8px 0 0", fontSize: 24, fontWeight: 700, color: "var(--atxt)" }}>Plan drafts, reviews, and scheduled programming posts</h2>
+              <p style={{ margin: "10px 0 0", color: "var(--atxt2)", opacity: 0.6, maxWidth: 500, fontSize: 14 }}>
                 Track what needs writing, what is waiting for review, and what will publish next.
               </p>
             </div>
-            <div className="aplanner-next">
-              <span>Next scheduled</span>
-              <strong>{data.nextScheduled?.title || "Nothing scheduled"}</strong>
-              <small>{data.nextScheduled ? formatDateTime(data.nextScheduled.scheduledAt) : "Choose a publish date from the post editor"}</small>
+            <div className="acard" style={{ textAlign: "center", minWidth: 200, padding: "16px", background: "var(--acard)", borderRadius: 12, boxShadow: "var(--sh-sm)", border: "1px solid var(--abdr)" }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--atxt2)", textTransform: "uppercase", marginBottom: 6, opacity: 0.7 }}>Next Scheduled</div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: "var(--ap)", lineHeight: 1.3, marginBottom: 4 }}>{data.nextScheduled?.title || "Nothing scheduled"}</div>
+              <div style={{ fontSize: 11, color: "var(--atxt2)", opacity: 0.6 }}>{data.nextScheduled ? formatDateTime(data.nextScheduled.scheduledAt) : "Set in editor"}</div>
             </div>
           </section>
 
-          <section className="aplanner-stats">
+          <section style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20, marginBottom: 24 }}>
             {stats.map((stat) => (
-              <div className={`aplanner-stat aplanner-stat--${stat.tone}`} key={stat.label}>
-                <span><i className={stat.icon} /></span>
+              <div className="acard" style={{ padding: "16px 20px", display: "flex", alignItems: "center", gap: 16 }} key={stat.label}>
+                <div style={{ 
+                  width: 44, height: 44, borderRadius: 12, 
+                  background: (stat.tone === "blue" ? "var(--ap)" : stat.tone === "orange" ? "#f59e0b" : stat.tone === "green" ? "#10b981" : "#64748b") + "15", 
+                  color: (stat.tone === "blue" ? "var(--ap)" : stat.tone === "orange" ? "#f59e0b" : stat.tone === "green" ? "#10b981" : "#64748b"), 
+                  display: "grid", placeItems: "center", fontSize: 20,
+                  boxShadow: "0 4px 10px rgba(0,0,0,0.05)"
+                }}>
+                  <i className={stat.icon} />
+                </div>
                 <div>
-                  <strong>{loading ? "..." : stat.value}</strong>
-                  <small>{stat.label}</small>
+                  <div style={{ fontSize: 24, fontWeight: 800, color: "var(--atxt)", lineHeight: 1.1 }}>{loading ? "..." : stat.value}</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: "var(--atxt2)", opacity: 0.6, marginTop: 2 }}>{stat.label}</div>
                 </div>
               </div>
             ))}

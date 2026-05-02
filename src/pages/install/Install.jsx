@@ -74,7 +74,7 @@ function StepRequirements({ onNext }) {
     fetch(`${API}/requirements.php`)
       .then((r) => r.json())
       .then((d) => { setChecks(d.checks); setAllPass(d.allPass); })
-      .catch(() => setError("Could not reach the API. Make sure the backend files are uploaded to public_html/api/."))
+      .catch(() => setError(`Could not reach the API. Make sure the backend files are uploaded to public_html${import.meta.env.VITE_API_URL || '/api'}/.`))
       .finally(() => setLoading(false));
   }, []);
 
@@ -137,6 +137,7 @@ function StepDatabase({ db, setDb, onNext, onBack }) {
   async function testConnection() {
     setTesting(true);
     setTestResult(null);
+    const start = Date.now();
     try {
       const res  = await fetch(`${API}/install.php`, {
         method: "POST",
@@ -144,9 +145,16 @@ function StepDatabase({ db, setDb, onNext, onBack }) {
         body: JSON.stringify({ action: "test_db", ...db }),
       });
       const data = await res.json();
+      
+      // Ensure at least 1.5s delay for "premium feel" processing
+      const elapsed = Date.now() - start;
+      if (elapsed < 1500) await new Promise(r => setTimeout(r, 1500 - elapsed));
+
       if (data.ok) { setTestResult("ok");  setTestMsg(data.message); }
       else          { setTestResult("err"); setTestMsg(data.error || "Connection failed"); }
     } catch {
+      const elapsed = Date.now() - start;
+      if (elapsed < 1500) await new Promise(r => setTimeout(r, 1500 - elapsed));
       setTestResult("err");
       setTestMsg("Could not reach the API.");
     }
@@ -157,11 +165,12 @@ function StepDatabase({ db, setDb, onNext, onBack }) {
     <>
       <div className="ins-fields-grid">
         <div className="ins-field">
-          <div className="ins-field-label">
+          <label htmlFor="ins-db-host" className="ins-field-label">
             Database Host
             <span className="ins-field-hint">usually localhost</span>
-          </div>
+          </label>
           <input
+            id="ins-db-host"
             className="ins-input" name="db_host"
             value={db.db_host} onChange={handleChange}
             placeholder="localhost"
@@ -169,8 +178,9 @@ function StepDatabase({ db, setDb, onNext, onBack }) {
         </div>
 
         <div className="ins-field">
-          <div className="ins-field-label">Database Name</div>
+          <label htmlFor="ins-db-name" className="ins-field-label">Database Name</label>
           <input
+            id="ins-db-name"
             className="ins-input" name="db_name"
             value={db.db_name} onChange={handleChange}
             placeholder="e.g. my_database"
@@ -178,8 +188,9 @@ function StepDatabase({ db, setDb, onNext, onBack }) {
         </div>
 
         <div className="ins-field">
-          <div className="ins-field-label">Database Username</div>
+          <label htmlFor="ins-db-user" className="ins-field-label">Database Username</label>
           <input
+            id="ins-db-user"
             className="ins-input" name="db_user"
             value={db.db_user} onChange={handleChange}
             placeholder="e.g. my_db_user"
@@ -187,9 +198,10 @@ function StepDatabase({ db, setDb, onNext, onBack }) {
         </div>
 
         <div className="ins-field">
-          <div className="ins-field-label">Database Password</div>
+          <label htmlFor="ins-db-pass" className="ins-field-label">Database Password</label>
           <div className="ins-pw-wrap">
             <input
+              id="ins-db-pass"
               className="ins-input" name="db_pass" type={showDbPw ? "text" : "password"}
               value={db.db_pass} onChange={handleChange}
               placeholder="••••••••••" autoComplete="new-password"
@@ -206,23 +218,41 @@ function StepDatabase({ db, setDb, onNext, onBack }) {
           className="ins-btn ins-btn--ghost ins-btn--sm"
           onClick={testConnection}
           disabled={testing || !db.db_name || !db.db_user}
+          style={{ transition: 'all 0.3s ease' }}
         >
           {testing
-            ? <><span className="ins-spin-sm ins-spin-sm--blue" /> Testing…</>
-            : "⚡ Test Connection"}
+            ? <><span className="ins-spin-sm ins-spin-sm--blue" /> Verifying Credentials...</>
+            : <><i className="fas fa-bolt" style={{ marginRight: 6 }} /> Test Connection</>}
         </button>
-        {testResult === "ok"  && <span className="ins-badge ins-badge--ok" >✓ {testMsg}</span>}
-        {testResult === "err" && <span className="ins-badge ins-badge--err">✗ {testMsg}</span>}
+        
+        {testResult === "ok"  && (
+          <div className="ins-badge ins-badge--ok" style={{ animation: 'ins-popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}>
+            <i className="fas fa-check-circle" style={{ marginRight: 6 }} />
+            {testMsg}
+          </div>
+        )}
+        
+        {testResult === "err" && (
+          <span style={{ fontSize: 13, color: "var(--err)", fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6, animation: 'ins-shake 0.4s ease' }}>
+            <i className="fas fa-exclamation-triangle" /> Connection failed
+          </span>
+        )}
+        
         {testResult === null  && !testing && (
-          <span style={{ fontSize: 12, color: "var(--muted)" }}>
+          <span style={{ fontSize: 13, color: "var(--muted)", fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <i className="fas fa-info-circle" style={{ opacity: 0.6 }} />
             Test your credentials before continuing
           </span>
         )}
       </div>
 
       {testResult === "err" && (
-        <div className="ins-alert ins-alert--err">
-          Could not connect. Double-check your database host, name, username, and password.
+        <div className="ins-alert ins-alert--err" style={{ animation: 'ins-shake 0.4s ease' }}>
+          <div style={{ fontWeight: 700, marginBottom: 4 }}>Oops! {testMsg}</div>
+          <div style={{ fontSize: 13, opacity: 0.9 }}>
+            We couldn't reach your database. Please double-check your <strong>Host</strong>, <strong>Name</strong>, <strong>Username</strong>, and <strong>Password</strong>. 
+            Commonly, host should be <code>localhost</code> unless specified by your provider.
+          </div>
         </div>
       )}
 
@@ -273,8 +303,9 @@ function StepAccount({ account, setAccount, onNext, onBack }) {
     <>
       <p className="ins-section-label">Site Information</p>
       <div className="ins-field ins-field--full">
-        <div className="ins-field-label">Site Name</div>
+        <label htmlFor="ins-site-name" className="ins-field-label">Site Name</label>
         <input
+          id="ins-site-name"
           className={`ins-input${errors.site_name ? " ins-input--err" : ""}`}
           name="site_name" value={account.site_name}
           onChange={handleChange} placeholder="My Portfolio"
@@ -287,8 +318,9 @@ function StepAccount({ account, setAccount, onNext, onBack }) {
       <p className="ins-section-label">Admin Credentials</p>
       <div className="ins-fields-grid">
         <div className="ins-field ins-field--full">
-          <div className="ins-field-label">Admin Email</div>
+          <label htmlFor="ins-admin-email" className="ins-field-label">Admin Email</label>
           <input
+            id="ins-admin-email"
             className={`ins-input${errors.admin_email ? " ins-input--err" : ""}`}
             name="admin_email" type="email" value={account.admin_email}
             onChange={handleChange} placeholder="you@example.com"
@@ -297,9 +329,10 @@ function StepAccount({ account, setAccount, onNext, onBack }) {
         </div>
 
         <div className="ins-field">
-          <div className="ins-field-label">Password</div>
+          <label htmlFor="ins-admin-password" className="ins-field-label">Password</label>
           <div className="ins-pw-wrap">
             <input
+              id="ins-admin-password"
               className={`ins-input${errors.admin_password ? " ins-input--err" : ""}`}
               name="admin_password" type={showPw ? "text" : "password"}
               value={account.admin_password} onChange={handleChange}
@@ -313,9 +346,10 @@ function StepAccount({ account, setAccount, onNext, onBack }) {
         </div>
 
         <div className="ins-field">
-          <div className="ins-field-label">Confirm Password</div>
+          <label htmlFor="ins-confirm-password" className="ins-field-label">Confirm Password</label>
           <div className="ins-pw-wrap">
             <input
+              id="ins-confirm-password"
               className={`ins-input${errors.confirm_password ? " ins-input--err" : ""}`}
               name="confirm_password" type={showPw2 ? "text" : "password"}
               value={account.confirm_password} onChange={handleChange}

@@ -207,6 +207,40 @@ function deleteMediaUploads(PDO $db): array {
     return ['deleted' => $deleted, 'missing' => $missing, 'failed' => $failed];
 }
 
+function pruneOrphans(PDO $db): array {
+    $rows = $db->query('SELECT file_path FROM media_files')->fetchAll(PDO::FETCH_ASSOC);
+    $base = realpath(UPLOADS_DIR);
+    if ($base === false || !is_dir($base)) return ['deleted' => 0, 'kb' => 0];
+    $base = rtrim($base, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+    
+    $referenced = [];
+    foreach ($rows as $row) {
+        $path = trim((string)($row['file_path'] ?? ''));
+        if ($path === '') continue;
+        $diskPath = safeUploadPath($path);
+        if ($diskPath) $referenced[$diskPath] = true;
+    }
+    
+    $deletedCount = 0;
+    $deletedBytes = 0;
+    
+    $files = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($base, FilesystemIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::CHILD_FIRST
+    );
+    
+    foreach ($files as $file) {
+        if (!$file->isFile()) continue;
+        $diskPath = $file->getRealPath();
+        if ($diskPath && !isset($referenced[$diskPath]) && str_starts_with($diskPath, $base)) {
+            $deletedBytes += $file->getSize();
+            if (@unlink($diskPath)) $deletedCount++;
+        }
+    }
+    
+    return ['deleted' => $deletedCount, 'kb' => round($deletedBytes / 1024, 2)];
+}
+
 function buildBackupSql(PDO $db, string $dbName, array $tables): string {
     $sql  = "-- Portfolio CMS Database Backup\n";
     $sql .= "-- Generated: " . date('Y-m-d H:i:s') . "\n";
@@ -246,6 +280,45 @@ function buildBackupSql(PDO $db, string $dbName, array $tables): string {
 
     $sql .= "SET FOREIGN_KEY_CHECKS = 1;\n";
     return $sql;
+}
+
+// ── GET: audit ─────────────────────────────────────────────────────────────
+if ($method === 'GET' && $action === 'audit') {
+    $limit  = (int)($_GET['limit'] ?? 50);
+    $offset = (int)($_GET['offset'] ?? 0);
+    $search = trim($_GET['q'] ?? '');
+
+    $sql = "SELECT id, action, target, details_json, ip_address, user_agent, created_at FROM admin_audit_events";
+    $params = [];
+
+    if ($search !== '') {
+        $sql .= " WHERE action LIKE ? OR target LIKE ? OR details_json LIKE ?";
+        $params[] = "%$search%";
+        $params[] = "%$search%";
+        $params[] = "%$search%";
+    }
+
+    $sql .= " ORDER BY created_at DESC LIMIT $limit OFFSET $offset";
+    
+    $stmt = $db->prepare($sql);
+    $stmt->execute($params);
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($rows as &$row) {
+        $details = json_decode($row['details_json'] ?? '', true) ?: [];
+        $row['can_restore'] = isset($details['restore_sql']);
+        unset($details['restore_sql']);
+        $row['details'] = $details;
+        unset($row['details_json']);
+    }
+    unset($row);
+
+    $total = $db->query("SELECT COUNT(*) FROM admin_audit_events")->fetchColumn();
+
+    jsonResponse([
+        'logs'  => $rows,
+        'total' => (int)$total,
+    ]);
 }
 
 // ── GET: stats ─────────────────────────────────────────────────────────────
@@ -352,6 +425,13 @@ if ($method === 'POST' && $action === 'truncate') {
         'restore_sql' => $encodedBackup
     ]);
     jsonResponse(['ok' => true, 'table' => $table, 'media_cleanup' => $mediaCleanup]);
+}
+
+// ── POST: prune ───────────────────────────────────────────────────────────
+if ($method === 'POST' && $action === 'prune') {
+    $results = pruneOrphans($db);
+    logAdminAction($db, 'database.prune', 'uploads', $results);
+    jsonResponse(['ok' => true, 'deleted' => $results['deleted'], 'kb' => $results['kb']]);
 }
 
 // ── POST: backup ───────────────────────────────────────────────────────────

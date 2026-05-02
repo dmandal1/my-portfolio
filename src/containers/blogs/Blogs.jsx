@@ -529,7 +529,7 @@ export default function Blogs({ theme, publicSettings = {} }) {
         >
           {showSearchWidget && (
             <div className="blogs-widget blogs-widget--search">
-              <h3 className="blogs-widget-title">Search</h3>
+              <label htmlFor="blogs-search-posts" className="blogs-widget-title">Search</label>
               <div className="blogs-searchbox">
                 <input
                   id="blogs-search-posts"
@@ -560,7 +560,7 @@ export default function Blogs({ theme, publicSettings = {} }) {
 
           {showCategoryWidget && (
             <div className="blogs-widget blogs-widget--categories">
-              <h3 className="blogs-widget-title">Categories</h3>
+              <label htmlFor="blogs-search-categories" className="blogs-widget-title">Categories</label>
               <div className="blogs-searchbox blogs-searchbox--category">
                 <input
                   id="blogs-search-categories"

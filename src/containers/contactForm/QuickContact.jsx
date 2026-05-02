@@ -94,9 +94,9 @@ export default function QuickContact({ theme }) {
               </svg>
             }
             label="Location"
-            value={addressSection.subtitle}
+            value={contactInfo.address}
             href={addressSection.location_map_link}
-            copyValue={addressSection.subtitle}
+            copyValue={contactInfo.address}
           />
         </div>
       </div>

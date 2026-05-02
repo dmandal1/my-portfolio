@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import AdminSidebar from "./components/AdminSidebar";
 import { useToast } from "./components/AdminToast";
 import {
@@ -128,7 +129,13 @@ export default function AdminCertifications() {
 
           <div className="apage-topbar">
             <div>
+              <div className="apage-crumb">
+                <Link to="/admin/home" className="apage-crumb-link">Admin</Link>
+                <span className="apage-crumb-sep">/</span>
+                <span className="apage-crumb-cur">Certifications</span>
+              </div>
               <h1 className="apage-title">Certifications</h1>
+              <p className="apage-subtitle">Manage your professional certificates and badges</p>
             </div>
             <div className="apage-topbar-meta">
               {!loading && (
@@ -159,86 +166,108 @@ export default function AdminCertifications() {
 
               <form onSubmit={handleSubmit} className="acat-form">
                 <div className="acat-field">
-                  <label className="acat-label">Title <span className="acat-required">*</span></label>
+                  <label htmlFor="cert-title" className="acat-label">Title <span className="acat-required">*</span></label>
                   <input
+                    id="cert-title"
+                    name="cert_title"
                     ref={titleRef}
                     className="ainput"
                     placeholder="e.g. JavaScript (Basic) Certificate"
                     value={form.title}
                     onChange={(e) => field("title", e.target.value)}
                     maxLength={120}
+                    autoComplete="off"
                     required
                   />
                 </div>
 
                 <div className="acat-field">
-                  <label className="acat-label">Subtitle</label>
+                  <label htmlFor="cert-subtitle" className="acat-label">Subtitle</label>
                   <input
+                    id="cert-subtitle"
+                    name="cert_subtitle"
                     className="ainput"
                     placeholder="e.g. - HackerRank"
                     value={form.subtitle}
                     onChange={(e) => field("subtitle", e.target.value)}
                     maxLength={80}
+                    autoComplete="off"
                   />
                 </div>
 
                 <div className="acat-field">
-                  <label className="acat-label">Issuer / Alt Name</label>
+                  <label htmlFor="cert-alt-name" className="acat-label">Issuer / Alt Name</label>
                   <input
+                    id="cert-alt-name"
+                    name="cert_alt_name"
                     className="ainput"
                     placeholder="e.g. HackerRank"
                     value={form.alt_name}
                     onChange={(e) => field("alt_name", e.target.value)}
                     maxLength={80}
+                    autoComplete="off"
                   />
                 </div>
 
                 <div className="acat-field">
-                  <label className="acat-label">Certificate Link</label>
+                  <label htmlFor="cert-link" className="acat-label">Certificate Link</label>
                   <input
+                    id="cert-link"
+                    name="cert_link"
                     className="ainput"
                     type="url"
                     placeholder="https://..."
                     value={form.certificate_link}
                     onChange={(e) => field("certificate_link", e.target.value)}
+                    autoComplete="off"
                   />
                 </div>
 
                 <div className="acat-field">
-                  <label className="acat-label">Logo Filename</label>
+                  <label htmlFor="cert-logo" className="acat-label">Logo Filename</label>
                   <input
+                    id="cert-logo"
+                    name="cert_logo"
                     className="ainput"
                     placeholder="e.g. hackerrank_logo.png"
                     value={form.logo_path}
                     onChange={(e) => field("logo_path", e.target.value)}
                     maxLength={120}
+                    autoComplete="off"
                   />
                   <p className="acat-hint">Filename from the public assets folder.</p>
                 </div>
 
                 <div className="acat-field" style={{ display: "flex", gap: 12 }}>
                   <div style={{ flex: 1 }}>
-                    <label className="acat-label">Background Color</label>
+                    <label htmlFor="cert-color-text" className="acat-label">Background Color</label>
                     <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                       <input
+                        id="cert-color-picker"
+                        name="cert_color_picker"
                         type="color"
                         value={form.color_code.slice(0, 7)}
                         onChange={(e) => field("color_code", e.target.value)}
                         style={{ width: 38, height: 34, padding: 2, borderRadius: 6, border: "1px solid var(--ab-border)", cursor: "pointer" }}
                       />
                       <input
+                        id="cert-color-text"
+                        name="cert_color_text"
                         className="ainput"
                         placeholder="#4285F4"
                         value={form.color_code}
                         onChange={(e) => field("color_code", e.target.value)}
                         maxLength={9}
+                        autoComplete="off"
                         style={{ flex: 1 }}
                       />
                     </div>
                   </div>
                   <div style={{ width: 90 }}>
-                    <label className="acat-label">Order</label>
+                    <label htmlFor="cert-order" className="acat-label">Order</label>
                     <input
+                      id="cert-order"
+                      name="cert_order"
                       className="ainput"
                       type="number"
                       min={0}
@@ -280,12 +309,16 @@ export default function AdminCertifications() {
                   )}
                 </div>
                 <div className="acat-search-wrap">
+                  <label htmlFor="cert-search" className="sr-only">Search certifications</label>
                   <i className="fas fa-search acat-search-icon" />
                   <input
+                    id="cert-search"
+                    name="cert_search"
                     className="acat-search-input"
                     placeholder="Search certifications…"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
+                    autoComplete="off"
                   />
                   {search && (
                     <button type="button" className="acat-search-clear" onClick={() => setSearch("")}>

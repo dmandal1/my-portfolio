@@ -1,0 +1,312 @@
+/* AdminProfile.css — Premium Glassmorphic Theme */
+
+.aprof-container {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 24px;
+  align-items: start;
+  animation: aprofFadeIn 0.6s ease-out;
+}
+
+@keyframes aprofFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Profile Sidebar Card ─────────────────────────────────────── */
+.aprof-sidebar {
+  position: sticky;
+  top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.aprof-card {
+  background: var(--acard);
+  border: 1px solid var(--abdr);
+  border-radius: 20px;
+  padding: 32px 24px;
+  box-shadow: var(--sh);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.aprof-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--sh-lg);
+}
+
+.aprof-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 80px;
+  background: linear-gradient(135deg, var(--ap), var(--ap-l));
+  opacity: 0.1;
+  z-index: 0;
+}
+
+.aprof-avatar-wrap {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 20px;
+  z-index: 1;
+}
+
+.aprof-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 30px;
+  background: var(--ap-grad);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 800;
+  color: #fff;
+  box-shadow: 0 10px 25px rgba(21, 101, 192, 0.3);
+  border: 4px solid #fff;
+}
+
+.aprof-status-badge {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  width: 24px;
+  height: 24px;
+  background: #10b981;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+}
+
+.aprof-user-info {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.aprof-name {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--atxt);
+  margin-bottom: 4px;
+}
+
+.aprof-role-tag {
+  display: inline-flex;
+  padding: 4px 12px;
+  background: var(--ap-soft);
+  color: var(--ap);
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.aprof-meta-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.aprof-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--acard-alt);
+  border-radius: 12px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.aprof-meta-item:hover {
+  border-color: var(--abdr);
+  background: #fff;
+}
+
+.aprof-meta-icon {
+  width: 32px;
+  height: 32px;
+  background: #fff;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ap);
+  font-size: 14px;
+  box-shadow: var(--sh-xs);
+}
+
+.aprof-meta-content {
+  flex: 1;
+}
+
+.aprof-meta-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--atxt2);
+  opacity: 0.6;
+  margin-bottom: 2px;
+}
+
+.aprof-meta-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--atxt);
+}
+
+/* ── Main Content Cards ───────────────────────────────────────── */
+.aprof-main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.aprof-section {
+  background: #fff;
+  border: 1px solid var(--abdr);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: var(--sh-sm);
+}
+
+.aprof-section-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.aprof-section-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--ap-soft);
+  color: var(--ap);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.aprof-section-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--atxt);
+  margin: 0;
+}
+
+/* Grid for account info */
+.aprof-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.aprof-info-box {
+  background: var(--acard-alt);
+  border: 1px solid var(--abdr);
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.aprof-info-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--atxt2);
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.aprof-info-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--atxt);
+}
+
+/* Form Styles */
+.aprof-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.aprof-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.aprof-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--atxt);
+  padding-left: 4px;
+}
+
+.aprof-input-wrap {
+  position: relative;
+}
+
+.aprof-input {
+  width: 100%;
+  height: 52px;
+  background: var(--acard-alt);
+  border: 1.5px solid var(--abdr);
+  border-radius: 14px;
+  padding: 0 18px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--atxt);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.aprof-input:focus {
+  background: #fff;
+  border-color: var(--ap);
+  box-shadow: 0 0 0 4px var(--ap-glow);
+}
+
+.aprof-pw-strength {
+  margin-top: 8px;
+  padding: 0 4px;
+}
+
+.aprof-pw-bar {
+  height: 4px;
+  background: var(--abdr);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.aprof-pw-fill {
+  height: 100%;
+  transition: width 0.4s ease, background 0.4s ease;
+}
+
+.aprof-pw-text {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .aprof-container {
+    grid-template-columns: 1fr;
+  }
+  .aprof-sidebar {
+    position: static;
+  }
+}

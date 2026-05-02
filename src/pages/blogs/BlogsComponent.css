@@ -77,3 +77,8 @@
     font-size: 14px;
   }
 }
+
+@keyframes blogsPageFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

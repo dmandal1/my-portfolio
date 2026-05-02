@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import AdminSidebar from "./components/AdminSidebar";
 import { useToast } from "./components/AdminToast";
 import { createTag, deleteTag, getTags, updateTag } from "../../api/apiService";
@@ -158,7 +159,15 @@ export default function AdminTags() {
       <main className="amain">
         <div className="amain-inner atag-page">
           <div className="apage-topbar">
-            <h1 className="apage-title">Tags</h1>
+            <div>
+              <div className="apage-crumb">
+                <Link to="/admin/home" className="apage-crumb-link">Admin</Link>
+                <span className="apage-crumb-sep">/</span>
+                <span className="apage-crumb-cur">Tags</span>
+              </div>
+              <h1 className="apage-title">Tags</h1>
+              <p className="apage-subtitle">Manage and group keywords for your articles</p>
+            </div>
           </div>
 
           <div className="acat-layout">
@@ -169,24 +178,32 @@ export default function AdminTags() {
 
               <form onSubmit={handleSubmit} className="acat-form">
                 <div className="acat-field">
-                  <label className="acat-label">Name</label>
+                  <label htmlFor="tag-name" className="acat-label">Name <span className="acat-required">*</span></label>
                   <input
+                    id="tag-name"
+                    name="name"
                     ref={nameRef}
                     className="ainput"
-                    placeholder="Enter tag name"
+                    placeholder="e.g. JavaScript"
                     value={form.name}
                     onChange={handleNameChange}
+                    maxLength={50}
+                    autoComplete="off"
                     required
                   />
                 </div>
 
                 <div className="acat-field">
-                  <label className="acat-label">Slug</label>
+                  <label htmlFor="tag-slug" className="acat-label">Slug</label>
                   <input
+                    id="tag-slug"
+                    name="slug"
                     className="ainput"
-                    placeholder="e.g. react-js"
+                    placeholder="e.g. javascript"
                     value={form.slug}
                     onChange={(e) => setForm((f) => ({ ...f, slug: slugify(e.target.value) }))}
+                    maxLength={60}
+                    autoComplete="off"
                     required
                   />
                   <p className="acat-hint">
@@ -213,13 +230,22 @@ export default function AdminTags() {
               <div className="acat-table-header">
                 <h2 className="acat-card-title">Tags</h2>
                 <div className="acat-search-wrap">
+                  <label htmlFor="tag-search" className="sr-only">Search tags</label>
                   <i className="fas fa-search acat-search-icon" />
                   <input
+                    id="tag-search"
+                    name="search"
                     className="acat-search-input"
-                    placeholder="Search Tags"
+                    placeholder="Search…"
                     value={tagSearch}
                     onChange={(e) => setTagSearch(e.target.value)}
+                    autoComplete="off"
                   />
+                  {tagSearch && (
+                    <button type="button" className="acat-search-clear" onClick={() => setTagSearch("")}>
+                      <i className="fas fa-times" />
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -268,6 +294,8 @@ export default function AdminTags() {
                         <th className="acat-check-head">
                           <span className="acat-check-inner">
                             <input
+                              id="select-all-tags"
+                              name="select-all-tags"
                               type="checkbox"
                               className="acat-row-check"
                               checked={allFilteredSelected}
@@ -306,6 +334,8 @@ export default function AdminTags() {
                               <td className="acat-check-cell">
                                 <span className="acat-check-inner">
                                   <input
+                                    id={`select-tag-${tag.id}`}
+                                    name={`select-tag-${tag.id}`}
                                     type="checkbox"
                                     className="acat-row-check"
                                     checked={selectedIds.includes(tag.id)}

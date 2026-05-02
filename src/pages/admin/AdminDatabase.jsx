@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { createPortal } from "react-dom";
 import AdminSidebar from "./components/AdminSidebar";
 import { useToast } from "./components/AdminToast";
@@ -8,6 +9,7 @@ import {
   truncateTable,
   downloadDatabaseBackup,
   restoreDatabaseTable,
+  pruneMediaStorage,
 } from "../../api/apiService";
 import "./Admin.css";
 import "./AdminDatabase.css";
@@ -63,6 +65,7 @@ export default function AdminDatabase() {
   const [backing,      setBacking]      = useState(false);
   const [restoring,    setRestoring]    = useState(null);
   const [truncating,   setTruncating]   = useState(null);
+  const [pruning,      setPruning]      = useState(false);
   const [confirmTrunc, setConfirmTrunc] = useState(null);
   const [confirmText,  setConfirmText]  = useState("");
   const [restoreConfirm, setRestoreConfirm] = useState(null);
@@ -97,6 +100,20 @@ export default function AdminDatabase() {
     catch { addToast("Could not load database stats.", "error"); }
     finally { setLoading(false); }
   }, [addToast]);
+
+  const handlePrune = async () => {
+    if (!window.confirm("This will permanently delete all media files that are NOT referenced in your blog posts or media library. Proceed?")) return;
+    setPruning(true);
+    try {
+      const res = await pruneMediaStorage();
+      addToast(`Cleaned up ${res.deleted} orphan files (${res.kb} KB).`, "success");
+      loadStats();
+    } catch {
+      addToast("Failed to prune media storage.", "error");
+    } finally {
+      setPruning(false);
+    }
+  };
 
   useEffect(() => { loadStats(); }, [loadStats]);
 
@@ -265,6 +282,11 @@ export default function AdminDatabase() {
             <div className="adb-banner-bg" />
             <div className="adb-banner-content">
               <div className="adb-banner-left">
+                <div className="apage-crumb" style={{ marginBottom: 12 }}>
+                  <Link to="/admin/home" className="apage-crumb-link" style={{ color: 'rgba(255,255,255,0.7)' }}>Admin</Link>
+                  <span className="apage-crumb-sep" style={{ color: 'rgba(255,255,255,0.4)' }}>/</span>
+                  <span className="apage-crumb-cur" style={{ color: 'rgba(255,255,255,0.9)' }}>Database</span>
+                </div>
                 <div className="adb-banner-eyebrow">
                   <span className={`adb-conn-dot${stats ? " ok" : loading ? " pulse" : " err"}`} />
                   {loading ? "Connecting…" : stats ? "Live connection" : "Disconnected"}
@@ -335,8 +357,20 @@ export default function AdminDatabase() {
                 <strong>{tableSummary.protectedTables}</strong>
               </div>
               <div className={`adb-insight${tableSummary.orphanUploads ? " adb-insight--warn" : ""}`}>
-                <span className="adb-insight-label">Orphan uploads</span>
-                <strong>{tableSummary.orphanUploads}</strong>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <span className="adb-insight-label">Orphan uploads</span>
+                  {tableSummary.orphanUploads > 0 && (
+                    <button 
+                      className="abtn abtn-sm abtn-danger" 
+                      onClick={handlePrune}
+                      disabled={pruning}
+                      style={{ padding: "1px 6px", fontSize: 9, borderRadius: 4, height: 18 }}
+                    >
+                      {pruning ? "..." : "Clean Up"}
+                    </button>
+                  )}
+                </div>
+                <strong>{tableSummary.orphanUploads} files</strong>
                 <span>{fmtSize(stats.uploads?.orphan_kb || 0)}</span>
               </div>
             </div>
@@ -355,9 +389,11 @@ export default function AdminDatabase() {
                 </div>
                 {stats && (
                   <div className="adb-panel-tools">
-                    <label className="adb-table-search">
+                    <label htmlFor="db-table-search" className="adb-table-search">
                       <i className="fas fa-search" />
                       <input
+                        id="db-table-search"
+                        name="db-table-search"
                         value={tableQuery}
                         onChange={(e) => setTableQuery(e.target.value)}
                         placeholder="Search tables"
@@ -381,9 +417,11 @@ export default function AdminDatabase() {
 
               {stats && (
                 <div className="adb-panel-mobile-tools">
-                  <label className="adb-table-search">
+                  <label htmlFor="db-table-search-mobile" className="adb-table-search">
                     <i className="fas fa-search" />
                     <input
+                      id="db-table-search-mobile"
+                      name="db-table-search-mobile"
                       value={tableQuery}
                       onChange={(e) => setTableQuery(e.target.value)}
                       placeholder="Search tables"
@@ -515,9 +553,11 @@ export default function AdminDatabase() {
                                     <span> Uploaded files in the uploads folder will also be removed.</span>
                                   )}
                                 </p>
-                                <label className="adb-confirm-type">
+                                <label htmlFor={`confirm-truncate-${table}`} className="adb-confirm-type">
                                   <span>Type <strong>{table}</strong> to confirm</span>
                                   <input
+                                    id={`confirm-truncate-${table}`}
+                                    name={`confirm-truncate-${table}`}
                                     value={confirmText}
                                     onChange={(e) => setConfirmText(e.target.value)}
                                     autoFocus

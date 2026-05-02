@@ -6,12 +6,23 @@ require_once __DIR__ . '/jwt_helper.php';
 $method = $_SERVER['REQUEST_METHOD'];
 $db     = getDb();
 
+// Ensure pending column exists (Auto-Migration)
+try {
+    $check = $db->query("SHOW COLUMNS FROM comments LIKE 'pending'");
+    if (!$check->fetch()) {
+        $db->exec("ALTER TABLE comments ADD COLUMN pending TINYINT(1) DEFAULT 1 AFTER is_author_reply");
+    }
+} catch (\Throwable $e) {
+    // Silently continue
+}
+
 // ── GET: list comments for a blog ──────────────────────────────────────────
 if ($method === 'GET') {
     $blogId   = $_GET['blog_id'] ?? '';
     $admin    = isset($_GET['admin']);
     $recent   = isset($_GET['recent']);
     $overview = isset($_GET['overview']);
+    $pending  = isset($_GET['pending']);
 
     // Admin: all comments overview
     if ($overview) {
@@ -23,6 +34,19 @@ if ($method === 'GET') {
              ORDER BY c.created_at DESC'
         )->fetchAll();
         jsonResponse(['total' => count($rows), 'comments' => $rows]);
+    }
+
+    // Pending comments for moderation
+    if ($pending) {
+        requireAuth();
+        $rows = $db->query(
+            'SELECT c.*, b.title AS blog_title
+             FROM comments c
+             LEFT JOIN blogs b ON b.id = c.blog_id
+             WHERE c.pending = 1
+             ORDER BY c.created_at DESC'
+        )->fetchAll();
+        jsonResponse($rows);
     }
 
     // Recent comments across all blogs
@@ -132,6 +156,29 @@ if ($method === 'DELETE') {
        ->execute([$remaining, $blogId]);
 
     jsonResponse(['ok' => true]);
+}
+
+// ── POST: action on comment (admin) ────────────────────────────────────────
+if ($method === 'POST' && isset($_GET['action'])) {
+    requireAuth();
+    $id     = $_GET['id'] ?? '';
+    $action = $_GET['action'];
+
+    if (!$id) errorResponse('Missing id');
+
+    if ($action === 'approve') {
+        $db->prepare('UPDATE comments SET pending = 0 WHERE id = ?')->execute([$id]);
+        jsonResponse(['ok' => true]);
+    }
+    if ($action === 'reject') {
+        $db->prepare('DELETE FROM comments WHERE id = ?')->execute([$id]);
+        jsonResponse(['ok' => true]);
+    }
+    if ($action === 'spam') {
+        // Just delete for now, or move to a spam table if needed
+        $db->prepare('DELETE FROM comments WHERE id = ?')->execute([$id]);
+        jsonResponse(['ok' => true]);
+    }
 }
 
 errorResponse('Method not allowed', 405);

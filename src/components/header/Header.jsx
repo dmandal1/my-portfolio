@@ -35,15 +35,7 @@ class HeaderInner extends Component {
               <span className="navicon"></span>
             </label>
             <ul className="menu">
-              {[
-                { to: "/home",       label: "Home" },
-                { to: "/education",  label: "Education" },
-                { to: "/experience", label: "Experience" },
-                { to: "/projects",   label: "Projects" },
-                { to: "/blogs",      label: "Blogs" },
-                { to: "/opensource", label: "Open Source" },
-                { to: "/contact",    label: "Contact Me" },
-              ].map(({ to, label }) => (
+              {(this.props.menuLinks || []).map(({ to, label }) => (
                 <li key={to}>
                   <NavLink to={to} style={({ isActive }) => ({ color: theme.text, fontWeight: isActive ? "bold" : "normal" })}>
                     {label}
@@ -74,5 +66,5 @@ class HeaderInner extends Component {
 export default function Header(props) {
   const data = usePortfolioData();
   const logoName = data?.profile?.logo_name || defaultGreeting.logo_name;
-  return <HeaderInner {...props} logoName={logoName} />;
+  return <HeaderInner {...props} logoName={logoName} menuLinks={data?.menuLinks} />;
 }

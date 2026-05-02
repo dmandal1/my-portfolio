@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import AdminSidebar from "./components/AdminSidebar";
 import { useToast } from "./components/AdminToast";
 import {
@@ -255,7 +256,13 @@ export default function AdminCategories() {
           {/* Page topbar */}
           <div className="apage-topbar">
             <div>
+              <div className="apage-crumb">
+                <Link to="/admin/home" className="apage-crumb-link">Admin</Link>
+                <span className="apage-crumb-sep">/</span>
+                <span className="apage-crumb-cur">Categories</span>
+              </div>
               <h1 className="apage-title">Categories</h1>
+              <p className="apage-subtitle">Organize and manage your blog topics</p>
             </div>
             <div className="apage-topbar-meta">
               {!loading && (
@@ -292,8 +299,10 @@ export default function AdminCategories() {
 
                 {/* Name */}
                 <div className="acat-field">
-                  <label className="acat-label">Name <span className="acat-required">*</span></label>
+                  <label htmlFor="category-name" className="acat-label">Name <span className="acat-required">*</span></label>
                   <input
+                    id="category-name"
+                    name="category-name"
                     ref={nameRef}
                     className="ainput"
                     placeholder="e.g. Web Development"
@@ -306,8 +315,10 @@ export default function AdminCategories() {
 
                 {/* Slug */}
                 <div className="acat-field">
-                  <label className="acat-label">Slug <span className="acat-required">*</span></label>
+                  <label htmlFor="category-slug" className="acat-label">Slug <span className="acat-required">*</span></label>
                   <input
+                    id="category-slug"
+                    name="category-slug"
                     className="ainput acat-slug-input"
                     placeholder="auto-generated from name"
                     value={form.slug}
@@ -321,9 +332,10 @@ export default function AdminCategories() {
 
                 {/* Parent */}
                 <div className="acat-field">
-                  <label className="acat-label">Parent Category</label>
+                  <label htmlFor="cat-parent-trigger" className="acat-label">Parent Category</label>
                   <div className="acat-parent-select" ref={parentMenuRef}>
                     <button
+                      id="cat-parent-trigger"
                       ref={parentTriggerRef}
                       type="button"
                       className={`ainput acat-parent-trigger${parentOpen ? " is-open" : ""}`}
@@ -365,12 +377,14 @@ export default function AdminCategories() {
                 {/* Description */}
                 <div className="acat-field">
                   <div className="acat-label-row">
-                    <label className="acat-label">Description</label>
+                    <label htmlFor="category-description" className="acat-label">Description</label>
                     <span className={`acat-charcount${form.description.length > DESC_MAX * 0.9 ? " acat-charcount--warn" : ""}`}>
                       {form.description.length}/{DESC_MAX}
                     </span>
                   </div>
                   <textarea
+                    id="category-description"
+                    name="category-description"
                     className="ainput acat-textarea"
                     placeholder="Optional short description of this category…"
                     value={form.description}
@@ -425,12 +439,16 @@ export default function AdminCategories() {
                   )}
                 </div>
                 <div className="acat-search-wrap">
+                  <label htmlFor="category-search" className="sr-only">Search categories</label>
                   <i className="fas fa-search acat-search-icon" />
                   <input
+                    id="category-search"
+                    name="category-search"
                     className="acat-search-input"
                     placeholder="Search categories…"
                     value={catSearch}
                     onChange={(e) => setCatSearch(e.target.value)}
+                    autoComplete="off"
                   />
                   {catSearch && (
                     <button
@@ -499,6 +517,8 @@ export default function AdminCategories() {
                         <th className="acat-check-head">
                           <span className="acat-check-inner">
                             <input
+                              id="select-all-categories"
+                              name="select-all-categories"
                               type="checkbox"
                               className="acat-row-check"
                               checked={allFilteredSelected}
@@ -576,6 +596,8 @@ export default function AdminCategories() {
                                 <td className="acat-check-cell">
                                   <span className="acat-check-inner">
                                     <input
+                                      id={`select-category-${cat.id}`}
+                                      name={`select-category-${cat.id}`}
                                       type="checkbox"
                                       className="acat-row-check"
                                       checked={selectedIds.includes(cat.id)}

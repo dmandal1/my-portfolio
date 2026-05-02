@@ -1,0 +1,125 @@
+.newsletter-section {
+  width: min(760px, calc(100% - 32px));
+  margin: 60px auto 80px;
+  max-width: 760px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.newsletter-section-title {
+  font-size: 48px;
+  font-weight: 400;
+  font-family: "Google Sans Medium";
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+
+.newsletter-section-subtitle {
+  font-size: 18px;
+  margin-bottom: 36px;
+  font-family: "Google Sans Regular";
+  line-height: 1.5;
+}
+
+.newsletter-section-form {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.newsletter-input-group {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.newsletter-input-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+.newsletter-field-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  pointer-events: none;
+}
+
+.newsletter-field-input {
+  width: 100%;
+  padding: 12px 16px 12px 44px;
+  border-radius: 10px;
+  border: 1.5px solid #BBDEFB;
+  background: transparent;
+  font-size: 15px;
+  font-family: "Google Sans Regular", sans-serif;
+  outline: none;
+  transition: all 0.2s ease;
+  height: 48px;
+  box-sizing: border-box;
+}
+
+.newsletter-field-input:focus {
+  border-color: #1565C0;
+  box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.12);
+}
+
+.newsletter-submit-btn {
+  padding: 0 32px;
+  border-radius: 10px;
+  border: none;
+  font-size: 16px;
+  font-family: "Google Sans Medium";
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  height: 48px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.newsletter-submit-btn:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+.newsletter-submit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.newsletter-feedback {
+  margin-top: 16px;
+  font-size: 15px;
+  font-family: "Google Sans Medium";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.newsletter-feedback.success { color: #2e7d32; }
+.newsletter-feedback.error { color: #c62828; }
+
+@media (max-width: 768px) {
+  .newsletter-section {
+    width: min(100% - 32px, 760px);
+    margin-top: 40px;
+    margin-bottom: 60px;
+  }
+  .newsletter-section-title { font-size: 30px; }
+  .newsletter-section-subtitle { font-size: 16px; }
+}
+
+@media (max-width: 580px) {
+  .newsletter-input-group {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .newsletter-submit-btn {
+    width: 100%;
+  }
+}

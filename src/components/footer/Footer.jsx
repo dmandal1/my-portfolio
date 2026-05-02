@@ -19,6 +19,7 @@ export default function Footer(props) {
   const greeting = data?.profile || defaultGreeting;
   const socialMediaLinks = data?.socialLinks || defaultSocialLinks;
   const year = new Date().getFullYear();
+  const apiBase = import.meta.env.VITE_API_URL || "/api";
 
   const cssVars = {
     "--ft-body":    theme.body,
@@ -76,6 +77,10 @@ export default function Footer(props) {
             Made with <span className="ft-heart" role="img" aria-label="love">❤️</span>{" by "}
             <span className="ft-credit-name" style={{ color: theme.text }}>{greeting.title}</span>
             <span className="ft-year" style={{ color: theme.imageHighlight }}>{" · © "}{year}</span>
+            <span className="ft-sep" style={{ color: theme.secondaryText, opacity: 0.4, margin: "0 8px" }}>|</span>
+            <a href={`${apiBase}/sitemap.php`} target="_blank" rel="noopener noreferrer" className="ft-sitemap-link" style={{ color: theme.secondaryText, fontSize: 12, textDecoration: "none" }}>Sitemap</a>
+            <span className="ft-sep" style={{ color: theme.secondaryText, opacity: 0.4, margin: "0 8px" }}>|</span>
+            <a href={`${apiBase}/rss.php`} target="_blank" rel="noopener noreferrer" className="ft-sitemap-link" title="RSS Feed" style={{ color: theme.secondaryText, fontSize: 12, textDecoration: "none" }}><i className="fas fa-rss" style={{ fontSize: 10, marginRight: 4 }} />RSS Feed</a>
           </p>
         </Fade>
       </div>

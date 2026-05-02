@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import pkg from "../../../package.json";
 import { useAuth } from "../../contexts/AuthContext";
-import { saveAdminPanelSettings } from "../../api/apiService";
+import { saveAdminPanelSettings, changeAdminPassword, getMenuLinks, saveMenuLinks } from "../../api/apiService";
 import AdminSidebar from "./components/AdminSidebar";
 import {
   applyAdminTheme,
@@ -58,11 +58,11 @@ function SectionHeader({ icon, title, desc }) {
 
 function Field({ label, hint, children, span }) {
   return (
-    <label className={`asettings-field${span ? " asettings-field--span" : ""}`}>
+    <div className={`asettings-field${span ? " asettings-field--span" : ""}`}>
       <span className="asettings-label">{label}</span>
       {children}
       {hint && <span className="asettings-hint">{hint}</span>}
-    </label>
+    </div>
   );
 }
 
@@ -376,7 +376,120 @@ export default function AdminSettings() {
   const [importErr, setImportErr]   = useState("");
   const [showImport, setShowImport] = useState(false);
   const [resetConfirm, setResetConfirm] = useState(false);
+  
+  // Security Tab State
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
   const importRef = useRef(null);
+
+  async function handlePasswordChange(e) {
+    e.preventDefault();
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      return toast?.addToast("All password fields are required.", "error");
+    }
+    if (newPassword !== confirmPassword) {
+      return toast?.addToast("New passwords do not match.", "error");
+    }
+    if (newPassword.length < 8) {
+      return toast?.addToast("New password must be at least 8 characters.", "error");
+    }
+
+    setPasswordLoading(true);
+    try {
+      await changeAdminPassword(oldPassword, newPassword);
+      toast?.addToast("Password changed successfully.", "success");
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      toast?.addToast(error.message || "Failed to change password.", "error");
+    } finally {
+      setPasswordLoading(false);
+    }
+  }
+
+  // Navigation Tab State
+  const [menuLinks, setMenuLinks] = useState([]);
+  const [menuLinksLoading, setMenuLinksLoading] = useState(false);
+  const [menuLinksDirty, setMenuLinksDirty] = useState(false);
+
+  useEffect(() => {
+    async function loadMenu() {
+      try {
+        const links = await getMenuLinks();
+        if (links && links.length > 0) {
+          setMenuLinks(links);
+        } else {
+          setMenuLinks([
+            { to: "/home",       label: "Home" },
+            { to: "/education",  label: "Education" },
+            { to: "/experience", label: "Experience" },
+            { to: "/projects",   label: "Projects" },
+            { to: "/blogs",      label: "Blogs" },
+            { to: "/opensource", label: "Open Source" },
+            { to: "/contact",    label: "Contact Me" },
+          ]);
+        }
+      } catch (e) {
+        console.error("Failed to load menu links", e);
+      }
+    }
+    loadMenu();
+  }, []);
+
+  async function handleMenuSave() {
+    setMenuLinksLoading(true);
+    try {
+      await saveMenuLinks(menuLinks);
+      toast?.addToast("Navigation menu saved successfully.", "success");
+      setMenuLinksDirty(false);
+    } catch (e) {
+      toast?.addToast("Failed to save menu links.", "error");
+    } finally {
+      setMenuLinksLoading(false);
+    }
+  }
+
+  function handleMenuChange(index, field, value) {
+    const next = [...menuLinks];
+    next[index] = { ...next[index], [field]: value };
+    setMenuLinks(next);
+    setMenuLinksDirty(true);
+  }
+
+  function handleMenuMoveUp(index) {
+    if (index === 0) return;
+    const next = [...menuLinks];
+    const temp = next[index - 1];
+    next[index - 1] = next[index];
+    next[index] = temp;
+    setMenuLinks(next);
+    setMenuLinksDirty(true);
+  }
+
+  function handleMenuMoveDown(index) {
+    if (index === menuLinks.length - 1) return;
+    const next = [...menuLinks];
+    const temp = next[index + 1];
+    next[index + 1] = next[index];
+    next[index] = temp;
+    setMenuLinks(next);
+    setMenuLinksDirty(true);
+  }
+
+  function handleMenuDelete(index) {
+    const next = menuLinks.filter((_, i) => i !== index);
+    setMenuLinks(next);
+    setMenuLinksDirty(true);
+  }
+
+  function handleMenuAdd() {
+    setMenuLinks([...menuLinks, { to: "/", label: "New Link" }]);
+    setMenuLinksDirty(true);
+  }
 
   /* Apply theme on load */
   useEffect(() => { applyAdminTheme(settings.theme); }, []); // eslint-disable-line
@@ -389,6 +502,8 @@ export default function AdminSettings() {
 
   const tabs = useMemo(() => [
     { id: "general",       label: "General",       icon: "fas fa-user-circle" },
+    { id: "navigation",    label: "Navigation",    icon: "fas fa-compass" },
+    { id: "security",      label: "Security",      icon: "fas fa-shield-alt" },
     { id: "appearance",    label: "Appearance",    icon: "fas fa-palette" },
     { id: "dashboard",     label: "Dashboard",     icon: "fas fa-chart-line" },
     { id: "content",       label: "Content",       icon: "fas fa-file-alt" },
@@ -586,20 +701,40 @@ export default function AdminSettings() {
                   />
                   <div className="asettings-grid">
                     <Field label="Site Name">
-                      <input className="ainput" value={settings.siteName}
-                        onChange={e => update("siteName", e.target.value)} />
+                      <input 
+                        id="setting-siteName"
+                        name="siteName"
+                        className="ainput" 
+                        value={settings.siteName}
+                        onChange={e => update("siteName", e.target.value)} 
+                      />
                     </Field>
                     <Field label="Site Tagline">
-                      <input className="ainput" value={settings.siteTagline}
-                        onChange={e => update("siteTagline", e.target.value)} />
+                      <input 
+                        id="setting-siteTagline"
+                        name="siteTagline"
+                        className="ainput" 
+                        value={settings.siteTagline}
+                        onChange={e => update("siteTagline", e.target.value)} 
+                      />
                     </Field>
                     <Field label="Default Author">
-                      <input className="ainput" value={settings.defaultAuthor}
-                        onChange={e => update("defaultAuthor", e.target.value)} />
+                      <input 
+                        id="setting-defaultAuthor"
+                        name="defaultAuthor"
+                        className="ainput" 
+                        value={settings.defaultAuthor}
+                        onChange={e => update("defaultAuthor", e.target.value)} 
+                      />
                     </Field>
                     <Field label="Timezone">
-                      <select className="ainput" value={settings.timezone}
-                        onChange={e => update("timezone", e.target.value)}>
+                      <select 
+                        id="setting-timezone"
+                        name="timezone"
+                        className="ainput" 
+                        value={settings.timezone}
+                        onChange={e => update("timezone", e.target.value)}
+                      >
                         {TIMEZONES.map(tz => (
                           <option key={tz} value={tz}>{tz}</option>
                         ))}
@@ -619,6 +754,212 @@ export default function AdminSettings() {
                       <span><i className="fas fa-user" /> {settings.defaultAuthor}</span>
                       <span><i className="fas fa-clock" /> {settings.timezone}</span>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── NAVIGATION ── */}
+              {activeTab === "navigation" && (
+                <div className="asettings-section">
+                  <SectionHeader
+                    icon="fas fa-compass"
+                    title="Menu Builder"
+                    desc="Manage the links that appear in your public website's header navigation. Reorder, add, or rename links to customize your portfolio's flow."
+                  />
+                  <div className="asettings-stack" style={{ gap: 16 }}>
+                    {menuLinks.map((link, idx) => (
+                      <div key={idx} className="anav-item-card">
+                        <div className="anav-drag-handle">
+                          <i className="fas fa-grip-vertical" />
+                        </div>
+                        <div className="anav-inputs-row">
+                          <div className="anav-input-group">
+                            <label htmlFor={`menu-label-${idx}`}>Label</label>
+                            <input 
+                              id={`menu-label-${idx}`}
+                              name={`menu-label-${idx}`}
+                              type="text" 
+                              className="ainput" 
+                              value={link.label} 
+                              onChange={(e) => handleMenuChange(idx, "label", e.target.value)} 
+                              placeholder="e.g. Home" 
+                            />
+                          </div>
+                          <div className="anav-input-group">
+                            <label htmlFor={`menu-route-${idx}`}>Route or URL</label>
+                            <input 
+                              id={`menu-route-${idx}`}
+                              name={`menu-route-${idx}`}
+                              type="text" 
+                              className="ainput" 
+                              value={link.to} 
+                              onChange={(e) => handleMenuChange(idx, "to", e.target.value)} 
+                              placeholder="e.g. /home" 
+                            />
+                          </div>
+                        </div>
+                        <div className="anav-actions">
+                          <button 
+                            type="button" 
+                            className="abtn abtn-ghost" 
+                            onClick={() => handleMenuMoveUp(idx)} 
+                            disabled={idx === 0}
+                            title="Move Up"
+                            style={{ padding: "8px 12px" }}
+                          >
+                            <i className="fas fa-arrow-up" />
+                          </button>
+                          <button 
+                            type="button" 
+                            className="abtn abtn-ghost" 
+                            onClick={() => handleMenuMoveDown(idx)} 
+                            disabled={idx === menuLinks.length - 1}
+                            title="Move Down"
+                            style={{ padding: "8px 12px" }}
+                          >
+                            <i className="fas fa-arrow-down" />
+                          </button>
+                          <button 
+                            type="button" 
+                            className="abtn abtn-danger" 
+                            onClick={() => handleMenuDelete(idx)}
+                            title="Delete Link"
+                            style={{ padding: "8px 12px" }}
+                          >
+                            <i className="fas fa-trash-alt" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    <button 
+                      type="button" 
+                      className="abtn abtn-secondary asettings-add-btn" 
+                      onClick={handleMenuAdd}
+                    >
+                      <i className="fas fa-plus" /> Add New Link
+                    </button>
+                  </div>
+
+                  {menuLinksDirty && (
+                    <div className="asettings-dirty-banner">
+                      <div className="ast-dirty-info">
+                        <i className="fas fa-info-circle" />
+                        <span>You have unsaved changes to your menu layout.</span>
+                      </div>
+                      <button 
+                        type="button" 
+                        className="abtn abtn-primary" 
+                        onClick={handleMenuSave}
+                        disabled={menuLinksLoading}
+                      >
+                        {menuLinksLoading ? <><i className="fas fa-spinner fa-spin" style={{ marginRight: 8 }} /> Saving...</> : "Save Menu Layout"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ── SECURITY ── */}
+              {activeTab === "security" && (
+                <div className="asettings-section">
+                  <div className="asecurity-hero">
+                    <div className="asecurity-hero-icon">
+                      <i className="fas fa-shield-alt" />
+                    </div>
+                    <div className="asecurity-hero-text">
+                      <h3>Administrator Security</h3>
+                      <p>Update your master password to keep your portfolio and CMS secure. Use a strong password containing numbers and special characters.</p>
+                    </div>
+                  </div>
+
+                  <div className="asecurity-card">
+                    <form className="asecurity-form" onSubmit={handlePasswordChange}>
+                      
+                      <div className="asecurity-input-group">
+                        <label htmlFor="security-old-password">Current Password</label>
+                        <div className="asecurity-input-wrapper">
+                          <i className="fas fa-unlock-alt asecurity-input-icon"></i>
+                          <input 
+                            id="security-old-password"
+                            name="security-old-password"
+                            type="password" 
+                            className="ainput asecurity-input" 
+                            value={oldPassword}
+                            onChange={e => setOldPassword(e.target.value)} 
+                            placeholder="Enter current password"
+                            autoComplete="current-password"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="asecurity-divider" />
+
+                      <div className="asecurity-row">
+                        <div className="asecurity-input-group">
+                          <label htmlFor="security-new-password">New Password</label>
+                          <div className="asecurity-input-wrapper">
+                            <i className="fas fa-lock asecurity-input-icon"></i>
+                            <input 
+                              id="security-new-password"
+                              name="security-new-password"
+                              type="password" 
+                              className="ainput asecurity-input" 
+                              value={newPassword}
+                              onChange={e => setNewPassword(e.target.value)} 
+                              placeholder="At least 8 characters"
+                              autoComplete="new-password"
+                            />
+                          </div>
+                          {newPassword.length > 0 && (
+                            <div className="asecurity-strength">
+                              <div className={`asecurity-strength-bar ${newPassword.length >= 8 ? 'is-strong' : newPassword.length >= 5 ? 'is-medium' : 'is-weak'}`}></div>
+                              <span>{newPassword.length >= 8 ? 'Strong' : newPassword.length >= 5 ? 'Fair' : 'Weak'}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="asecurity-input-group">
+                          <label htmlFor="security-confirm-password">Confirm New Password</label>
+                          <div className="asecurity-input-wrapper">
+                            <i className="fas fa-check-circle asecurity-input-icon"></i>
+                            <input 
+                              id="security-confirm-password"
+                              name="security-confirm-password"
+                              type="password" 
+                              className="ainput asecurity-input" 
+                              value={confirmPassword}
+                              onChange={e => setConfirmPassword(e.target.value)} 
+                              placeholder="Retype new password"
+                              autoComplete="new-password"
+                            />
+                          </div>
+                          {confirmPassword.length > 0 && (
+                            <div className={`asecurity-match-hint ${newPassword === confirmPassword ? 'is-match' : 'is-mismatch'}`}>
+                              {newPassword === confirmPassword ? (
+                                <><i className="fas fa-check"></i> Passwords match</>
+                              ) : (
+                                <><i className="fas fa-times"></i> Passwords do not match</>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="asecurity-actions">
+                        <button 
+                          type="submit" 
+                          className="abtn abtn-primary asecurity-submit-btn" 
+                          disabled={passwordLoading || !oldPassword || !newPassword || !confirmPassword || newPassword !== confirmPassword}
+                        >
+                          {passwordLoading ? (
+                            <><i className="fas fa-spinner fa-spin" style={{ marginRight: 8 }} /> Updating...</>
+                          ) : (
+                            <><i className="fas fa-key" style={{ marginRight: 8 }} /> Update Password</>
+                          )}
+                        </button>
+                      </div>
+                    </form>
                   </div>
                 </div>
               )}
@@ -679,8 +1020,13 @@ export default function AdminSettings() {
                   />
                   <div className="asettings-grid">
                     <Field label="Default Posts Filter" hint="Initial filter on the Manage Blog Posts page.">
-                      <select className="ainput" value={settings.dashboardDefaultFilter}
-                        onChange={e => update("dashboardDefaultFilter", e.target.value)}>
+                      <select
+                        id="setting-dashboardDefaultFilter"
+                        name="dashboardDefaultFilter"
+                        className="ainput"
+                        value={settings.dashboardDefaultFilter}
+                        onChange={e => update("dashboardDefaultFilter", e.target.value)}
+                      >
                         <option value="all">All Posts</option>
                         <option value="published">Published</option>
                         <option value="draft">Drafts</option>
@@ -689,12 +1035,12 @@ export default function AdminSettings() {
                       </select>
                     </Field>
                     <Field label="Recent Posts Count" hint="Rows shown in the admin home recent-posts table (3–12).">
-                      <input className="ainput" type="number" min="3" max="12" step="1"
+                      <input id="setting-dashboardRecentPostsCount" name="dashboardRecentPostsCount" className="ainput" type="number" min="3" max="12" step="1"
                         value={settings.dashboardRecentPostsCount}
                         onChange={e => update("dashboardRecentPostsCount", Number(e.target.value))} />
                     </Field>
                     <Field label="Recent Comments Count" hint="Comments shown on admin home when enabled (3–20).">
-                      <input className="ainput" type="number" min="3" max="20" step="1"
+                      <input id="setting-dashboardRecentCommentsCount" name="dashboardRecentCommentsCount" className="ainput" type="number" min="3" max="20" step="1"
                         value={settings.dashboardRecentCommentsCount}
                         onChange={e => update("dashboardRecentCommentsCount", Number(e.target.value))} />
                     </Field>
@@ -759,13 +1105,18 @@ export default function AdminSettings() {
                   />
                   <div className="asettings-grid">
                     <Field label="Posts Per Page" hint="How many posts to show per page in lists (6–48).">
-                      <input className="ainput" type="number" min="6" max="48" step="6"
+                      <input id="setting-postsPerPage" name="postsPerPage" className="ainput" type="number" min="6" max="48" step="6"
                         value={settings.postsPerPage}
                         onChange={e => update("postsPerPage", Number(e.target.value))} />
                     </Field>
                     <Field label="Default Difficulty">
-                      <select className="ainput" value={settings.defaultDifficulty}
-                        onChange={e => update("defaultDifficulty", e.target.value)}>
+                      <select
+                        id="setting-defaultDifficulty"
+                        name="defaultDifficulty"
+                        className="ainput"
+                        value={settings.defaultDifficulty}
+                        onChange={e => update("defaultDifficulty", e.target.value)}
+                      >
                         <option value="beginner">Beginner</option>
                         <option value="intermediate">Intermediate</option>
                         <option value="advanced">Advanced</option>
@@ -831,12 +1182,12 @@ export default function AdminSettings() {
                   />
                   <div className="asettings-grid">
                     <Field label="Autosave Interval" hint="Seconds between draft saves while writing (3–60).">
-                      <input className="ainput" type="number" min="3" max="60" step="1"
+                      <input id="setting-autosaveIntervalSec" name="autosaveIntervalSec" className="ainput" type="number" min="3" max="60" step="1"
                         value={settings.autosaveIntervalSec}
                         onChange={e => update("autosaveIntervalSec", Number(e.target.value))} />
                     </Field>
                     <Field label="Reading Speed" hint="Words per minute used for post reading time (120–320).">
-                      <input className="ainput" type="number" min="120" max="320" step="10"
+                      <input id="setting-readingSpeedWpm" name="readingSpeedWpm" className="ainput" type="number" min="120" max="320" step="10"
                         value={settings.readingSpeedWpm}
                         onChange={e => update("readingSpeedWpm", Number(e.target.value))} />
                     </Field>
@@ -906,12 +1257,12 @@ export default function AdminSettings() {
                   />
                   <div className="asettings-grid">
                     <Field label="Max Upload Size" hint="Maximum image size in MB for admin uploads (1–25).">
-                      <input className="ainput" type="number" min="1" max="25" step="1"
+                      <input id="setting-maxUploadSizeMb" name="maxUploadSizeMb" className="ainput" type="number" min="1" max="25" step="1"
                         value={settings.maxUploadSizeMb}
                         onChange={e => update("maxUploadSizeMb", Number(e.target.value))} />
                     </Field>
                     <Field label="Allowed Image Formats" hint="The current uploader accepts these formats.">
-                      <input className="ainput" value="JPEG, PNG, WebP, GIF, AVIF" readOnly />
+                      <input id="setting-allowedFormats" name="allowedFormats" className="ainput" value="JPEG, PNG, WebP, GIF, AVIF" readOnly />
                     </Field>
                   </div>
                   <div className="ast-divider" />
@@ -938,12 +1289,25 @@ export default function AdminSettings() {
                   />
                   <div className="asettings-grid">
                     <Field label="Featured Posts Count" hint="How many featured post cards to show at once in the top featured row on desktop (1–8). The row stays single-line; remaining featured posts appear by sliding left or right.">
-                      <input className="ainput" type="number" min="1" max="8" step="1"
+                      <input id="setting-publicBlogFeaturedCount" name="publicBlogFeaturedCount" className="ainput" type="number" min="1" max="8" step="1"
                         value={settings.publicBlogFeaturedCount}
                         onChange={e => update("publicBlogFeaturedCount", Number(e.target.value))} />
                     </Field>
+                    <Field label="Article Schema Type" hint="Schema.org type for SEO.">
+                      <select
+                        id="setting-seoArticleType"
+                        name="seoArticleType"
+                        className="ainput"
+                        value={settings.seoArticleType}
+                        onChange={e => update("seoArticleType", e.target.value)}
+                      >
+                        <option value="Article">Standard Article</option>
+                        <option value="BlogPosting">Blog Post</option>
+                        <option value="TechArticle">Technical Article</option>
+                      </select>
+                    </Field>
                     <Field label="Posts Per Row" hint="Preferred cards per row in the main blog grid below the Featured slider (2–4). If needed, the grid can expand to fit the total posts you choose.">
-                      <select className="ainput" value={settings.publicBlogColumnsPerRow}
+                      <select id="setting-blog-cols" name="blog_cols" className="ainput" value={settings.publicBlogColumnsPerRow}
                         onChange={e => update("publicBlogColumnsPerRow", Number(e.target.value))}>
                         <option value={2}>2 posts per row</option>
                         <option value={3}>3 posts per row</option>
@@ -951,30 +1315,57 @@ export default function AdminSettings() {
                       </select>
                     </Field>
                     <Field label="Rows Per Page" hint="How many rows the main blog grid should try to use on each page (1–6).">
-                      <select className="ainput" value={settings.publicBlogRowsPerPage}
+                      <select id="setting-blog-rows" name="blog_rows" className="ainput" value={settings.publicBlogRowsPerPage}
                         onChange={e => update("publicBlogRowsPerPage", Number(e.target.value))}>
                         {[1,2,3,4,5,6].map(r => <option key={r} value={r}>{r} {r === 1 ? "row" : "rows"}</option>)}
                       </select>
                     </Field>
                     <Field label="Total Posts Per Page" hint="Actual number of posts to show on each page (1–24). This is independent, so if you choose 1 row, that row can show however many posts you set here.">
-                      <input className="ainput" type="number" min="1" max="24" step="1"
+                      <input id="setting-publicBlogPostsPerPage" name="publicBlogPostsPerPage" className="ainput" type="number" min="1" max="24" step="1"
                         value={settings.publicBlogPostsPerPage || 6}
                         onChange={e => update("publicBlogPostsPerPage", Number(e.target.value))} />
                     </Field>
                     <Field label="Listing Recent Posts" hint="Recent posts shown in /blogs right sidebar (3–15).">
-                      <input className="ainput" type="number" min="3" max="15" step="1"
+                      <input id="setting-publicBlogRecentPostsCount" name="publicBlogRecentPostsCount" className="ainput" type="number" min="3" max="15" step="1"
                         value={settings.publicBlogRecentPostsCount}
                         onChange={e => update("publicBlogRecentPostsCount", Number(e.target.value))} />
                     </Field>
                     <Field label="Post Page Recent Posts" hint="Recent posts shown on individual post sidebars (2–10).">
-                      <input className="ainput" type="number" min="2" max="10" step="1"
+                      <input id="setting-publicBlogPostRecentCount" name="publicBlogPostRecentCount" className="ainput" type="number" min="2" max="10" step="1"
                         value={settings.publicBlogPostRecentCount}
                         onChange={e => update("publicBlogPostRecentCount", Number(e.target.value))} />
                     </Field>
                     <Field label="Post Page Categories" hint="Categories shown on individual post sidebars (3–12).">
-                      <input className="ainput" type="number" min="3" max="12" step="1"
+                      <input id="setting-publicBlogCategoryCount" name="publicBlogCategoryCount" className="ainput" type="number" min="3" max="12" step="1"
                         value={settings.publicBlogCategoryCount}
                         onChange={e => update("publicBlogCategoryCount", Number(e.target.value))} />
+                    </Field>
+                    <Field label="Reading Progress" hint="Show reading progress bar at the top of the post.">
+                      <select
+                        id="setting-publicBlogReadingProgress"
+                        name="publicBlogReadingProgress"
+                        className="ainput"
+                        value={settings.publicBlogReadingProgress}
+                        onChange={e => update("publicBlogReadingProgress", e.target.value)}
+                      >
+                        <option value="none">None</option>
+                        <option value="top">Top (Fixed)</option>
+                        <option value="bottom">Bottom (Fixed)</option>
+                      </select>
+                    </Field>
+                    <Field label="Date Format" hint="How dates are displayed on the public blog.">
+                      <select
+                        id="setting-publicBlogDateFormat"
+                        name="publicBlogDateFormat"
+                        className="ainput"
+                        value={settings.publicBlogDateFormat}
+                        onChange={e => update("publicBlogDateFormat", e.target.value)}
+                      >
+                        <option value="MMM D, YYYY">Oct 1, 2023</option>
+                        <option value="D MMM YYYY">1 Oct 2023</option>
+                        <option value="YYYY-MM-DD">2023-10-01</option>
+                        <option value="relative">Relative (2 days ago)</option>
+                      </select>
                     </Field>
                   </div>
 
@@ -1044,22 +1435,22 @@ export default function AdminSettings() {
                   />
                   <div className="asettings-grid">
                     <Field label="Canonical Host" hint="Used when cross-posting to other platforms.">
-                      <input className="ainput" value={settings.defaultCanonicalHost}
+                      <input id="setting-defaultCanonicalHost" name="defaultCanonicalHost" className="ainput" value={settings.defaultCanonicalHost}
                         placeholder="https://yourdomain.com"
                         onChange={e => update("defaultCanonicalHost", e.target.value)} />
                     </Field>
                     <Field label="Twitter / X Handle" hint="e.g. @deepakmandal — added to OG cards.">
-                      <input className="ainput" value={settings.twitterHandle}
+                      <input id="setting-twitterHandle" name="twitterHandle" className="ainput" value={settings.twitterHandle}
                         placeholder="@handle"
                         onChange={e => update("twitterHandle", e.target.value)} />
                     </Field>
                     <Field label="Default OG Image URL" hint="Fallback when a post has no cover image." span>
-                      <input className="ainput" value={settings.ogImageDefault}
+                      <input id="setting-ogImageDefault" name="ogImageDefault" className="ainput" value={settings.ogImageDefault}
                         placeholder="https://yourdomain.com/og-default.png"
                         onChange={e => update("ogImageDefault", e.target.value)} />
                     </Field>
                     <Field label="Default Meta Description Template" hint="Use {title} as a placeholder." span>
-                      <textarea className="ainput ast-textarea" rows={3}
+                      <textarea id="setting-defaultMetaDesc" name="defaultMetaDesc" className="ainput ast-textarea" rows={3}
                         value={settings.defaultMetaDesc}
                         placeholder="e.g. Learn {title} with practical examples and code."
                         onChange={e => update("defaultMetaDesc", e.target.value)} />
@@ -1173,7 +1564,7 @@ export default function AdminSettings() {
                   </div>
                   <div className="asettings-grid" style={{ marginTop: 14 }}>
                     <Field label="Maintenance Title">
-                      <input className="ainput" value={settings.portfolioMaintenanceTitle}
+                      <input id="setting-portfolioMaintenanceTitle" name="portfolioMaintenanceTitle" className="ainput" value={settings.portfolioMaintenanceTitle}
                         onChange={e => update("portfolioMaintenanceTitle", e.target.value)} />
                     </Field>
                     <Field label="Expected Back Online" hint="Used for the live countdown on the maintenance page.">
@@ -1183,17 +1574,17 @@ export default function AdminSettings() {
                       />
                     </Field>
                     <Field label="Contact URL" hint="Optional link for urgent visitors. Use /#/contact or a full URL.">
-                      <input className="ainput" value={settings.portfolioMaintenanceContactUrl}
+                      <input id="setting-portfolioMaintenanceContactUrl" name="portfolioMaintenanceContactUrl" className="ainput" value={settings.portfolioMaintenanceContactUrl}
                         placeholder="/#/contact"
                         onChange={e => update("portfolioMaintenanceContactUrl", e.target.value)} />
                     </Field>
                     <Field label="Maintenance Message" span>
-                      <textarea className="ainput ast-textarea" rows={3}
+                      <textarea id="setting-portfolioMaintenanceMessage" name="portfolioMaintenanceMessage" className="ainput ast-textarea" rows={3}
                         value={settings.portfolioMaintenanceMessage}
                         onChange={e => update("portfolioMaintenanceMessage", e.target.value)} />
                     </Field>
                     <Field label="What's Coming" hint="One item per line. Shown as a bullet list on the maintenance page." span>
-                      <textarea className="ainput ast-textarea" rows={4}
+                      <textarea id="setting-portfolioMaintenanceWhatsComing" name="portfolioMaintenanceWhatsComing" className="ainput ast-textarea" rows={4}
                         value={settings.portfolioMaintenanceWhatsComing}
                         placeholder={"Refreshed project showcase\nPerformance improvements\nNew blog integration"}
                         onChange={e => update("portfolioMaintenanceWhatsComing", e.target.value)} />
@@ -1232,7 +1623,7 @@ export default function AdminSettings() {
                   </div>
                   <div className="asettings-grid" style={{ marginTop: 14 }}>
                     <Field label="Maintenance Title">
-                      <input className="ainput" value={settings.blogMaintenanceTitle}
+                      <input id="setting-blogMaintenanceTitle" name="blogMaintenanceTitle" className="ainput" value={settings.blogMaintenanceTitle}
                         onChange={e => update("blogMaintenanceTitle", e.target.value)} />
                     </Field>
                     <Field label="Expected Back Online" hint="Used for the live countdown on the maintenance page.">
@@ -1242,12 +1633,12 @@ export default function AdminSettings() {
                       />
                     </Field>
                     <Field label="Contact URL" hint="Optional link for urgent visitors. Use /#/contact or a full URL.">
-                      <input className="ainput" value={settings.blogMaintenanceContactUrl}
+                      <input id="setting-blogMaintenanceContactUrl" name="blogMaintenanceContactUrl" className="ainput" value={settings.blogMaintenanceContactUrl}
                         placeholder="/#/contact"
                         onChange={e => update("blogMaintenanceContactUrl", e.target.value)} />
                     </Field>
                     <Field label="Maintenance Message" span>
-                      <textarea className="ainput ast-textarea" rows={3}
+                      <textarea id="setting-blogMaintenanceMessage" name="blogMaintenanceMessage" className="ainput ast-textarea" rows={3}
                         value={settings.blogMaintenanceMessage}
                         onChange={e => update("blogMaintenanceMessage", e.target.value)} />
                     </Field>
@@ -1306,8 +1697,10 @@ export default function AdminSettings() {
                   {/* Import panel */}
                   {showImport && (
                     <div className="ast-import-panel" ref={importRef}>
-                      <label className="asettings-label">Paste Settings JSON</label>
+                      <label htmlFor="import-settings-json" className="asettings-label">Paste Settings JSON</label>
                       <textarea
+                        id="import-settings-json"
+                        name="import_settings_json"
                         className="ainput ast-textarea ast-import-area"
                         rows={6}
                         value={importJson}

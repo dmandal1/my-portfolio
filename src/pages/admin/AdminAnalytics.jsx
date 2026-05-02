@@ -320,6 +320,7 @@ export default function AdminAnalytics() {
                 <span className="apage-crumb-cur">Analytics</span>
               </div>
               <h1 className="apage-title">Analytics</h1>
+              <p className="apage-subtitle">Insights and performance metrics for your blog</p>
             </div>
             <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
               <div className="aan-range-tabs">

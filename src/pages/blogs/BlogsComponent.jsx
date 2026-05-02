@@ -10,15 +10,24 @@ import ErrorBoundary from "../../components/ErrorBoundary";
 function BlogsComponent({ theme, onToggle }) {
   const { enabled, settings } = useBlogMaintenanceSettings();
   return (
-    <div style={{ backgroundColor: theme.body, transition: "background-color 0.25s linear" }}>
+    <div className="blogs-wrapper" style={{ 
+      backgroundColor: theme.body, 
+      minHeight: "100vh",
+      display: "flex",
+      flexDirection: "column",
+      transition: "background-color 0.25s ease-out",
+      animation: "blogsPageFadeIn 0.4s ease-out forwards"
+    }}>
       <Header theme={theme} />
-      <ErrorBoundary>
-        {enabled ? (
-          <BlogMaintenancePage settings={settings} theme={theme} />
-        ) : (
-          <Blogs theme={theme} publicSettings={settings} />
-        )}
-      </ErrorBoundary>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+        <ErrorBoundary>
+          {enabled ? (
+            <BlogMaintenancePage settings={settings} theme={theme} />
+          ) : (
+            <Blogs theme={theme} publicSettings={settings} />
+          )}
+        </ErrorBoundary>
+      </div>
       <Footer theme={theme} onToggle={onToggle} />
       <TopButton theme={theme} />
     </div>

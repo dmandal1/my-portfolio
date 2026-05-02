@@ -118,6 +118,8 @@ function TagInput({ tags, onChange }) {
         </span>
       ))}
       <input
+        id="post-tags-input"
+        name="tags"
         ref={inputRef}
         className="atag-input"
         value={input}
@@ -125,6 +127,7 @@ function TagInput({ tags, onChange }) {
         onKeyDown={onKeyDown}
         onBlur={() => { if (input.trim()) addTag(input); }}
         placeholder={tags.length === 0 ? "Add tags (press Enter or comma)…" : ""}
+        autoComplete="off"
       />
     </div>
   );
@@ -4433,7 +4436,10 @@ export default function AdminPostEditor() {
 
           {/* ── Page header ── */}
           <div className="apage-topbar">
-            <h1 className="apage-title">{isEditing ? "Edit Post" : "Add New Post"}</h1>
+            <div>
+              <h1 className="apage-title">{isEditing ? "Edit Post" : "Add New Post"}</h1>
+              <p className="apage-subtitle">{isEditing ? "Modify your existing article" : "Craft a new story for your audience"}</p>
+            </div>
             <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
               {autoSaveState === "saving" && (
                 <span className="aautosave-badge aautosave-badge--saving">
@@ -4451,6 +4457,15 @@ export default function AdminPostEditor() {
               >
                 Add New Post
               </button>
+              {isEditing && (
+                <button
+                  className="abtn abtn-secondary"
+                  onClick={() => navigate(`/admin/post/${id}/revisions`)}
+                  title="View revision history for this post"
+                >
+                  <i className="fas fa-history" /> Revisions
+                </button>
+              )}
             </div>
           </div>
 
@@ -4468,6 +4483,7 @@ export default function AdminPostEditor() {
               {/* Title */}
               <div className="aeditor-title-wrap">
                 <input
+                  id="post-title"
                   className="aeditor-title-input"
                   name="title"
                   value={form.title}
@@ -4480,6 +4496,7 @@ export default function AdminPostEditor() {
               </div>
 
               <input
+                id="post-subtitle"
                 className="aeditor-subtitle-input"
                 name="subtitle"
                 value={form.subtitle}
@@ -4672,6 +4689,8 @@ export default function AdminPostEditor() {
 
                           <div className="awp-color-input-row">
                             <input
+                              id="post-color-hex"
+                              name="color-hex"
                               type="text"
                               className="awp-color-hex-input"
                               value={pickerHexInput}
@@ -4820,28 +4839,34 @@ export default function AdminPostEditor() {
                             </button>
                           </div>
 
-                          <label className="awp-link-label">URL</label>
+                          <label htmlFor="link-url" className="awp-link-label">URL</label>
                           <div className="awp-link-input-row">
                             <input
+                              id="link-url"
+                              name="link_url"
                               ref={linkUrlInputRef}
                               type="text"
                               className="awp-link-input"
                               placeholder="https://example.com"
                               value={linkDraft.url}
                               onChange={(e) => setLinkDraft((p) => ({ ...p, url: e.target.value }))}
+                              autoComplete="off"
                             />
                             <button type="button" className="awp-link-input-icon" tabIndex={-1} aria-hidden="true">
                               <i className="fas fa-link" />
                             </button>
                           </div>
 
-                          <label className="awp-link-label">Link Text</label>
+                          <label htmlFor="link-text" className="awp-link-label">Link Text</label>
                           <input
+                            id="link-text"
+                            name="link_text"
                             type="text"
                             className="awp-link-input"
                             placeholder="sample text"
                             value={linkDraft.text}
                             onChange={(e) => setLinkDraft((p) => ({ ...p, text: e.target.value }))}
+                            autoComplete="off"
                           />
 
                           <label className="awp-link-check">
@@ -4884,13 +4909,16 @@ export default function AdminPostEditor() {
                                 />
                                 Add rel="noopener"
                               </label>
-                              <label className="awp-link-label">Title attribute (optional)</label>
+                              <label htmlFor="link-title" className="awp-link-label">Title attribute (optional)</label>
                               <input
+                                id="link-title"
+                                name="link_title"
                                 type="text"
                                 className="awp-link-input"
                                 placeholder="e.g., Official Website"
                                 value={linkDraft.title}
                                 onChange={(e) => setLinkDraft((p) => ({ ...p, title: e.target.value }))}
+                                autoComplete="off"
                               />
                             </div>
                           )}
@@ -5046,8 +5074,10 @@ export default function AdminPostEditor() {
                               <i className="fas fa-times" />
                             </button>
                           </div>
-                          <label className="awp-link-label">YouTube or Vimeo URL</label>
+                          <label htmlFor="embed-video-url" className="awp-link-label">YouTube or Vimeo URL</label>
                           <input
+                            id="embed-video-url"
+                            name="embed_url"
                             ref={embedInputRef}
                             type="text"
                             className="awp-link-input"
@@ -5055,6 +5085,7 @@ export default function AdminPostEditor() {
                             value={embedUrl}
                             onChange={(e) => setEmbedUrl(e.target.value)}
                             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); insertVideoEmbed(); } }}
+                            autoComplete="off"
                           />
                           <div className="awp-link-actions">
                             <button type="button" className="abtn abtn-primary abtn-sm" onClick={insertVideoEmbed}>Embed</button>
@@ -5138,12 +5169,15 @@ export default function AdminPostEditor() {
                             <div className="awp-emoji-searchbar">
                               <i className="fas fa-search awp-emoji-searchicon" />
                               <input
+                                id="chars-search"
+                                name="chars_search"
                                 className="awp-emoji-searchinput"
                                 placeholder="Search characters…"
                                 value={charsSearch}
                                 onChange={(e) => setCharsSearch(e.target.value)}
                                 onMouseDown={(e) => e.stopPropagation()}
                                 onKeyDown={(e) => e.stopPropagation()}
+                                autoComplete="off"
                               />
                               {charsSearch && (
                                 <button className="awp-emoji-searchclear" type="button"
@@ -5266,12 +5300,15 @@ export default function AdminPostEditor() {
                             <div className="awp-emoji-searchbar">
                               <i className="fas fa-search awp-emoji-searchicon" />
                               <input
+                                id="emoji-search"
+                                name="emoji_search"
                                 className="awp-emoji-searchinput"
                                 placeholder="Search Emoji"
                                 value={emojiSearch}
                                 onChange={(e) => setEmojiSearch(e.target.value)}
                                 onMouseDown={(e) => e.stopPropagation()}
                                 onKeyDown={(e) => e.stopPropagation()}
+                                autoComplete="off"
                               />
                               {emojiSearch && (
                                 <button
@@ -5345,8 +5382,11 @@ export default function AdminPostEditor() {
                           <div className="awp-emoji-searchbar">
                             <i className="fas fa-search awp-emoji-searchicon" />
                             <input
+                              id="gif-search"
+                              name="gif_search"
                               ref={gifInputRef}
                               className="awp-emoji-searchinput"
+                              autoComplete="off"
                               placeholder="Search Tenor GIFs"
                               value={gifSearch}
                               onChange={(e) => setGifSearch(e.target.value)}
@@ -5371,7 +5411,7 @@ export default function AdminPostEditor() {
                                 type="button"
                                 className={`awp-gif-chip${(!gifSearch.trim() && label === "Trending") || gifSearch.trim().toLowerCase() === label.toLowerCase() ? " is-active" : ""}`}
                                 onMouseDown={(e) => e.preventDefault()}
-                                onClick={() => setGifSearch(label === "Trending" ? "" : label)}
+                                    onClick={() => setGifSearch(label === "Trending" ? "" : label)}
                               >
                                 {label}
                               </button>
@@ -5447,8 +5487,10 @@ export default function AdminPostEditor() {
                               <i className="fas fa-times" />
                             </button>
                           </div>
-                          <label className="awp-link-label">Anchor ID</label>
+                          <label htmlFor="anchor-id" className="awp-link-label">Anchor ID</label>
                           <input
+                            id="anchor-id"
+                            name="anchor_id"
                             ref={anchorInputRef}
                             type="text"
                             className="awp-link-input"
@@ -5456,6 +5498,7 @@ export default function AdminPostEditor() {
                             value={anchorId}
                             onChange={(e) => setAnchorId(e.target.value)}
                             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); insertAnchorMark(); } }}
+                            autoComplete="off"
                           />
                           <p className="awp-anchor-hint">Link to it with <code>#installation</code></p>
                           <div className="awp-link-actions">
@@ -5492,8 +5535,10 @@ export default function AdminPostEditor() {
                               >{t === "inline" ? "Inline" : "Block"}</button>
                             ))}
                           </div>
-                          <label className="awp-link-label">Formula (LaTeX)</label>
+                          <label htmlFor="math-formula" className="awp-link-label">Formula (LaTeX)</label>
                           <input
+                            id="math-formula"
+                            name="math_formula"
                             ref={mathInputRef}
                             type="text"
                             className="awp-link-input awp-math-input"
@@ -5501,6 +5546,7 @@ export default function AdminPostEditor() {
                             value={mathFormula}
                             onChange={(e) => setMathFormula(e.target.value)}
                             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); insertMath(); }}}
+                            autoComplete="off"
                           />
                           <div className="awp-link-actions">
                             <button type="button" className="abtn abtn-primary abtn-sm" onClick={insertMath}>Insert</button>
@@ -5532,8 +5578,10 @@ export default function AdminPostEditor() {
                             <span>Section Divider</span>
                             <button type="button" className="awp-link-close" onClick={() => setDividerOpen(false)}><i className="fas fa-times" /></button>
                           </div>
-                          <label className="awp-link-label">Label (optional)</label>
+                          <label htmlFor="divider-label" className="awp-link-label">Label (optional)</label>
                           <input
+                            id="divider-label"
+                            name="divider_label"
                             ref={dividerInputRef}
                             type="text"
                             className="awp-link-input"
@@ -5541,6 +5589,7 @@ export default function AdminPostEditor() {
                             value={dividerLabel}
                             onChange={(e) => setDividerLabel(e.target.value)}
                             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); insertLabeledDivider(); }}}
+                            autoComplete="off"
                           />
                           <div className="awp-link-actions">
                             <button type="button" className="abtn abtn-primary abtn-sm" onClick={insertLabeledDivider}>Insert</button>
@@ -5564,8 +5613,10 @@ export default function AdminPostEditor() {
                             <span>Table of Contents</span>
                             <button type="button" className="awp-link-close" onClick={() => setTocOpen(false)}><i className="fas fa-times" /></button>
                           </div>
-                          <label className="awp-link-label">Title</label>
+                          <label htmlFor="toc-title" className="awp-link-label">Title</label>
                           <input
+                            id="toc-title"
+                            name="toc_title"
                             ref={tocInputRef}
                             type="text"
                             className="awp-link-input"
@@ -5573,6 +5624,7 @@ export default function AdminPostEditor() {
                             value={tocTitle}
                             onChange={(e) => setTocTitle(e.target.value)}
                             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); insertTOC(); }}}
+                            autoComplete="off"
                           />
                           <p className="awp-anchor-hint">
                             {getTOCHeadings().length} heading{getTOCHeadings().length === 1 ? "" : "s"} detected
@@ -5651,10 +5703,13 @@ export default function AdminPostEditor() {
                   <div className="awp-find-panel" onMouseDown={(e) => e.stopPropagation()}>
                     <div className="awp-find-row">
                       <input
+                        id="editor-find"
+                        name="editor_find"
                         ref={findQueryRef}
                         type="text"
                         className="awp-find-input"
                         placeholder="Find…"
+                        autoComplete="off"
                         value={findQuery}
                         onChange={(e) => { setFindQuery(e.target.value); runFind(e.target.value); }}
                         onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); findNav(1); }}}
@@ -5665,9 +5720,12 @@ export default function AdminPostEditor() {
                     </div>
                     <div className="awp-find-row">
                       <input
+                        id="editor-replace"
+                        name="editor_replace"
                         type="text"
                         className="awp-find-input"
                         placeholder="Replace with…"
+                        autoComplete="off"
                         value={replaceQuery}
                         onChange={(e) => setReplaceQuery(e.target.value)}
                         onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); performReplace(); }}}
@@ -5828,6 +5886,7 @@ export default function AdminPostEditor() {
                   <label className="aeditor-tech-field aeditor-tech-field--wide">
                     <span>Excerpt</span>
                     <textarea
+                      id="post-excerpt"
                       className="ainput aeditor-tech-textarea"
                       name="excerpt"
                       value={form.excerpt}
@@ -5841,6 +5900,7 @@ export default function AdminPostEditor() {
                   <label className="aeditor-tech-field">
                     <span>SEO Title</span>
                     <input
+                      id="post-meta-title"
                       className="ainput"
                       name="metaTitle"
                       value={form.metaTitle}
@@ -5862,6 +5922,7 @@ export default function AdminPostEditor() {
                   <label className="aeditor-tech-field aeditor-tech-field--wide">
                     <span>Meta Description</span>
                     <textarea
+                      id="post-meta-description"
                       className="ainput aeditor-tech-textarea"
                       name="metaDescription"
                       value={form.metaDescription}
@@ -5875,6 +5936,7 @@ export default function AdminPostEditor() {
                   <label className="aeditor-tech-field">
                     <span>Audience</span>
                     <input
+                      id="post-audience"
                       className="ainput"
                       name="audience"
                       value={form.audience}
@@ -5886,6 +5948,7 @@ export default function AdminPostEditor() {
                   <label className="aeditor-tech-field">
                     <span>Series</span>
                     <input
+                      id="post-series"
                       className="ainput"
                       name="series"
                       value={form.series}
@@ -5897,6 +5960,7 @@ export default function AdminPostEditor() {
                   <label className="aeditor-tech-field aeditor-tech-field--wide">
                     <span>Prerequisites</span>
                     <input
+                      id="post-prerequisites"
                       className="ainput"
                       name="prerequisites"
                       value={form.prerequisites}
@@ -5908,6 +5972,7 @@ export default function AdminPostEditor() {
                   <label className="aeditor-tech-field">
                     <span>Repository URL</span>
                     <input
+                      id="post-repo-url"
                       className="ainput"
                       name="repoUrl"
                       value={form.repoUrl}
@@ -5919,6 +5984,7 @@ export default function AdminPostEditor() {
                   <label className="aeditor-tech-field">
                     <span>Demo URL</span>
                     <input
+                      id="post-demo-url"
                       className="ainput"
                       name="demoUrl"
                       value={form.demoUrl}
@@ -5930,6 +5996,7 @@ export default function AdminPostEditor() {
                   <label className="aeditor-tech-field aeditor-tech-field--wide">
                     <span>Canonical URL</span>
                     <input
+                      id="post-canonical-url"
                       className="ainput"
                       name="canonicalUrl"
                       value={form.canonicalUrl}
@@ -6035,6 +6102,8 @@ export default function AdminPostEditor() {
                   <div className="aeditor-pub-slug-wrap">
                     <span className="aeditor-pub-slug-prefix">/blogs/</span>
                     <input
+                      id="sidebar-post-slug"
+                      name="sidebar-slug"
                       type="text"
                       className="aeditor-pub-slug-input"
                       value={form.slug}
@@ -6082,7 +6151,7 @@ export default function AdminPostEditor() {
 
                 {/* Toggle rows */}
                 <div className="aeditor-pub-toggles">
-                  <label className="aeditor-pub-toggle-row">
+                  <div className="aeditor-pub-toggle-row">
                     <span className="aeditor-pub-toggle-info">
                       <i className="fas fa-comment-alt" />
                       <span>Allow Comments</span>
@@ -6095,8 +6164,8 @@ export default function AdminPostEditor() {
                     >
                       <span className="apub-toggle-thumb" />
                     </span>
-                  </label>
-                  <label className="aeditor-pub-toggle-row">
+                  </div>
+                  <div className="aeditor-pub-toggle-row">
                     <span className="aeditor-pub-toggle-info">
                       <i className="fas fa-star" />
                       <span>Featured Post</span>
@@ -6109,7 +6178,7 @@ export default function AdminPostEditor() {
                     >
                       <span className="apub-toggle-thumb" />
                     </span>
-                  </label>
+                  </div>
                 </div>
 
               </div>
@@ -6167,6 +6236,8 @@ export default function AdminPostEditor() {
                       <div className="aeditor-cat-search-wrap">
                         <i className="fas fa-search aeditor-cat-search-icon" />
                         <input
+                          id="sidebar-cat-search"
+                          name="catSearch"
                           className="aeditor-cat-search"
                           placeholder="Search categories…"
                           value={catSearch}
@@ -6215,6 +6286,8 @@ export default function AdminPostEditor() {
                             {visible.map((cat) => (
                               <label key={cat.id} className="aeditor-cat-label">
                                 <input
+                                  id={`sidebar-cat-${cat.id}`}
+                                  name={`sidebar-cat-${cat.id}`}
                                   type="checkbox"
                                   className="achk"
                                   checked={form.categoryIds.includes(cat.id)}
@@ -6269,6 +6342,8 @@ export default function AdminPostEditor() {
                       <div className="aeditor-cat-search-wrap">
                         <i className="fas fa-search aeditor-cat-search-icon" />
                         <input
+                          id="sidebar-tag-search"
+                          name="tagSearch"
                           className="aeditor-cat-search"
                           placeholder="Search tags…"
                           value={tagSearch}
@@ -6382,12 +6457,15 @@ export default function AdminPostEditor() {
                       <label className="aeditor-image-alt-field">
                         <span>Image Alt Text</span>
                         <input
+                          id="post-image-alt"
+                          name="post_image_alt"
                           type="text"
                           className="ainput"
                           value={form.imageAlt}
                           placeholder="Describe the cover image for accessibility"
                           maxLength={140}
                           onChange={(e) => setForm((p) => ({ ...p, imageAlt: e.target.value }))}
+                          autoComplete="off"
                         />
                       </label>
                       <button
@@ -6556,13 +6634,16 @@ export default function AdminPostEditor() {
             </div>
             <form onSubmit={handleAddQuickTag} className="acat-modal-body">
               <div className="acat-modal-field">
-                <label className="acat-modal-label">Tag Name</label>
+                <label htmlFor="modal-tag-name" className="acat-modal-label">Tag Name</label>
                 <input
+                  id="modal-tag-name"
+                  name="tag_name"
                   className="ainput"
                   placeholder="e.g. React"
                   value={newTagName}
                   onChange={(e) => setNewTagName(e.target.value)}
                   autoFocus
+                  autoComplete="off"
                   required
                 />
               </div>
@@ -6607,20 +6688,25 @@ export default function AdminPostEditor() {
             {/* Body */}
             <form onSubmit={handleAddQuickCat} className="acat-modal-body">
               <div className="acat-modal-field">
-                <label className="acat-modal-label">Name</label>
+                <label htmlFor="modal-cat-name" className="acat-modal-label">Name</label>
                 <input
+                  id="modal-cat-name"
+                  name="cat_name"
                   className="ainput"
                   placeholder="Nature"
                   value={newCatName}
                   onChange={(e) => setNewCatName(e.target.value)}
                   autoFocus
+                  autoComplete="off"
                   required
                 />
               </div>
 
               <div className="acat-modal-field">
-                <label className="acat-modal-label">Parent Category</label>
+                <label htmlFor="modal-cat-parent" className="acat-modal-label">Parent Category</label>
                 <select
+                  id="modal-cat-parent"
+                  name="cat_parent_id"
                   className="ainput acat-modal-select"
                   value={newCatParentId}
                   onChange={(e) => setNewCatParentId(e.target.value)}

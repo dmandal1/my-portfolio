@@ -445,6 +445,11 @@ export const getExperienceHeader    = () => getSection('portfolioExperienceHeade
 export const saveExperienceHeader   = (d) => saveSection('portfolioExperienceHeader', d);
 export const getContactPageData     = () => getSection('portfolioContactPageData');
 export const saveContactPageData    = (d) => saveSection('portfolioContactPageData', d);
+
+export const getNewsletterSubscribers    = () => apiFetch('/newsletter.php');
+export const deleteNewsletterSubscriber = (id) => apiFetch(`/newsletter.php?id=${id}`, { method: 'DELETE' });
+export const sendNewsletterBroadcast     = (data) => apiFetch('/newsletter.php?action=broadcast', { method: 'POST', body: JSON.stringify(data) });
+
 export const getProjectsHeader      = () => getSection('portfolioProjectsHeader');
 export const saveProjectsHeader     = (d) => saveSection('portfolioProjectsHeader', d);
 export const getOpenSourceConfig    = () => getSection('portfolioOpenSource');
@@ -453,6 +458,8 @@ export const getPodcastSection      = () => getSection('portfolioPodcast');
 export const savePodcastSection     = (d) => saveSection('portfolioPodcast', d);
 export const getBlogSectionConfig   = () => getSection('portfolioBlogSection');
 export const saveBlogSectionConfig  = (d) => saveSection('portfolioBlogSection', d);
+export const getMenuLinks           = () => getSection('portfolioMenuLinks');
+export const saveMenuLinks          = (d) => saveSection('portfolioMenuLinks', d);
 
 // ── Portfolio: collection sections ─────────────────────────────────────────
 function makeCollection(collectionName) {
@@ -549,3 +556,29 @@ export async function downloadDatabaseBackup(table = '') {
   a.click();
   URL.revokeObjectURL(url);
 }
+
+// ── Auth & Account ────────────────────────────────────────────────────────
+export const changeAdminPassword = (oldPassword, newPassword) =>
+  apiFetch('/change_password.php', {
+    method: 'POST',
+    body: JSON.stringify({ oldPassword, newPassword }),
+  });
+
+// ── Contact Messages ──────────────────────────────────────────────────────
+export const getContactMessages = () => apiFetch('/messages.php');
+export const submitContactMessage = (data) => 
+  apiFetch('/messages.php', { method: 'POST', body: JSON.stringify(data) });
+export const deleteContactMessage = (id) => 
+  apiFetch(`/messages.php?id=${id}`, { method: 'DELETE' });
+export const markContactMessageRead = (id) => 
+  apiFetch(`/messages.php?id=${id}`, { method: 'PUT' });
+
+// ── Newsletter ────────────────────────────────────────────────────────────
+export const subscribeNewsletter = (email) => 
+  apiFetch('/newsletter.php', { method: 'POST', body: JSON.stringify({ email }) });
+export const getAuditLogs = (q = '', limit = 50, offset = 0) => 
+  apiFetch(`/database.php?action=audit&q=${encodeURIComponent(q)}&limit=${limit}&offset=${offset}`);
+
+export const getSystemHealth = () => apiFetch('/status.php?action=health');
+
+export const pruneMediaStorage = () => apiFetch('/database.php?action=prune', { method: 'POST' });

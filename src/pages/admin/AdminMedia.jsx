@@ -198,7 +198,10 @@ export default function AdminMedia() {
 
           {/* ── Page header ── */}
           <div className="apage-topbar">
-            <h1 className="apage-title">Media Library</h1>
+            <div>
+              <h1 className="apage-title">Media Library</h1>
+              <p className="apage-subtitle">Manage and organize your uploaded images</p>
+            </div>
             <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
               <button
                 className="abtn abtn-primary"
@@ -305,8 +308,11 @@ export default function AdminMedia() {
               <div className="aml-controls">
                 {/* Inline search */}
                 <div className={`aml-search${searchOpen ? " aml-search--open" : ""}`}>
+                  <label htmlFor="media-search" className="sr-only">Search Media</label>
                   {searchOpen && (
                     <input
+                      id="media-search"
+                      name="media-search"
                       ref={searchRef}
                       className="aml-search-input"
                       placeholder="Search files…"
@@ -515,6 +521,8 @@ export default function AdminMedia() {
                     <span className="aml-detail-label">File URL</span>
                     <div className="aml-detail-url-row">
                       <input
+                        id="media-file-url"
+                        name="media-file-url"
                         className="ainput"
                         value={selected.url}
                         readOnly

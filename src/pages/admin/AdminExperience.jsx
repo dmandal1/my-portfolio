@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import AdminSidebar from "./components/AdminSidebar";
 import { useToast } from "./components/AdminToast";
 import {
@@ -149,7 +150,13 @@ export default function AdminExperience() {
 
           <div className="apage-topbar">
             <div>
+              <div className="apage-crumb">
+                <Link to="/admin/home" className="apage-crumb-link">Admin</Link>
+                <span className="apage-crumb-sep">/</span>
+                <span className="apage-crumb-cur">Experience</span>
+              </div>
               <h1 className="apage-title">Experience</h1>
+              <p className="apage-subtitle">Manage your professional work history</p>
             </div>
             <div className="apage-topbar-meta">
               {!loading && (
@@ -181,8 +188,10 @@ export default function AdminExperience() {
               <form onSubmit={handleSubmit} className="acat-form">
 
                 <div className="acat-field">
-                  <label className="acat-label">Section <span className="acat-required">*</span></label>
+                  <label htmlFor="exp-section" className="acat-label">Section <span className="acat-required">*</span></label>
                   <select
+                    id="exp-section"
+                    name="section"
                     className="ainput"
                     value={form.section}
                     onChange={(e) => field("section", e.target.value)}
@@ -194,8 +203,10 @@ export default function AdminExperience() {
                 </div>
 
                 <div className="acat-field">
-                  <label className="acat-label">Job Title <span className="acat-required">*</span></label>
+                  <label htmlFor="exp-title" className="acat-label">Job Title <span className="acat-required">*</span></label>
                   <input
+                    id="exp-title"
+                    name="title"
                     ref={titleRef}
                     className="ainput"
                     placeholder="e.g. Senior Associate Consultant"
@@ -207,8 +218,10 @@ export default function AdminExperience() {
                 </div>
 
                 <div className="acat-field">
-                  <label className="acat-label">Company <span className="acat-required">*</span></label>
+                  <label htmlFor="exp-company" className="acat-label">Company <span className="acat-required">*</span></label>
                   <input
+                    id="exp-company"
+                    name="company"
                     className="ainput"
                     placeholder="e.g. Infosys Ltd."
                     value={form.company}
@@ -219,8 +232,10 @@ export default function AdminExperience() {
                 </div>
 
                 <div className="acat-field">
-                  <label className="acat-label">Company URL</label>
+                  <label htmlFor="exp-company-url" className="acat-label">Company URL</label>
                   <input
+                    id="exp-company-url"
+                    name="company_url"
                     className="ainput"
                     type="url"
                     placeholder="https://..."
@@ -230,8 +245,10 @@ export default function AdminExperience() {
                 </div>
 
                 <div className="acat-field">
-                  <label className="acat-label">Duration</label>
+                  <label htmlFor="exp-duration" className="acat-label">Duration</label>
                   <input
+                    id="exp-duration"
+                    name="duration"
                     className="ainput"
                     placeholder="e.g. Apr 2026 - Present"
                     value={form.duration}
@@ -241,8 +258,10 @@ export default function AdminExperience() {
                 </div>
 
                 <div className="acat-field">
-                  <label className="acat-label">Location</label>
+                  <label htmlFor="exp-location" className="acat-label">Location</label>
                   <input
+                    id="exp-location"
+                    name="location"
                     className="ainput"
                     placeholder="e.g. Noida, India"
                     value={form.location}
@@ -252,7 +271,7 @@ export default function AdminExperience() {
                 </div>
 
                 <div className="acat-field">
-                  <label className="acat-label">Company Logo</label>
+                  <label htmlFor="exp-logo" className="acat-label">Company Logo</label>
                   <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
                     {form.logo_path && (
                       <div style={{
@@ -276,6 +295,8 @@ export default function AdminExperience() {
                       </div>
                     )}
                     <input
+                      id="exp-logo"
+                      name="logo_path"
                       className="ainput"
                       placeholder="https://… or filename.png"
                       value={form.logo_path}
@@ -290,8 +311,10 @@ export default function AdminExperience() {
                 </div>
 
                 <div className="acat-field">
-                  <label className="acat-label">Description</label>
+                  <label htmlFor="exp-desc" className="acat-label">Description</label>
                   <textarea
+                    id="exp-desc"
+                    name="description"
                     className="ainput acat-textarea"
                     placeholder="Describe your role and responsibilities…"
                     value={form.description}
@@ -302,15 +325,19 @@ export default function AdminExperience() {
 
                 <div className="acat-field" style={{ display: "flex", gap: 12 }}>
                   <div style={{ flex: 1 }}>
-                    <label className="acat-label">Card Color</label>
+                    <label htmlFor="exp-color-picker" className="acat-label">Card Color</label>
                     <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                       <input
+                        id="exp-color-picker"
+                        name="color-picker"
                         type="color"
                         value={form.color.slice(0, 7)}
                         onChange={(e) => field("color", e.target.value)}
                         style={{ width: 38, height: 34, padding: 2, borderRadius: 6, border: "1px solid var(--ab-border)", cursor: "pointer" }}
                       />
                       <input
+                        id="exp-color-text"
+                        name="color-text"
                         className="ainput"
                         placeholder="#1565C0"
                         value={form.color}
@@ -321,8 +348,10 @@ export default function AdminExperience() {
                     </div>
                   </div>
                   <div style={{ width: 90 }}>
-                    <label className="acat-label">Order</label>
+                    <label htmlFor="exp-order" className="acat-label">Order</label>
                     <input
+                      id="exp-order"
+                      name="order"
                       className="ainput"
                       type="number"
                       min={0}
@@ -364,7 +393,10 @@ export default function AdminExperience() {
                   )}
                 </div>
                 <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                  <label htmlFor="aexp-section-filter" className="sr-only">Filter by section</label>
                   <select
+                    id="aexp-section-filter"
+                    name="aexp_section_filter"
                     className="ainput"
                     style={{ width: "auto", padding: "6px 10px", fontSize: 13 }}
                     value={filterSection}
@@ -374,8 +406,11 @@ export default function AdminExperience() {
                     {SECTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
                   </select>
                   <div className="acat-search-wrap">
+                    <label htmlFor="exp-search" className="sr-only">Search Experience</label>
                     <i className="fas fa-search acat-search-icon" />
                     <input
+                      id="exp-search"
+                      name="search"
                       className="acat-search-input"
                       placeholder="Search…"
                       value={search}

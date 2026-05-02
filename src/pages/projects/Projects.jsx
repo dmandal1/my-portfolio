@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import Header from "../../components/header/Header";
 import Footer from "../../components/footer/Footer";
 import GithubRepoCard from "../../components/githubRepoCard/GithubRepoCard";
@@ -19,6 +20,7 @@ export default function Projects({ theme, onToggle }) {
   return (
     <div className="projects-main">
       <Header theme={theme} />
+
 
       <div className="basic-projects">
         <Fade direction="up" duration={1000}>

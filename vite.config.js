@@ -10,11 +10,13 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      // Forward /api/* to the local PHP server during development
-      // Run: php -S localhost:8080 -t public_html
-      '/api': {
+      // Forward /api/* or /api/v1/* to the local PHP server during development
+      // Run: php -S localhost:8080 -t backend
+      '^/api.*': {
         target: 'http://localhost:8080',
         changeOrigin: true,
+        // Rewrite /api/v1/blogs.php to /blogs.php if your local php server is pointed directly at the backend folder
+        rewrite: (path) => path.replace(/^\/api(\/v1)?/, ''),
       },
     },
   },

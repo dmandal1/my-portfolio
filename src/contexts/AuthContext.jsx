@@ -24,7 +24,11 @@ export function AuthProvider({ children }) {
         const timeToLive = expirationTime - Date.now();
 
         if (timeToLive > 0) {
-          setCurrentUser({ email: payload.email, uid: String(payload.sub) });
+          setCurrentUser({
+            email: payload.email,
+            uid: String(payload.sub),
+            createdAt: payload.created_at
+          });
           // Auto logout when token expires
           const timeoutId = setTimeout(() => {
             console.log("Token expired, logging out...");

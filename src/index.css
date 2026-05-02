@@ -100,3 +100,13 @@ body {
     font-size: 14px;
   }
 }
+
+/* ── Premium Text Selection ───────────────────────────────── */
+::selection {
+  background-color: #1565c0 !important;
+  color: #ffffff !important;
+}
+::-moz-selection {
+  background-color: #1565c0 !important;
+  color: #ffffff !important;
+}

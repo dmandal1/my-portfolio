@@ -89,6 +89,7 @@ export default function AdminLogin() {
               <label htmlFor="admin-email">Email Address</label>
               <input
                 id="admin-email"
+                name="admin-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -104,6 +105,7 @@ export default function AdminLogin() {
               <div className="aLogin-pw-wrap">
                 <input
                   id="admin-password"
+                  name="admin-password"
                   type={showPw ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

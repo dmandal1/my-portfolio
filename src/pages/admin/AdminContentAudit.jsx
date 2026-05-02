@@ -163,22 +163,22 @@ export default function AdminContentAudit() {
             </div>
           )}
 
-          <section className="aaudit-hero">
+          <section className="acard" style={{ marginBottom: 24, padding: "28px 32px", display: "flex", justifyContent: "space-between", alignItems: "center", background: "linear-gradient(135deg, rgba(21, 101, 192, 0.03) 0%, rgba(66, 165, 245, 0.08) 100%)" }}>
             <div>
-              <span className="aaudit-kicker">Publishing quality</span>
-              <h2>Find posts that need SEO, structure, or metadata fixes</h2>
+              <span className="aaudit-kicker" style={{ color: "var(--ap)", fontWeight: 800, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.05em" }}>Publishing quality</span>
+              <h2 style={{ margin: "8px 0 0", fontSize: 24, fontWeight: 700, color: "var(--atxt)" }}>Find posts that need SEO, structure, or metadata fixes</h2>
             </div>
-            <div className="aaudit-score">
-              <strong>{loading ? "..." : stats.avgScore}</strong>
-              <span>Average Score</span>
+            <div className="aaudit-score-card" style={{ textAlign: "center", minWidth: 140, padding: "16px", background: "var(--acard)", borderRadius: 12, boxShadow: "var(--sh-sm)", border: "1px solid var(--abdr)" }}>
+              <div style={{ fontSize: 32, fontWeight: 800, color: "var(--ap)", lineHeight: 1 }}>{loading ? "..." : stats.avgScore}</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--atxt2)", textTransform: "uppercase", marginTop: 6, opacity: 0.7 }}>Avg. Score</div>
             </div>
           </section>
 
-          <section className="aaudit-stats">
-            <AuditStat icon="fas fa-file-alt" label="Total Posts" value={stats.total} />
-            <AuditStat icon="fas fa-exclamation-circle" label="Critical" value={stats.critical} tone="red" />
-            <AuditStat icon="fas fa-tools" label="Needs Work" value={stats.needsWork} tone="orange" />
-            <AuditStat icon="fas fa-check-circle" label="Ready" value={stats.ready} tone="green" />
+          <section className="aaudit-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20, marginBottom: 24 }}>
+            <AuditStat icon="fas fa-file-alt" label="Total Posts" value={stats.total} color="var(--ap)" />
+            <AuditStat icon="fas fa-exclamation-triangle" label="Critical Issues" value={stats.critical} color="#ef4444" />
+            <AuditStat icon="fas fa-tools" label="Needs Work" value={stats.needsWork} color="#f59e0b" />
+            <AuditStat icon="fas fa-check-circle" label="Ready to Go" value={stats.ready} color="#10b981" />
           </section>
 
           <div className="aaudit-toolbar">
@@ -217,13 +217,19 @@ export default function AdminContentAudit() {
   );
 }
 
-function AuditStat({ icon, label, value, tone = "blue" }) {
+function AuditStat({ icon, label, value, color = "var(--ap)" }) {
   return (
-    <div className={`aaudit-stat aaudit-stat--${tone}`}>
-      <span><i className={icon} /></span>
+    <div className="acard aaudit-stat-card" style={{ padding: "16px 20px", display: "flex", alignItems: "center", gap: 16 }}>
+      <div style={{ 
+        width: 44, height: 44, borderRadius: 12, background: color + "15", 
+        color: color, display: "grid", placeItems: "center", fontSize: 20,
+        boxShadow: `0 4px 10px ${color}20`
+      }}>
+        <i className={icon} />
+      </div>
       <div>
-        <strong>{value}</strong>
-        <small>{label}</small>
+        <div style={{ fontSize: 24, fontWeight: 800, color: "var(--atxt)", lineHeight: 1.1 }}>{value}</div>
+        <div style={{ fontSize: 12, fontWeight: 600, color: "var(--atxt2)", opacity: 0.6, marginTop: 2 }}>{label}</div>
       </div>
     </div>
   );

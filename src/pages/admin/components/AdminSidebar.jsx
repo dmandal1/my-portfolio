@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
-import { getAllBlogsAdmin, saveAdminPanelSettings } from "../../../api/apiService";
+import { getAllBlogsAdmin, saveAdminPanelSettings, getContactMessages } from "../../../api/apiService";
 import { useAdminSettings } from "./useAdminSettings";
 import {
   ADMIN_SETTINGS_UPDATED_EVENT,
@@ -17,6 +17,10 @@ const NAV_TABS = [
   { to: "/admin/dashboard",  label: "Posts",     end: true },
   { to: "/admin/comments",   label: "Comments" },
   { to: "/admin/categories", label: "Categories" },
+  { to: "/admin/tags",       label: "Tags" },
+  { to: "/admin/media",      label: "Media" },
+  { to: "/admin/portfolio",  label: "Portfolio" },
+  { to: "/admin/settings",   label: "Settings" },
 ];
 
 /* Sidebar secondary nav — use divider:true for separator lines */
@@ -31,12 +35,20 @@ const NAV_ITEMS = [
   { to: "/admin/media",      icon: "fas fa-photo-video", label: "Media" },
   { to: "/admin/analytics",  icon: "fas fa-chart-bar",   label: "Analytics" },
   { to: "/admin/editorial-planner", icon: "far fa-calendar-alt", label: "Planner" },
-  { to: "/admin/content-audit", icon: "fas fa-clipboard-check", label: "Audit" },
+  { to: "/admin/content-audit", icon: "fas fa-clipboard-check", label: "Content Audit" },
+  { to: "/admin/seo",        icon: "fas fa-search-plus",  label: "SEO Manager" },
+  { to: "/admin/redirects",  icon: "fas fa-directions",   label: "Redirects" },
   { divider: true, key: "d3" },
   { to: "/admin/portfolio",  icon: "fas fa-user-circle",   label: "Portfolio" },
   { divider: true, key: "d4" },
-  { to: "/admin/database",   icon: "fas fa-database",      label: "Database" },
-  { to: "/admin/settings",   icon: "fas fa-cog",           label: "Settings" },
+  { to: "/admin/inbox",       icon: "fas fa-inbox",         label: "Inbox" },
+  { to: "/admin/moderation",  icon: "fas fa-gavel",          label: "Moderation" },
+  { to: "/admin/subscribers", icon: "fas fa-users",          label: "Subscribers" },
+  { to: "/admin/audit",       icon: "fas fa-history",        label: "Audit Logs" },
+  { to: "/admin/import-export", icon: "fas fa-exchange-alt", label: "Import/Export" },
+  { to: "/admin/database",    icon: "fas fa-database",       label: "Database" },
+  { to: "/admin/system",      icon: "fas fa-server",         label: "System Status" },
+  { to: "/admin/settings",    icon: "fas fa-cog",            label: "Settings" },
 ];
 
 const SEARCH_LINKS = [
@@ -50,8 +62,16 @@ const SEARCH_LINKS = [
   { to: "/admin/analytics", label: "Analytics", icon: "fas fa-chart-bar" },
   { to: "/admin/editorial-planner", label: "Editorial Planner", icon: "far fa-calendar-alt" },
   { to: "/admin/content-audit", label: "Content Audit", icon: "fas fa-clipboard-check" },
+  { to: "/admin/seo",       label: "SEO Manager",       icon: "fas fa-search-plus" },
+  { to: "/admin/redirects", label: "Redirect Manager",  icon: "fas fa-directions" },
   { to: "/admin/portfolio", label: "Portfolio Content", icon: "fas fa-user-circle" },
+  { to: "/admin/subscribers", label: "Newsletter Subscribers", icon: "fas fa-users" },
+  { to: "/admin/moderation",  label: "Comment Moderation",     icon: "fas fa-gavel" },
+  { to: "/admin/import-export", label: "Import / Export",      icon: "fas fa-exchange-alt" },
+  { to: "/admin/audit",       label: "Audit Logs",              icon: "fas fa-history" },
   { to: "/admin/database",  label: "Database",          icon: "fas fa-database" },
+  { to: "/admin/system",    label: "System Status",     icon: "fas fa-server" },
+  { to: "/admin/profile",   label: "My Profile",        icon: "fas fa-user-circle" },
   { to: "/admin/settings",  label: "Settings",          icon: "fas fa-cog" },
 ];
 
@@ -190,7 +210,10 @@ export default function AdminSidebar() {
     async function loadNotifications() {
       setNotifLoading(true);
       try {
-        const blogs = await getAllBlogsAdmin();
+        const [blogs, messages] = await Promise.all([
+          getAllBlogsAdmin(),
+          getContactMessages().catch(() => [])
+        ]);
         const now = Date.now();
         const oneDayAgo = now - 24 * 60 * 60 * 1000;
 
@@ -227,6 +250,17 @@ export default function AdminSidebar() {
             updatedAt: latestPostTime(scheduled),
           });
         }
+        const unreadMsgs = messages.filter(m => !m.is_read);
+        if (unreadMsgs.length > 0) {
+          items.push({
+            id: "messages",
+            icon: "fas fa-envelope",
+            text: `${unreadMsgs.length} unread contact message${unreadMsgs.length > 1 ? "s" : ""}`,
+            to: "/admin/inbox",
+            updatedAt: Math.max(...unreadMsgs.map(m => new Date(m.created_at).getTime()))
+          });
+        }
+
         if (recent.length > 0) {
           items.push({
             id: "recent",
@@ -365,6 +399,23 @@ export default function AdminSidebar() {
 
         {/* Right controls */}
         <div className="abar-right">
+          {/* Maintenance Mode Toggle */}
+          <div className="abar-maintenance-wrap">
+             <button 
+               className={`abar-maint-btn ${adminSettings.blogMaintenanceMode ? "is-active" : ""}`}
+               title={adminSettings.blogMaintenanceMode ? "Blog is in Maintenance Mode (Publicly hidden)" : "Blog is Live (Publicly visible)"}
+               onClick={() => {
+                 const next = !adminSettings.blogMaintenanceMode;
+                 saveAdminPanelSettings({ ...adminSettings, blogMaintenanceMode: next });
+                 cacheAdminSettings({ ...adminSettings, blogMaintenanceMode: next });
+               }}
+             >
+               <i className="fas fa-hammer" />
+               <span className="abar-maint-status">
+                 {adminSettings.blogMaintenanceMode ? "Maintenance" : "Live"}
+               </span>
+             </button>
+          </div>
 
           {/* Search icon */}
           <div className="abar-search-wrap" ref={searchRef}>
@@ -384,13 +435,17 @@ export default function AdminSidebar() {
             {searchOpen && (
               <div className="abar-search-dropdown">
                 <form className="abar-search-input-wrap" onSubmit={onSearchSubmit}>
+                  <label htmlFor="abar-search-input" className="sr-only">Search</label>
                   <i className="fas fa-search" />
                   <input
+                    id="abar-search-input"
+                    name="search"
                     ref={searchInputRef}
                     className="abar-search-input"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search posts, categories, pages..."
+                    autoComplete="off"
                   />
                 </form>
 
@@ -523,6 +578,16 @@ export default function AdminSidebar() {
                   </div>
 
                   <div className="abar-um-divider" />
+
+                  {/* Profile */}
+                  <button
+                    type="button"
+                    className="abar-dropdown-item"
+                    onClick={() => { setUserMenuOpen(false); navigate('/admin/profile'); }}
+                  >
+                    <i className="fas fa-user-circle abar-di-icon" />
+                    <span>My Profile</span>
+                  </button>
 
                   {/* Visit Site */}
                   <button

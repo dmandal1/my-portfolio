@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import profileImg from "../../assests/images/deepak_mandal.jpeg";
 import Header from "../../components/header/Header";
 import Footer from "../../components/footer/Footer";
@@ -14,13 +15,14 @@ import ContactForm from "../../containers/contactForm/ContactForm";
 import QuickContact from "../../containers/contactForm/QuickContact";
 import ContactFAQ from "../../containers/contactForm/ContactFAQ";
 import { usePortfolioData } from "../../contexts/PortfolioDataContext";
+import Newsletter from "../../components/newsletter/Newsletter";
 
 export default function Contact({ theme, onToggle }) {
   const data = usePortfolioData();
-  const cpd         = data?.contactPageData  ?? defaultContactPageData;
+  const contactInfo = data?.contactInfo ?? defaultGreeting;
+  const cpd         = data?.contactPageData ?? defaultContactPageData;
   const resumeLink  = data?.profile?.resumeLink ?? defaultGreeting.resumeLink;
 
-  const contactSection = cpd.contactSection ?? defaultContactPageData.contactSection;
   const blogSection    = cpd.blogSection    ?? defaultContactPageData.blogSection;
   const addressSection = cpd.addressSection ?? defaultContactPageData.addressSection;
   const phoneSection   = cpd.phoneSection   ?? defaultContactPageData.phoneSection;
@@ -28,6 +30,8 @@ export default function Contact({ theme, onToggle }) {
   return (
     <div className="contact-main">
       <Header theme={theme} />
+
+
       <div className="basic-contact">
         <Fade direction="up" duration={1000}>
           <div className="contact-heading-div">
@@ -36,10 +40,10 @@ export default function Contact({ theme, onToggle }) {
             </div>
             <div className="contact-heading-text-div">
               <h1 className="contact-heading-text" style={{ color: theme.text }}>
-                {contactSection.title}
+                {contactInfo.title}
               </h1>
               <p className="contact-header-detail-text subTitle" style={{ color: theme.secondaryText }}>
-                {contactSection.description}
+                {contactInfo.subtitle}
               </p>
               <SocialMedia theme={theme} />
               <div className="resume-btn-div">
@@ -106,13 +110,13 @@ export default function Contact({ theme, onToggle }) {
                 {addressSection.title}
               </h1>
               <p className="contact-header-detail-text subTitle" style={{ color: theme.secondaryText }}>
-                {addressSection.subtitle}
+                {contactInfo.address}
               </p>
               <h1 className="address-heading-text" style={{ color: theme.text }}>
                 {phoneSection.title}
               </h1>
               <p className="contact-header-detail-text subTitle" style={{ color: theme.secondaryText }}>
-                {phoneSection.subtitle}
+                {contactInfo.number}
               </p>
               <div className="address-btn-div">
                 <Button
@@ -136,6 +140,7 @@ export default function Contact({ theme, onToggle }) {
       <QuickContact theme={theme} />
       <ContactForm theme={theme} />
       <ContactFAQ theme={theme} />
+      <Newsletter theme={theme} />
       <Footer theme={theme} onToggle={onToggle} />
       <TopButton theme={theme} />
     </div>

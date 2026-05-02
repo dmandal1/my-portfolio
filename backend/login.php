@@ -16,7 +16,7 @@ if (!$email || !$password) {
 }
 
 $db   = getDb();
-$stmt = $db->prepare('SELECT id, email, password_hash FROM admin_users WHERE email = ? LIMIT 1');
+$stmt = $db->prepare('SELECT id, email, password_hash, created_at FROM admin_users WHERE email = ? LIMIT 1');
 $stmt->execute([$email]);
 $user = $stmt->fetch();
 
@@ -25,10 +25,11 @@ if (!$user || !password_verify($password, $user['password_hash'])) {
 }
 
 $token = createJwt([
-    'sub' => $user['id'],
+    'sub'   => $user['id'],
     'email' => $user['email'],
-    'iat' => time(),
-    'exp' => time() + JWT_TTL,
+    'iat'   => time(),
+    'exp'   => time() + JWT_TTL,
+    'created_at' => $user['created_at']
 ]);
 
 jsonResponse(['token' => $token, 'email' => $user['email']]);

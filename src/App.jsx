@@ -25,13 +25,13 @@ function App() {
       .then((r) => r.json())
       .then((d) => {
         if (!d.installed && !window.location.hash.startsWith("#/install")) {
-          window.location.hash = "#/install";
+          window.location.replace("#/install");
         }
       })
       .catch(() => {
         // API unreachable — backend not yet uploaded; show installer anyway
         if (!window.location.hash.startsWith("#/install")) {
-          window.location.hash = "#/install";
+          window.location.replace("#/install");
         }
       })
       .finally(() => setChecked(true));

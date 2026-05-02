@@ -176,8 +176,11 @@ export default function AdminComments() {
                 <span className="acmt2-sidebar-badge">{commentedBlogs.length}</span>
               </div>
               <div className="acmt2-search">
+                <label htmlFor="comment-post-search" className="sr-only">Search Posts</label>
                 <i className="fas fa-search acmt2-search-icon" />
                 <input
+                  id="comment-post-search"
+                  name="comment-post-search"
                   className="acmt2-search-input"
                   placeholder="Search posts…"
                   value={search}
@@ -319,6 +322,8 @@ export default function AdminComments() {
                                 <span>Replying as <strong>{authorName}</strong></span>
                               </div>
                               <textarea
+                                id={`comment-reply-${c.id}`}
+                                name={`comment-reply-${c.id}`}
                                 className="acmt2-reply-textarea"
                                 placeholder={`Write your reply to ${c.name}…`}
                                 value={replyText}

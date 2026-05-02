@@ -651,14 +651,8 @@ const contactInfo = {
   email_address: "me@deepakmandal.dev",
 };
 
-// Keep contactPageData for any legacy usage
+// Keep contactPageData for structural labels and section settings
 const contactPageData = {
-  contactSection: {
-    title: "Contact Me",
-    profile_image_path: "deepak_mandal.jpeg",
-    description:
-      "I am available on almost every social media. You can message me and I will reply within 24 hours. I can help you with JavaScript, Node.js, React, Express, Cloud, and Open Source Development.",
-  },
   blogSection: {
     title: "Blogs",
     subtitle:
@@ -668,13 +662,11 @@ const contactPageData = {
   },
   addressSection: {
     title: "Address",
-    subtitle: "Noida, Uttar Pradesh, India - 201301",
     avatar_image_path: "address_image.svg",
     location_map_link: "https://goo.gl/maps/Cp4tx2eiYvHeXvDN9",
   },
   phoneSection: {
     title: "Phone Number",
-    subtitle: "+91-9504243148",
   },
   faqs: [
     {
