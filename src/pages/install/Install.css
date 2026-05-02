@@ -455,6 +455,42 @@
 }
 .ins-pw-toggle:hover { background: rgba(21,101,192,0.08); }
 
+/* Premium Password Requirements Checklist */
+.ins-pw-requirements {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  background: rgba(21, 101, 192, 0.03);
+  padding: 16px;
+  border-radius: 14px;
+  margin-top: 14px;
+  border: 1px solid rgba(21, 101, 192, 0.1);
+}
+
+.ins-req-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11.5px;
+  color: #7a95b4;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ins-req-item i {
+  font-size: 10px;
+  transition: transform 0.3s;
+}
+
+.ins-req-item--met {
+  color: var(--ok);
+}
+
+.ins-req-item--met i {
+  color: var(--ok);
+  transform: scale(1.15);
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    ALERTS
    ═══════════════════════════════════════════════════════════════════ */

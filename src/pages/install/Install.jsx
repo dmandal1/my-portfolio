@@ -509,19 +509,20 @@ function StepAccount({ account, setAccount, onNext, onBack }) {
     setAccount((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
-  function validate() {
-    const errs = {};
-    if (!account.site_name.trim())   errs.site_name   = "Site name is required";
-    if (!account.admin_email.trim()) errs.admin_email  = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(account.admin_email)) errs.admin_email = "Invalid email address";
-    if (account.admin_password.length < 8) errs.admin_password = "Minimum 8 characters";
-    if (account.admin_password !== account.confirm_password) errs.confirm_password = "Passwords do not match";
-    return errs;
-  }
+  // Password Validation Logic
+  const pass = account.admin_password || "";
+  const hasUpper = /[A-Z]/.test(pass);
+  const hasLower = /[a-z]/.test(pass);
+  const hasNumber = /\d/.test(pass);
+  const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(pass);
+  const isLongEnough = pass.length >= 8;
+  const isMatch = pass === account.confirm_password && pass !== "";
+
+  const isPassValid = isLongEnough && hasUpper && hasLower && hasNumber && hasSpecial;
+  const isFormValid = account.site_name.trim() !== "" && account.admin_email.trim() !== "" && isPassValid && isMatch;
 
   function handleNext() {
-    const errs = validate();
-    if (Object.keys(errs).length) { setErrors(errs); return; }
+    if (!isFormValid) return;
     onNext();
   }
 
@@ -568,7 +569,22 @@ function StepAccount({ account, setAccount, onNext, onBack }) {
               {showPw ? "Hide" : "Show"}
             </button>
           </div>
-          {errors.admin_password && <div className="ins-field-error">⚠ {errors.admin_password}</div>}
+
+          {/* Premium Password Requirements Checklist */}
+          <div className="ins-pw-requirements">
+             <div className={`ins-req-item ${isLongEnough ? 'ins-req-item--met' : ''}`}>
+               <i className={`fas fa-${isLongEnough ? 'check-circle' : 'circle'}`} /> 8+ Characters
+             </div>
+             <div className={`ins-req-item ${(hasUpper && hasLower) ? 'ins-req-item--met' : ''}`}>
+               <i className={`fas fa-${(hasUpper && hasLower) ? 'check-circle' : 'circle'}`} /> Upper & Lowercase
+             </div>
+             <div className={`ins-req-item ${hasNumber ? 'ins-req-item--met' : ''}`}>
+               <i className={`fas fa-${hasNumber ? 'check-circle' : 'circle'}`} /> At least one number
+             </div>
+             <div className={`ins-req-item ${hasSpecial ? 'ins-req-item--met' : ''}`}>
+               <i className={`fas fa-${hasSpecial ? 'check-circle' : 'circle'}`} /> Special Character
+             </div>
+          </div>
         </div>
 
         <div className="ins-field">
@@ -585,13 +601,24 @@ function StepAccount({ account, setAccount, onNext, onBack }) {
               {showPw2 ? "Hide" : "Show"}
             </button>
           </div>
-          {errors.confirm_password && <div className="ins-field-error">⚠ {errors.confirm_password}</div>}
+          {account.confirm_password && !isMatch && (
+            <div className="ins-field-error">⚠ Passwords do not match</div>
+          )}
+          {account.confirm_password && isMatch && (
+             <div className="ins-field-error" style={{ color: 'var(--ok)' }}>✓ Passwords match</div>
+          )}
         </div>
       </div>
 
       <div className="ins-btn-row">
         <button className="ins-btn ins-btn--ghost" onClick={onBack}>← Back</button>
-        <button className="ins-btn ins-btn--primary" onClick={handleNext}>Review &amp; Install →</button>
+        <button 
+          className="ins-btn ins-btn--primary" 
+          onClick={handleNext}
+          disabled={!isFormValid}
+        >
+          Review &amp; Install →
+        </button>
       </div>
     </>
   );

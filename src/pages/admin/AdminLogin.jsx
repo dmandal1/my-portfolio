@@ -22,6 +22,8 @@ export default function AdminLogin() {
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showNewPw, setShowNewPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
   const [showSentSuccess, setShowSentSuccess] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
 
@@ -139,8 +141,20 @@ export default function AdminLogin() {
 
   async function handleResetFinal(e) {
     e.preventDefault();
-    if (newPassword !== confirmPassword) { setError("Passwords do not match."); return; }
-    if (newPassword.length < 8) { setError("Password must be at least 8 characters."); return; }
+    
+    // Comprehensive Validation
+    const hasUpper = /[A-Z]/.test(newPassword);
+    const hasLower = /[a-z]/.test(newPassword);
+    const hasNumber = /\d/.test(newPassword);
+    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword);
+    const isLongEnough = newPassword.length >= 8;
+
+    if (!isLongEnough) { setError("Password must be at least 8 characters."); return; }
+    if (!hasUpper || !hasLower) { setError("Password must contain both uppercase and lowercase letters."); return; }
+    if (!hasNumber) { setError("Password must contain at least one number."); return; }
+    if (!hasSpecial) { setError("Password must contain at least one special character."); return; }
+    if (newPassword !== confirmPassword) { setError("Passwords do not match. Please verify your entries."); return; }
+
     setError("");
     setLoading(true);
     try {
@@ -159,6 +173,7 @@ export default function AdminLogin() {
         setEmail("");
         setResetOtp("");
         setNewPassword("");
+        setConfirmPassword("");
       }, 3000);
     } catch (err) {
       setError(err.message);
@@ -453,26 +468,84 @@ export default function AdminLogin() {
                      <form onSubmit={handleResetFinal}>
                        <div className="aLogin-field">
                          <label>New Password</label>
-                         <input
-                           type="password"
-                           value={newPassword}
-                           onChange={(e) => setNewPassword(e.target.value)}
-                           required
-                           placeholder="••••••••"
-                           autoFocus
-                         />
+                         <div className="aLogin-pw-wrap">
+                            <input
+                              type={showNewPw ? "text" : "password"}
+                              value={newPassword}
+                              onChange={(e) => { setNewPassword(e.target.value); setError(""); }}
+                              required
+                              placeholder="••••••••"
+                              autoFocus
+                            />
+                            <button
+                              type="button"
+                              className="aLogin-pw-toggle"
+                              onClick={() => setShowNewPw((v) => !v)}
+                            >
+                              {showNewPw ? "Hide" : "Show"}
+                            </button>
+                          </div>
                        </div>
-                       <div className="aLogin-field">
+
+                       {/* Premium Password Requirements Checklist */}
+                       <div className="aLogin-pw-requirements">
+                         <div className={`aLogin-req-item ${newPassword.length >= 8 ? 'aLogin-req-item--met' : ''}`}>
+                           <i className={`fas fa-${newPassword.length >= 8 ? 'check-circle' : 'circle'}`} /> 8+ Characters
+                         </div>
+                         <div className={`aLogin-req-item ${(/[A-Z]/.test(newPassword) && /[a-z]/.test(newPassword)) ? 'aLogin-req-item--met' : ''}`}>
+                           <i className={`fas fa-${(/[A-Z]/.test(newPassword) && /[a-z]/.test(newPassword)) ? 'check-circle' : 'circle'}`} /> Uppercase & Lowercase
+                         </div>
+                         <div className={`aLogin-req-item ${/\d/.test(newPassword) ? 'aLogin-req-item--met' : ''}`}>
+                           <i className={`fas fa-${/\d/.test(newPassword) ? 'check-circle' : 'circle'}`} /> At least one number
+                         </div>
+                         <div className={`aLogin-req-item ${/[!@#$%^&*(),.?":{}|<>]/.test(newPassword) ? 'aLogin-req-item--met' : ''}`}>
+                           <i className={`fas fa-${/[!@#$%^&*(),.?":{}|<>]/.test(newPassword) ? 'check-circle' : 'circle'}`} /> Special Character
+                         </div>
+                       </div>
+
+                       <div className="aLogin-field" style={{ marginTop: 20 }}>
                          <label>Confirm Password</label>
-                         <input
-                           type="password"
-                           value={confirmPassword}
-                           onChange={(e) => setConfirmPassword(e.target.value)}
-                           required
-                           placeholder="••••••••"
-                         />
+                         <div className="aLogin-pw-wrap">
+                            <input
+                              type={showConfirmPw ? "text" : "password"}
+                              value={confirmPassword}
+                              onChange={(e) => { setConfirmPassword(e.target.value); setError(""); }}
+                              required
+                              placeholder="••••••••"
+                            />
+                            <button
+                              type="button"
+                              className="aLogin-pw-toggle"
+                              onClick={() => setShowConfirmPw((v) => !v)}
+                            >
+                              {showConfirmPw ? "Hide" : "Show"}
+                            </button>
+                          </div>
+                          {confirmPassword && newPassword !== confirmPassword && (
+                            <p style={{ color: '#ef4444', fontSize: 12, marginTop: 6, fontWeight: 600 }}>
+                              <i className="fas fa-times-circle" /> Passwords do not match
+                            </p>
+                          )}
+                          {confirmPassword && newPassword === confirmPassword && (
+                            <p style={{ color: '#10b981', fontSize: 12, marginTop: 6, fontWeight: 600 }}>
+                              <i className="fas fa-check-circle" /> Passwords match
+                            </p>
+                          )}
                        </div>
-                       <button type="submit" className="aLogin-btn" disabled={loading}>
+
+                       <button 
+                         type="submit" 
+                         className="aLogin-btn" 
+                         disabled={
+                           loading || 
+                           newPassword.length < 8 || 
+                           !/[A-Z]/.test(newPassword) || 
+                           !/[a-z]/.test(newPassword) || 
+                           !/\d/.test(newPassword) || 
+                           !/[!@#$%^&*(),.?":{}|<>]/.test(newPassword) ||
+                           newPassword !== confirmPassword
+                         }
+                       >
                          {loading ? "Updating..." : "Update Password"}
                        </button>
                      </form>
