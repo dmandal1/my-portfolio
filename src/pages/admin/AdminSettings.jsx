@@ -382,6 +382,9 @@ export default function AdminSettings() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [showOldPw, setShowOldPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
 
   const importRef = useRef(null);
 
@@ -883,13 +886,21 @@ export default function AdminSettings() {
                           <input 
                             id="security-old-password"
                             name="security-old-password"
-                            type="password" 
+                            type={showOldPw ? "text" : "password"} 
                             className="ainput asecurity-input" 
                             value={oldPassword}
                             onChange={e => setOldPassword(e.target.value)} 
                             placeholder="Enter current password"
                             autoComplete="current-password"
+                            style={{ paddingRight: 40 }}
                           />
+                          <button
+                            type="button"
+                            className="aLogin-pw-toggle"
+                            onClick={() => setShowOldPw(!showOldPw)}
+                          >
+                            <i className={showOldPw ? "fas fa-eye-slash" : "fas fa-eye"} />
+                          </button>
                         </div>
                       </div>
 
@@ -903,13 +914,21 @@ export default function AdminSettings() {
                             <input 
                               id="security-new-password"
                               name="security-new-password"
-                              type="password" 
+                              type={showNewPw ? "text" : "password"} 
                               className="ainput asecurity-input" 
                               value={newPassword}
                               onChange={e => setNewPassword(e.target.value)} 
                               placeholder="At least 8 characters"
                               autoComplete="new-password"
+                              style={{ paddingRight: 40 }}
                             />
+                            <button
+                              type="button"
+                              className="aLogin-pw-toggle"
+                              onClick={() => setShowNewPw(!showNewPw)}
+                            >
+                              <i className={showNewPw ? "fas fa-eye-slash" : "fas fa-eye"} />
+                            </button>
                           </div>
                           {newPassword.length > 0 && (
                             <div className="asecurity-strength">
@@ -926,13 +945,21 @@ export default function AdminSettings() {
                             <input 
                               id="security-confirm-password"
                               name="security-confirm-password"
-                              type="password" 
+                              type={showConfirmPw ? "text" : "password"} 
                               className="ainput asecurity-input" 
                               value={confirmPassword}
                               onChange={e => setConfirmPassword(e.target.value)} 
                               placeholder="Retype new password"
                               autoComplete="new-password"
+                              style={{ paddingRight: 40 }}
                             />
+                            <button
+                              type="button"
+                              className="aLogin-pw-toggle"
+                              onClick={() => setShowConfirmPw(!showConfirmPw)}
+                            >
+                              <i className={showConfirmPw ? "fas fa-eye-slash" : "fas fa-eye"} />
+                            </button>
                           </div>
                           {confirmPassword.length > 0 && (
                             <div className={`asecurity-match-hint ${newPassword === confirmPassword ? 'is-match' : 'is-mismatch'}`}>

@@ -498,7 +498,7 @@ export default function AdminProfile() {
                         className="aprof-pw-toggle" 
                         onClick={() => setShowOldPw(!showOldPw)}
                       >
-                        {showOldPw ? "Hide" : "Show"}
+                        <i className={showOldPw ? "fas fa-eye-slash" : "fas fa-eye"} />
                       </button>
                     </div>
                   </div>
@@ -522,7 +522,7 @@ export default function AdminProfile() {
                           className="aprof-pw-toggle" 
                           onClick={() => setShowNextPw(!showNextPw)}
                         >
-                          {showNextPw ? "Hide" : "Show"}
+                          <i className={showNextPw ? "fas fa-eye-slash" : "fas fa-eye"} />
                         </button>
                       </div>
                       {pwForm.next && (
@@ -554,7 +554,7 @@ export default function AdminProfile() {
                           className="aprof-pw-toggle" 
                           onClick={() => setShowConfirmPw(!showConfirmPw)}
                         >
-                          {showConfirmPw ? "Hide" : "Show"}
+                          <i className={showConfirmPw ? "fas fa-eye-slash" : "fas fa-eye"} />
                         </button>
                       </div>
                       {pwForm.confirm && pwForm.next !== pwForm.confirm && (

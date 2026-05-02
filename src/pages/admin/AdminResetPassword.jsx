@@ -11,6 +11,8 @@ export default function AdminResetPassword() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [step, setStep] = useState(1); // 1: OTP, 2: New Password
+  const [showPw, setShowPw] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   async function handleVerifyOtp(e) {
     e.preventDefault();
@@ -99,24 +101,42 @@ export default function AdminResetPassword() {
                 <form onSubmit={handleSubmit} className="aLogin-form">
                   <div className="aLogin-field">
                     <label>New Password</label>
-                    <input 
-                      type="password" 
-                      value={password} 
-                      onChange={e => setPassword(e.target.value)} 
-                      required 
-                      placeholder="••••••••"
-                      autoFocus
-                    />
+                    <div className="aLogin-pw-wrap">
+                      <input 
+                        type={showPw ? "text" : "password"} 
+                        value={password} 
+                        onChange={e => setPassword(e.target.value)} 
+                        required 
+                        placeholder="••••••••"
+                        autoFocus
+                      />
+                      <button
+                        type="button"
+                        className="aLogin-pw-toggle"
+                        onClick={() => setShowPw(!showPw)}
+                      >
+                        <i className={showPw ? "fas fa-eye-slash" : "fas fa-eye"} />
+                      </button>
+                    </div>
                   </div>
                   <div className="aLogin-field">
                     <label>Confirm New Password</label>
-                    <input 
-                      type="password" 
-                      value={confirm} 
-                      onChange={e => setConfirm(e.target.value)} 
-                      required 
-                      placeholder="••••••••"
-                    />
+                    <div className="aLogin-pw-wrap">
+                      <input 
+                        type={showConfirm ? "text" : "password"} 
+                        value={confirm} 
+                        onChange={e => setConfirm(e.target.value)} 
+                        required 
+                        placeholder="••••••••"
+                      />
+                      <button
+                        type="button"
+                        className="aLogin-pw-toggle"
+                        onClick={() => setShowConfirm(!showConfirm)}
+                      >
+                        <i className={showConfirm ? "fas fa-eye-slash" : "fas fa-eye"} />
+                      </button>
+                    </div>
                   </div>
                   <button type="submit" className="aLogin-btn" disabled={loading}>
                     {loading ? "Updating..." : "Update Password"}

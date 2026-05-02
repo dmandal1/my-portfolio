@@ -398,14 +398,16 @@
   transform: translateY(-50%);
   background: none;
   border: none;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 16px;
   color: var(--ap);
   cursor: pointer;
-  padding: 4px 10px;
-  border-radius: 6px;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.2s ease;
-  z-index: 2;
+  z-index: 10;
 }
 
 .aprof-pw-toggle:hover {

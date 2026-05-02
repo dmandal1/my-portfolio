@@ -342,7 +342,7 @@ export default function AdminLogin() {
                       className="aLogin-pw-toggle"
                       onClick={() => setShowPw((v) => !v)}
                     >
-                      {showPw ? "Hide" : "Show"}
+                      <i className={showPw ? "fas fa-eye-slash" : "fas fa-eye"} />
                     </button>
                   </div>
                   <div style={{ textAlign: 'right', marginTop: 8 }}>
@@ -533,7 +533,7 @@ export default function AdminLogin() {
                               className="aLogin-pw-toggle"
                               onClick={() => setShowNewPw((v) => !v)}
                             >
-                              {showNewPw ? "Hide" : "Show"}
+                              <i className={showNewPw ? "fas fa-eye-slash" : "fas fa-eye"} />
                             </button>
                           </div>
                        </div>
@@ -569,7 +569,7 @@ export default function AdminLogin() {
                               className="aLogin-pw-toggle"
                               onClick={() => setShowConfirmPw((v) => !v)}
                             >
-                              {showConfirmPw ? "Hide" : "Show"}
+                              <i className={showConfirmPw ? "fas fa-eye-slash" : "fas fa-eye"} />
                             </button>
                           </div>
                           {confirmPassword && newPassword !== confirmPassword && (
