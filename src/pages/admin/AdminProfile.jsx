@@ -23,16 +23,17 @@ export default function AdminProfile() {
   const [qrUrl, setQrUrl] = useState('');
   const [twoFactorCode, setTwoFactorCode] = useState('');
   const [twoFactorLoading, setTwoFactorLoading] = useState(false);
+  const [showDisableConfirm, setShowDisableConfirm] = useState(false);
 
   // Lock body scroll when 2FA wizard is open
   useEffect(() => {
-    if (show2FAWizard) {
+    if (show2FAWizard || showDisableConfirm) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
     return () => { document.body.style.overflow = 'unset'; };
-  }, [show2FAWizard]);
+  }, [show2FAWizard, showDisableConfirm]);
 
   // Password change
   const [pwForm, setPwForm]     = useState({ old: '', next: '', confirm: '' });
@@ -141,12 +142,16 @@ export default function AdminProfile() {
   }
 
   async function handleDisable2FA() {
-    if (!window.confirm('Are you sure you want to disable 2FA? This will decrease your account security.')) return;
+    setShowDisableConfirm(true);
+  }
+
+  async function performDisable2FA() {
     setTwoFactorLoading(true);
     try {
       await disable2FA();
       updateUser({ twoFactorEnabled: false });
       toast?.addToast('Two-Factor Authentication disabled.', 'info');
+      setShowDisableConfirm(false);
     } catch (err) {
       toast?.addToast('Failed to disable 2FA.', 'error');
     } finally {
@@ -657,6 +662,39 @@ export default function AdminProfile() {
                       </button>
                     </div>
 
+                  </div>
+                </div>,
+                document.body
+              )}
+
+              {/* Disable 2FA Confirmation Modal */}
+              {showDisableConfirm && createPortal(
+                <div className="adb-modal-overlay" onClick={() => setShowDisableConfirm(false)}>
+                  <div className="adb-modal" style={{ maxWidth: 400 }} onClick={e => e.stopPropagation()}>
+                    <div className="adb-modal-icon" style={{ background: 'linear-gradient(135deg, #ef4444, #f87171)', boxShadow: '0 4px 14px rgba(239, 68, 68, 0.3)' }}>
+                      <i className="fas fa-exclamation-triangle" />
+                    </div>
+                    <h3 className="adb-modal-title">Disable 2FA?</h3>
+                    <p className="adb-modal-desc">
+                      Are you sure you want to disable <strong>Two-Factor Authentication</strong>? This will significantly decrease your account security.
+                    </p>
+                    <div className="adb-modal-actions">
+                      <button 
+                        className="adb-modal-btn adb-modal-btn--cancel" 
+                        onClick={() => setShowDisableConfirm(false)}
+                        disabled={twoFactorLoading}
+                      >
+                        No, keep it enabled
+                      </button>
+                      <button 
+                        className="adb-modal-btn adb-modal-btn--confirm" 
+                        style={{ background: 'linear-gradient(135deg, #dc2626, #ef4444)', boxShadow: '0 4px 14px rgba(220, 38, 38, 0.3)' }}
+                        onClick={performDisable2FA}
+                        disabled={twoFactorLoading}
+                      >
+                        {twoFactorLoading ? <><i className="fas fa-spinner fa-spin" /> Disabling...</> : 'Yes, Disable 2FA'}
+                      </button>
+                    </div>
                   </div>
                 </div>,
                 document.body

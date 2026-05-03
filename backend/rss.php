@@ -7,7 +7,7 @@ $db = getDb();
 
 // Fetch latest published posts
 $stmt = $db->query("
-    SELECT id, title, slug, subtitle, content, created_at, image 
+    SELECT id, title, slug, subtitle, excerpt, content, created_at, cover_image 
     FROM blogs 
     WHERE published = 1 
     ORDER BY created_at DESC 
@@ -41,7 +41,7 @@ foreach ($posts as $post) {
     $link = $siteUrl . '/#/blogs/' . $post['slug'];
     $guid = $post['id'];
     $date = date(DATE_RSS, strtotime($post['created_at']));
-    $description = $post['subtitle'] ?: substr(strip_tags($post['content']), 0, 250) . '...';
+    $description = $post['excerpt'] ?: ($post['subtitle'] ?: substr(strip_tags($post['content']), 0, 250) . '...');
 
     echo '  <item>' . PHP_EOL;
     echo '    <title>' . htmlspecialchars($post['title']) . '</title>' . PHP_EOL;
@@ -49,8 +49,8 @@ foreach ($posts as $post) {
     echo '    <guid isPermaLink="false">' . htmlspecialchars($guid) . '</guid>' . PHP_EOL;
     echo '    <pubDate>' . htmlspecialchars($date) . '</pubDate>' . PHP_EOL;
     echo '    <description>' . htmlspecialchars($description) . '</description>' . PHP_EOL;
-    if ($post['image']) {
-        echo '    <enclosure url="' . htmlspecialchars($post['image']) . '" length="0" type="image/jpeg" />' . PHP_EOL;
+    if ($post['cover_image']) {
+        echo '    <enclosure url="' . htmlspecialchars($post['cover_image']) . '" length="0" type="image/jpeg" />' . PHP_EOL;
     }
     echo '    <content:encoded><![CDATA[' . $post['content'] . ']]></content:encoded>' . PHP_EOL;
     echo '  </item>' . PHP_EOL;

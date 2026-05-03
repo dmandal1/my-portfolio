@@ -78,10 +78,14 @@ async function deploy() {
     console.log("📤 Uploading files via FTP...");
     
     ftpDeploy.on("uploaded", (data) => {
-      // Clear line and return cursor to start to prevent artifacting
-      process.stdout.clearLine(0);
-      process.stdout.cursorTo(0);
-      process.stdout.write(`[${data.transferredFileCount}/${data.totalFilesCount}] Synchronized: ${data.filename}`);
+      // Clear line and return cursor to start to prevent artifacting (if supported)
+      if (process.stdout.clearLine && process.stdout.cursorTo) {
+        process.stdout.clearLine(0);
+        process.stdout.cursorTo(0);
+        process.stdout.write(`[${data.transferredFileCount}/${data.totalFilesCount}] Synchronized: ${data.filename}`);
+      } else {
+        process.stdout.write(`\r[${data.transferredFileCount}/${data.totalFilesCount}] Synchronized: ${data.filename}`);
+      }
     });
 
     await ftpDeploy.deploy(config);

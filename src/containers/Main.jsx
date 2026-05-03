@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Route, Routes, HashRouter } from "react-router-dom";
+import { Route, Routes, HashRouter, Outlet } from "react-router-dom";
 import Home from "../pages/home/HomeComponent";
 import Splash from "../pages/splash/Splash";
 import usePortfolioMaintenanceSettings from "../pages/portfolio/usePortfolioMaintenanceSettings";
@@ -47,42 +47,20 @@ import Error404 from "../pages/errors/error404/Error";
 import ErrorBoundary from "../components/ErrorBoundary";
 import AdminTransition from "../pages/admin/components/AdminTransition";
 
-function PortfolioGuard({ theme, children }) {
-  const { enabled, settings, loading } = usePortfolioMaintenanceSettings();
-  if (loading) {
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "grid",
-          placeItems: "center",
-          background: theme?.body || "#F0F8FF",
-          color: theme?.text || "#0A1628",
-          padding: 24,
-        }}
-      >
-        <div style={{ textAlign: "center" }}>
-          <div
-            style={{
-              width: 42,
-              height: 42,
-              borderRadius: "50%",
-              border: `3px solid ${theme?.cardBorder || "rgba(66, 165, 245, 0.25)"}`,
-              borderTopColor: theme?.imageHighlight || theme?.gradientStart || "#1565C0",
-              margin: "0 auto 12px",
-            }}
-            aria-hidden="true"
-          />
-          <div style={{ fontWeight: 700 }}>Loading…</div>
-        </div>
-      </div>
-    );
+function PortfolioGuard({ children }) {
+  const { enabled, settings } = usePortfolioMaintenanceSettings();
+
+  // Allow Admin and Install routes to bypass maintenance mode so the user isn't locked out.
+  const isAdminPath = window.location.hash.startsWith("#/admin");
+  const isInstallPath = window.location.hash.startsWith("#/install");
+
+  if (enabled && !isAdminPath && !isInstallPath) {
+    return <PortfolioMaintenancePage settings={settings} />;
   }
-  if (enabled) return <PortfolioMaintenancePage settings={settings} theme={theme} />;
   return children;
 }
 
-function Guarded({ theme, children }) {
+function Guarded({ children }) {
   return (
     <ErrorBoundary
       fallback={
@@ -92,19 +70,19 @@ function Guarded({ theme, children }) {
         </div>
       }
     >
-      <PortfolioGuard theme={theme}>{children}</PortfolioGuard>
+      <PortfolioGuard>{children}</PortfolioGuard>
     </ErrorBoundary>
   );
 }
 
 const commonRoutes = (theme, onToggle) => (
   <>
-    <Route path="/home" element={<Guarded theme={theme}><Home theme={theme} /></Guarded>} />
-    <Route path="/experience" element={<Guarded theme={theme}><Experience theme={theme} /></Guarded>} />
-    <Route path="/education" element={<Guarded theme={theme}><Education theme={theme} /></Guarded>} />
-    <Route path="/opensource" element={<Guarded theme={theme}><Opensource theme={theme} /></Guarded>} />
-    <Route path="/contact" element={<Guarded theme={theme}><Contact theme={theme} /></Guarded>} />
-    <Route path="/projects" element={<Guarded theme={theme}><Projects theme={theme} /></Guarded>} />
+    <Route path="/home" element={<Home theme={theme} />} />
+    <Route path="/experience" element={<Experience theme={theme} />} />
+    <Route path="/education" element={<Education theme={theme} />} />
+    <Route path="/opensource" element={<Opensource theme={theme} />} />
+    <Route path="/contact" element={<Contact theme={theme} />} />
+    <Route path="/projects" element={<Projects theme={theme} />} />
     <Route path="/blogs" element={<Blogs theme={theme} onToggle={onToggle} />} />
     <Route
       path="/blogs/:slug"
@@ -383,15 +361,23 @@ const MainContent = ({ theme, onToggle }) => (
   <HashRouter>
     <AdminTransition>
       <Routes>
-        {settings.isSplash ? (
-          <>
-            <Route path="/" element={<Guarded theme={theme}><Splash theme={theme} /></Guarded>} />
-            <Route path="/splash" element={<Guarded theme={theme}><Splash theme={theme} /></Guarded>} />
-          </>
-        ) : (
-          <Route path="/" element={<Guarded theme={theme}><Home theme={theme} /></Guarded>} />
-        )}
-        {commonRoutes(theme, onToggle)}
+        <Route
+          element={
+            <Guarded>
+              <Outlet />
+            </Guarded>
+          }
+        >
+          {settings.isSplash ? (
+            <>
+              <Route path="/" element={<Splash theme={theme} />} />
+              <Route path="/splash" element={<Splash theme={theme} />} />
+            </>
+          ) : (
+            <Route path="/" element={<Home theme={theme} />} />
+          )}
+          {commonRoutes(theme, onToggle)}
+        </Route>
       </Routes>
     </AdminTransition>
   </HashRouter>

@@ -59,9 +59,57 @@ function App() {
     return () => window.removeEventListener(PORTFOLIO_THEME_PREVIEW_EVENT, onPreviewTheme);
   }, []);
 
-  // Show nothing until we know whether the site is installed.
-  // This prevents a flash of the portfolio before redirect to /install.
-  if (!installChecked) return null;
+  // Show a clean floating spinner while the install-check fetch runs.
+  // No box/card — just a spinner + label floating on the page background.
+  if (!installChecked) {
+    const bg       = theme?.body            || "#F0F8FF";
+    const accent   = theme?.imageHighlight  || theme?.gradientStart || "#1565C0";
+    const accentEnd= theme?.gradientEnd     || "#42A5F5";
+    const textColor= theme?.text            || "#0A1628";
+    const isDark   = theme === darkTheme;
+
+    return (
+      <div style={{
+        position: "fixed", inset: 0,
+        display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center", gap: 18,
+        background: bg,
+        zIndex: 9999,
+      }}>
+        {/* Spinner ring — no card around it */}
+        <div style={{ position: "relative", width: 52, height: 52 }}>
+          {/* Track */}
+          <div style={{
+            position: "absolute", inset: 0, borderRadius: "50%",
+            border: `3px solid ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.07)"}`,
+          }} />
+          {/* Arc */}
+          <div style={{
+            position: "absolute", inset: 0, borderRadius: "50%",
+            border: "3px solid transparent",
+            borderTopColor: accent,
+            borderRightColor: accentEnd,
+            animation: "pf-spin 0.9s linear infinite",
+          }} />
+        </div>
+
+        {/* Label */}
+        <div style={{
+          fontSize: 13, fontWeight: 600,
+          letterSpacing: "0.08em", textTransform: "uppercase",
+          color: textColor, opacity: 0.45,
+          animation: "pf-fade 2s ease-in-out infinite",
+        }}>
+          Loading...
+        </div>
+
+        <style>{`
+          @keyframes pf-spin { to { transform: rotate(360deg); } }
+          @keyframes pf-fade { 0%,100% { opacity:0.3; } 50% { opacity:0.6; } }
+        `}</style>
+      </div>
+    );
+  }
 
   return (
     <ThemeProvider theme={theme}>

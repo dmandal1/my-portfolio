@@ -4,12 +4,13 @@ import {
   ADMIN_SETTINGS_UPDATED_EVENT,
   loadAdminSettings,
   normalizeAdminSettings,
+  SETTINGS_KEY,
 } from "./adminSettingsConfig";
 import { AdminSettingsContext, AdminSettingsMetaContext } from "./AdminSettingsShared";
 
 export function AdminSettingsProvider({ children }) {
   const [settings, setSettings] = useState(loadAdminSettings);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !localStorage.getItem(SETTINGS_KEY));
 
   const refresh = useCallback(() => {
     setSettings(loadAdminSettings());
