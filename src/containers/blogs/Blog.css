@@ -5,6 +5,7 @@
 .blogs-section {
   --blog-bg: #f0f8ff;
   --blog-card: #ffffff;
+  --blog-input: #fafcff;
   --blog-text: #0a1628;
   --blog-muted: #4a6fa5;
   --blog-accent: #1565c0;
@@ -15,9 +16,11 @@
   --blog-gradient: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
   --blogs-sidebar-w: 260px;
 
-  background-color: var(--blog-bg);
+  background-color: transparent;
+  background: transparent;
   min-height: 100vh;
   padding: 0 0 80px;
+  transition: background-color 0.3s ease, background 0.3s ease;
 }
 
 /* ── Page Head ─────────────────────────── */
@@ -200,12 +203,14 @@
   padding: 0 42px 0 14px;
   border-radius: 8px;
   border: 1px solid var(--blog-border);
-  background: #fafcff;
+  background: var(--blog-input);
   color: var(--blog-text);
   font-size: 13.5px;
   outline: none;
   transition:
-    border-color 0.18s ease,
+    background 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease,
     box-shadow 0.18s ease;
 }
 
@@ -215,7 +220,8 @@
 }
 
 .blogs-searchbox input::placeholder {
-  color: #aabfd8;
+  color: var(--blog-muted);
+  transition: color 0.3s ease;
 }
 
 .blogs-search-icon {
@@ -233,6 +239,7 @@
   font-size: 13px;
   cursor: pointer;
   flex-shrink: 0;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .blogs-search-clear {
@@ -485,11 +492,12 @@
 }
 
 .blogs-widget {
-  background: #ffffff;
+  background: var(--blog-card);
   border: 1px solid var(--blog-border);
   border-radius: 10px;
   padding: 16px;
   box-shadow: 0 2px 10px rgba(21, 101, 192, 0.05);
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .blogs-widget--categories,
@@ -556,8 +564,8 @@
   cursor: pointer;
   text-align: left;
   transition:
-    background 0.14s ease,
-    color 0.14s ease;
+    background 0.3s ease,
+    color 0.3s ease;
 }
 
 .blogs-category-item:hover {
@@ -608,7 +616,7 @@
   color: inherit;
   padding: 8px 0;
   border-bottom: 1px solid var(--blog-border, rgba(187, 222, 251, 0.35));
-  transition: opacity 0.14s ease;
+  transition: opacity 0.14s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .blogs-recent-item:last-child {

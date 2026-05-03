@@ -255,13 +255,8 @@ body {
 }
 
 /* Page-level wrappers use body bg so they blend with header/footer */
-[data-portfolio-theme="dark"] .blog-root,
-[data-portfolio-theme="dark"] .bp-root,
-[data-portfolio-theme="dark"] .blogs-section {
-  background: var(--pf-bg);
-  border-color: var(--pf-border);
-  color: var(--pf-text);
-}
+/* Transition handled via inline styles and component-specific CSS */
+
 
 /* Page-level blog post elements match body/header/footer */
 [data-portfolio-theme="dark"] .bp-pagehead,
@@ -273,7 +268,6 @@ body {
 
 /* Inner elements use surface bg */
 [data-portfolio-theme="dark"] .blogs-featured,
-[data-portfolio-theme="dark"] .blogs-widget,
 [data-portfolio-theme="dark"] .blogs-pagination-summary,
 [data-portfolio-theme="dark"] .blogs-pagination-controls,
 [data-portfolio-theme="dark"] .blogs-page-btn,
@@ -297,7 +291,6 @@ body {
 }
 
 [data-portfolio-theme="dark"] .bc-card,
-[data-portfolio-theme="dark"] .blogs-widget,
 [data-portfolio-theme="dark"] .bp-widget,
 [data-portfolio-theme="dark"] .bp-comment-form,
 [data-portfolio-theme="dark"] .bp-comment,
@@ -307,7 +300,6 @@ body {
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
 }
 
-[data-portfolio-theme="dark"] .blogs-searchbox input,
 [data-portfolio-theme="dark"] .bp-comment-form input,
 [data-portfolio-theme="dark"] .bp-comment-form textarea,
 [data-portfolio-theme="dark"] .bp-reply-form input,
@@ -749,6 +741,8 @@ body {
   --blog-border: var(--pf-border);
   --blog-text: var(--pf-text);
   --blog-muted: var(--pf-muted);
+  --blog-card: var(--pf-surface);
+  --blog-input: var(--pf-surface-2);
 }
 
 [data-portfolio-theme="dark"] .blogs-widget-title {
@@ -805,27 +799,8 @@ body {
   color: var(--pf-accent);
 }
 
-[data-portfolio-theme="dark"] .blogs-searchbox {
-  background: var(--pf-surface-2);
-  border-color: var(--pf-border);
-}
+/* Search box styles handled via variables in Blog.css */
 
-[data-portfolio-theme="dark"] .blogs-searchbox input {
-  background: transparent;
-  color: var(--pf-text);
-}
-
-[data-portfolio-theme="dark"] .blogs-searchbox input::placeholder {
-  color: var(--pf-muted);
-}
-
-[data-portfolio-theme="dark"] .blogs-search-icon {
-  color: var(--pf-muted);
-}
-
-[data-portfolio-theme="dark"] .blogs-search-clear {
-  color: var(--pf-muted);
-}
 
 [data-portfolio-theme="dark"] .blogs-category-list::-webkit-scrollbar-track {
   background: var(--pf-surface-2);

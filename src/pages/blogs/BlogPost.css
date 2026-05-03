@@ -33,7 +33,8 @@
 /* ── Page shell ──────────────────────── */
 .bp-root {
   min-height: 100vh;
-  background: var(--bp-bg);
+  background: transparent;
+  transition: background 0.3s ease;
 }
 .bp-page {
   min-height: 60vh;

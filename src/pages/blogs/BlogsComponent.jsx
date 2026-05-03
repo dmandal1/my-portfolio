@@ -11,12 +11,11 @@ function BlogsComponent({ theme, onToggle }) {
   const { enabled, settings } = useBlogMaintenanceSettings();
   return (
     <div className="blogs-wrapper" style={{ 
-      backgroundColor: theme.body, 
+      backgroundColor: theme.body,
       minHeight: "100vh",
       display: "flex",
       flexDirection: "column",
-      transition: "background-color 0.25s ease-out",
-      animation: "blogsPageFadeIn 0.4s ease-out forwards"
+      transition: "background-color 0.3s ease"
     }}>
       <Header theme={theme} />
       <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>

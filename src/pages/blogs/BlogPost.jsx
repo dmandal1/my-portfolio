@@ -1315,7 +1315,7 @@ const portfolioCtx = usePortfolioData();
   const visibleCommentsCount = comments.filter((comment) => !comment.parentId || visibleCommentIds.has(comment.parentId)).length;
 
   return (
-	    <div className="bp-root" style={themeVars}>
+    <div className="bp-root" style={{ ...themeVars, backgroundColor: theme.body, transition: "background-color 0.3s ease" }}>
       <Helmet>
         <title>{metaTitle}</title>
         <meta name="description" content={metaDescription} />
