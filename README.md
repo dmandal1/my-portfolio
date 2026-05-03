@@ -10,7 +10,7 @@
 
 A high-end, premium portfolio template featuring a fully-integrated **Admin Dashboard CMS**. This project is designed for software developers who want a beautiful, glassmorphic portfolio combined with the power of a professional content management system.
 
-**[🔗 View Live Demo](https://deepakmandal.dev)** • **[🚀 Setup Wizard](#-setup-wizard--initial-configuration)** • **[🛠️ Tech Stack](#️-tech-stack)**
+**[🔗 View Live Demo](https://deepakmandal.dev)** • **[🚀 Setup Wizard](#setup-wizard--initial-configuration)** • **[🛠️ Tech Stack](#tech-stack)**
 
 ---
 
