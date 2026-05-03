@@ -149,7 +149,7 @@ export default function AdminLogin() {
     } catch (err) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      setTimeout(() => setLoading(false), 800);
     }
   }
 
@@ -290,18 +290,25 @@ export default function AdminLogin() {
           </h2>
           <p className="aLogin-form-sub">
             {step === 'login' ? "Access your admin dashboard" : 
-             step === '2fa' ? "Enter the 6-digit code sent to your email" : 
+        step === '2fa' ? "Enter the 6-digit code sent to your email" : 
              "We'll send you a 6-digit OTP to recover your account"}
           </p>
 
           {error && (
-            <div className="aLogin-error-wrap" key={error}>
+            <div className={`aLogin-error-wrap ${step === 'forgot' ? 'aLogin-error-wrap--friendly' : ''}`} key={error}>
               <div className="aLogin-error-icon">
-                <i className="fas fa-exclamation-circle" />
+                <i className="fas fa-times-circle" />
               </div>
               <div className="aLogin-error-content">
-                <div className="aLogin-error-title">Login Failed</div>
-                <div className="aLogin-error-text">{error}</div>
+                <div className="aLogin-error-title">
+                  {step === 'forgot' ? "Identity Not Recognized" : step === '2fa' ? "Verification Failed" : "Access Denied"}
+                </div>
+                <div className="aLogin-error-text">
+                  {step === 'forgot' && (error.toLowerCase().includes('registered') || error.toLowerCase().includes('not found'))
+                    ? `Oops! We couldn't find an account for ${email}. Please check for typos or try the email used during setup.`
+                    : error
+                  }
+                </div>
               </div>
             </div>
           )}
