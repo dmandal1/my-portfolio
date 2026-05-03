@@ -1,8 +1,0 @@
-{
-  "jest.enable": false,
-  "jest.autoRun": "off",
-  "jest.jestCommandLine": "npx vitest run",
-  "jestrunner.jestCommand": "npx vitest run",
-  "jestrunner.runOptions": [],
-  "testing.automaticallyOpenPeekView": "never"
-}
