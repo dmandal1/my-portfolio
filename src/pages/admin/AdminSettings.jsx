@@ -564,12 +564,12 @@ export default function AdminSettings() {
         .join(", ");
       toast?.addToast(
         cloudTargets
-          ? `Settings saved to Firestore: ${cloudTargets}.`
-          : "Settings saved and synced to cloud.",
+          ? `Settings saved successfully: ${cloudTargets}.`
+          : "Settings saved and synced successfully.",
         "success",
       );
     } catch (error) {
-      console.error("[AdminSettings] Firestore save failed:", error);
+      console.error("[AdminSettings] Cloud save failed:", error);
       const time = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
       setSavedAt(time);
       setDirty(false);
@@ -580,7 +580,7 @@ export default function AdminSettings() {
               .join(" | ")
           : error?.code || error?.message || "unknown error";
       toast?.addToast(
-        `Settings saved locally but Firestore sync failed. ${details}`,
+        `Settings saved locally but cloud sync failed. ${details}`,
         "error",
       );
     }

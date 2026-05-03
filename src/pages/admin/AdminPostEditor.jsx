@@ -1087,7 +1087,7 @@ export default function AdminPostEditor() {
     return () => { if (pendingCoverPreviewRef.current) URL.revokeObjectURL(pendingCoverPreviewRef.current); };
   }, []);
 
-  /* ── Live categories from Firestore ── */
+  /* ── Live categories from Database ── */
   const [allCategories, setAllCategories]     = useState([]);
   const [catsLoading, setCatsLoading]         = useState(true);
   const [catPanelOpen, setCatPanelOpen]       = useState(true);
@@ -1098,7 +1098,7 @@ export default function AdminPostEditor() {
   const [newCatParentId, setNewCatParentId]   = useState("");
   const [addingCat, setAddingCat]             = useState(false);
 
-  /* ── Live tags from Firestore ── */
+  /* ── Live tags from Database ── */
   const [allTags, setAllTags]                 = useState([]);
   const [tagsLoading, setTagsLoading]         = useState(true);
   const [tagPanelOpen, setTagPanelOpen]       = useState(true);

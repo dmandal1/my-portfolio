@@ -1009,7 +1009,7 @@ export default function BlogPost({ theme }) {
   const commentsRef = useRef(null);
 
   // If navigation came from the blog list we can prefetch the cover image before the
-  // Firestore fetch completes. This improves perceived performance on slow networks.
+  // Database fetch completes. This improves perceived performance on slow networks.
   const navPrefetchImage = location?.state?.prefetchImage || "";
 
   async function loadComments(blogId, mounted = true) {
