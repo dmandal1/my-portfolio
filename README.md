@@ -82,6 +82,7 @@ This project includes a built-in **Setup Wizard** to help you get your database 
 3.  The Setup Wizard will guide you through:
     - **Environment Check**: Verifying server compatibility.
     - **Database Connection**: Linking your site to your MySQL database.
+    - **Email Configuration (SMTP)**: Configuring your mailing server for 2FA and security alerts.
     - **Admin Setup**: Creating your primary administrative account (Username & Password).
 
 ### 3. Post-Installation
