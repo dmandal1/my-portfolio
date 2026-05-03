@@ -62,6 +62,28 @@ npm start
 
 ---
 
+## 🧙‍♂️ Setup Wizard & Initial Configuration
+
+This project includes a built-in **Setup Wizard** to help you get your database and admin panel running in minutes.
+
+### 1. Database Preparation
+- Create a new **MySQL Database** on your hosting server (e.g., via cPanel or Hostinger Dashboard).
+- Note down your **Database Name**, **Username**, and **Password**.
+
+### 2. Running the Installer
+1.  Deploy the backend files to your server.
+2.  Navigate to your site at `yourdomain.com/#/install`.
+3.  The Setup Wizard will guide you through:
+    - **Environment Check**: Verifying server compatibility.
+    - **Database Connection**: Linking your site to your MySQL database.
+    - **Admin Setup**: Creating your primary administrative account (Username & Password).
+
+### 3. Post-Installation
+- Once finished, the installer will automatically generate a `config.php` file on your server and lock itself for security.
+- You can now log in to the **Admin Dashboard** at `yourdomain.com/#/admin/login`.
+
+---
+
 ## 📤 Deployment
 
 The project includes a simplified deployment pipeline:
