@@ -827,7 +827,41 @@ function AboutAuthor({ totalPosts = 0, authorName = "", authorRole = "", authorB
                 style={{ "--s-color": s.backgroundColor || "#1565c0" }}
                 aria-label={s.name}
               >
-                <i className={`fab fa-${s.fontAwesomeIcon?.replace("fa-", "") || "globe"}`} />
+                {(() => {
+                  const icon = (s.fontAwesomeIcon || "").replace(/^fa[brs]?\s+fa-/, "").replace(/^fa-/, "").trim() || "globe";
+                  const iconMap = {
+                    "facebook": "\uf082", "facebook-f": "\uf39e", "facebook-square": "\uf082",
+                    "twitter": "\uf099", "twitter-square": "\uf081",
+                    "instagram": "\uf16d", "instagram-square": "\ufe66",
+                    "linkedin": "\uf08c", "linkedin-in": "\uf0e1", "linkedin-square": "\uf08c",
+                    "google": "\uf1a0", "google-plus": "\uf2b3",
+                    "github": "\uf09b", "github-square": "\uf092",
+                    "globe": "\uf0ac", "envelope": "\uf0e0", "phone": "\uf095", "rss": "\uf09e"
+                  };
+                  const brandIcons = new Set([
+                    "facebook","facebook-f","facebook-square","twitter","twitter-square",
+                    "instagram","instagram-square","linkedin","linkedin-in","linkedin-square",
+                    "google","google-plus","youtube","youtube-square","github","github-square"
+                  ]);
+                  const isBrand = brandIcons.has(icon);
+                  const fontFamily = isBrand ? "'Font Awesome 5 Brands'" : "'Font Awesome 5 Free'";
+                  const fontWeight = isBrand ? 400 : 900;
+                  const unicode = iconMap[icon] || "\uf0ac";
+
+                  return (
+                    <i 
+                      style={{ 
+                        fontFamily, 
+                        fontWeight, 
+                        fontStyle: "normal",
+                        display: "inline-block",
+                        lineHeight: 1
+                      }}
+                    >
+                      {unicode}
+                    </i>
+                  );
+                })()}
               </a>
             ))}
           </div>
