@@ -45,6 +45,7 @@ import { AdminSettingsProvider } from "../pages/admin/components/AdminSettingsCo
 import { settings } from "../portfolio.js";
 import Error404 from "../pages/errors/error404/Error";
 import ErrorBoundary from "../components/ErrorBoundary";
+import AdminTransition from "../pages/admin/components/AdminTransition";
 
 function PortfolioGuard({ theme, children }) {
   const { enabled, settings, loading } = usePortfolioMaintenanceSettings();
@@ -378,27 +379,33 @@ const commonRoutes = (theme, onToggle) => (
   </>
 );
 
+const MainContent = ({ theme, onToggle }) => (
+  <HashRouter>
+    <AdminTransition>
+      <Routes>
+        {settings.isSplash ? (
+          <>
+            <Route path="/" element={<Guarded theme={theme}><Splash theme={theme} /></Guarded>} />
+            <Route path="/splash" element={<Guarded theme={theme}><Splash theme={theme} /></Guarded>} />
+          </>
+        ) : (
+          <Route path="/" element={<Guarded theme={theme}><Home theme={theme} /></Guarded>} />
+        )}
+        {commonRoutes(theme, onToggle)}
+      </Routes>
+    </AdminTransition>
+  </HashRouter>
+);
+
 export default class Main extends Component {
   render() {
     const { theme, onToggle } = this.props;
     return (
       <AuthProvider>
         <PortfolioDataProvider>
-        <AdminSettingsProvider>
-        <HashRouter>
-          <Routes>
-            {settings.isSplash ? (
-              <>
-                <Route path="/" element={<Guarded theme={theme}><Splash theme={theme} /></Guarded>} />
-                <Route path="/splash" element={<Guarded theme={theme}><Splash theme={theme} /></Guarded>} />
-              </>
-            ) : (
-              <Route path="/" element={<Guarded theme={theme}><Home theme={theme} /></Guarded>} />
-            )}
-            {commonRoutes(theme, onToggle)}
-          </Routes>
-        </HashRouter>
-        </AdminSettingsProvider>
+          <AdminSettingsProvider>
+            <MainContent theme={theme} onToggle={onToggle} />
+          </AdminSettingsProvider>
         </PortfolioDataProvider>
       </AuthProvider>
     );

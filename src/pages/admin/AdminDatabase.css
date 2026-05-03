@@ -1067,3 +1067,42 @@ tr:hover .adb-tname {
   .adb-stat { padding: 14px 12px 12px; }
   .adb-tbl th, .adb-tbl td { padding: 8px 10px; }
 }
+
+/* ══ Buttery Skeletons ══════════════════════════════════════════════ */
+.adb-stat-skeleton {
+  background: var(--acard);
+  border: 1px solid var(--abdr);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid var(--abdr);
+}
+
+.adb-stat-icon-skel {
+  width: 46px;
+  height: 46px;
+  background: var(--ap-soft);
+  border-radius: 12px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--abdr);
+}
+
+.adb-stat-icon-skel::after,
+.adb-stat-skeleton .askel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: admin-shimmer 1.5s infinite;
+}
+
+[data-admin-theme="dark"] .adb-stat-icon-skel::after,
+[data-admin-theme="dark"] .adb-stat-skeleton .askel::after {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+}

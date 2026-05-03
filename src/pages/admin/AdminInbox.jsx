@@ -69,13 +69,13 @@ export default function AdminInbox() {
               <p className="apage-subtitle">Manage and respond to messages from your visitors</p>
             </div>
             <div style={{ display: "flex", gap: 12 }}>
-              <button className="abtn abtn-ghost" onClick={loadMessages}>
-                <i className="fas fa-sync-alt" style={{ marginRight: 6 }} /> Refresh
+              <button className="abtn abtn-ghost" onClick={loadMessages} disabled={loading}>
+                <i className={`fas fa-sync-alt${loading ? " fa-spin" : ""}`} style={{ marginRight: 6 }} /> Refresh
               </button>
             </div>
           </div>
           
-          <div className="ainbox-container">
+          <div className={`ainbox-container${loading && messages.length > 0 ? " is-refreshing" : ""}`}>
             {/* Left: Message List */}
             <div className="ainbox-sidebar">
               <div className="ainbox-sidebar-header">

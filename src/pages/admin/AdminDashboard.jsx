@@ -769,8 +769,8 @@ export default function AdminDashboard() {
               </span>
 
               {/* Refresh */}
-              <button className="abtn abtn-ghost abtn-sm" title="Refresh" onClick={loadBlogs}>
-                <i className="fas fa-sync-alt" />
+              <button className="abtn abtn-ghost abtn-sm" title="Refresh" onClick={loadBlogs} disabled={loading}>
+                <i className={`fas fa-sync-alt${loading ? " fa-spin" : ""}`} />
               </button>
 
               {/* Column toggle */}
@@ -850,8 +850,8 @@ export default function AdminDashboard() {
           )}
 
           {/* ── Table ── */}
-          <div className="atable-card">
-            {loading ? (
+          <div className={`atable-card${loading && blogs.length > 0 ? " is-refreshing" : ""}`}>
+            {loading && blogs.length === 0 ? (
               <div className="atable-responsive">
                 <table className="atable">
                   <thead>

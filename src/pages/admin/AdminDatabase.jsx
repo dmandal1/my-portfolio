@@ -276,6 +276,7 @@ export default function AdminDatabase() {
       <AdminSidebar />
       <main className="amain">
         <div className="amain-inner adb-page">
+          <div className={`workspace-sync-bar${loading ? " is-active" : ""}`} />
 
           {/* ══ Hero Banner ══════════════════════════════════════════ */}
           <div className="adb-banner">
@@ -313,11 +314,11 @@ export default function AdminDatabase() {
           </div>
 
           {/* ══ Stat Cards ══════════════════════════════════════════ */}
-          <div className="adb-cards-row">
+          <div className={`adb-cards-row${loading && stats ? " is-refreshing" : ""}`}>
             {STATS.map((s, i) => (
               <div
                 key={s.label}
-                className={`adb-stat adb-stat--${s.key}`}
+                className={`adb-stat adb-stat--${s.key}${loading ? " refresh-shimmer" : ""}`}
                 style={{ "--ac": s.accent, animationDelay: `${i * 55}ms` }}
               >
                 <div className="adb-stat-icon">
@@ -338,7 +339,7 @@ export default function AdminDatabase() {
           </div>
 
           {stats && (
-            <div className="adb-insights">
+            <div className={`adb-insights${loading ? " is-refreshing" : ""}`}>
               <div className="adb-insight">
                 <span className="adb-insight-label">Total rows</span>
                 <strong>{fmtCount(tableSummary.totalRows)}</strong>
@@ -380,7 +381,7 @@ export default function AdminDatabase() {
           <div className="adb-grid">
 
             {/* Table Overview */}
-            <div className="adb-panel">
+            <div className={`adb-panel${loading && stats ? " is-refreshing" : ""}`}>
               <div className="adb-panel-head" ref={overviewHeadRef}>
                 <div className="adb-panel-head-l">
                   <div className="adb-panel-icon"><i className="fas fa-table" /></div>
@@ -512,7 +513,7 @@ export default function AdminDatabase() {
             <div className="adb-right">
 
               {/* Clear Data panel — built from live tables, protected tables hidden */}
-              <div className="adb-panel adb-panel--danger" ref={dangerPanelRef}>
+              <div className={`adb-panel adb-panel--danger${loading && stats ? " is-refreshing" : ""}`} ref={dangerPanelRef}>
                 <div className="adb-panel-head">
                   <div className="adb-panel-head-l">
                     <div className="adb-panel-icon adb-panel-icon--red"><i className="fas fa-exclamation-triangle" /></div>
@@ -603,7 +604,7 @@ export default function AdminDatabase() {
 
           {/* ══ Recent Activity — full-width ══════════════════════════ */}
           {stats?.audit?.length > 0 && (
-            <div className="adb-audit-panel">
+            <div className={`adb-audit-panel${loading ? " is-refreshing" : ""}`}>
               <div className="adb-audit-head">
                 <div className="adb-audit-icon"><i className="fas fa-history" /></div>
                 <div>

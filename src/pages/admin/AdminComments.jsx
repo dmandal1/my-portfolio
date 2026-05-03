@@ -246,14 +246,15 @@ export default function AdminComments() {
                       className="acmt2-refresh-btn"
                       onClick={() => loadComments(selected.blogId)}
                       title="Refresh comments"
+                      disabled={loading}
                     >
-                      <i className="fas fa-sync-alt" />
+                      <i className={`fas fa-sync-alt${loading ? " fa-spin" : ""}`} />
                     </button>
                   </div>
 
                   {/* Comments list */}
-                  <div className="acmt2-comments">
-                    {loading ? (
+                  <div className={`acmt2-comments${loading && comments.length > 0 ? " is-refreshing" : ""}`}>
+                    {loading && comments.length === 0 ? (
                       <div className="acmt2-loading">
                         <div className="acmt2-loading-spinner" />
                         <span>Loading comments…</span>

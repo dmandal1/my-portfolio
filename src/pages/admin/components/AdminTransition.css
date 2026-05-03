@@ -1,0 +1,272 @@
+/* ── Premium Admin Transition Shield System ── */
+
+/* 1. Elegant Shimmering Progress Bar */
+.admin-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa, #3b82f6, #93c5fd, #3b82f6);
+  background-size: 300% 100%;
+  z-index: 1000003;
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+  pointer-events: none;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+}
+
+[data-admin-theme="dark"] .admin-progress-bar {
+  background: linear-gradient(90deg, #fbbf24, #fcd34d, #fbbf24, #fde68a, #fbbf24);
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.6);
+}
+
+.admin-progress-bar.is-loading {
+  width: 85%; /* Start by filling most of the way */
+  opacity: 1;
+  animation: bar-shimmer 2s linear infinite;
+  transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.admin-progress-bar.is-idle {
+  width: 100%; /* Snap to end */
+  opacity: 0;
+  transition: width 0.3s ease-out, opacity 0.4s ease 0.2s; /* Brief hold at 100% then fade */
+}
+
+@keyframes bar-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+/* 1.5 Content Wrapper */
+.admin-transition-body {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+  transition: opacity 0.4s ease;
+}
+
+.admin-transition-body.is-blurring {
+  pointer-events: none;
+  opacity: 0.4; /* Increased visibility to match the lighter blur */
+}
+
+/* 2. Premium Transition Overlay (Glass Shield) */
+.admin-transition-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000002;
+  transition: opacity 0.6s cubic-bezier(0.23, 1, 0.32, 1), 
+              visibility 0.6s;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.admin-transition-overlay.is-active {
+  opacity: 1;
+  visibility: visible;
+  background: rgba(248, 250, 252, 0.65); /* More translucent */
+  backdrop-filter: blur(12px) saturate(180%); /* Reduced blur as requested */
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  pointer-events: auto;
+}
+
+[data-admin-theme="dark"] .admin-transition-overlay.is-active {
+  background: rgba(10, 18, 35, 0.75); /* More translucent Dark Mode */
+}
+
+/* 3. Premium Transition Content Box */
+.admin-transition-content {
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-transition-icon {
+  font-size: 56px;
+  color: #3b82f6;
+  margin-bottom: 24px;
+  filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.4));
+  opacity: 0;
+}
+
+[data-admin-theme="dark"] .admin-transition-icon {
+  color: #fbbf24;
+  filter: drop-shadow(0 0 30px rgba(251, 191, 36, 0.4));
+}
+
+.admin-transition-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 8px;
+  letter-spacing: -1.2px;
+  opacity: 0;
+}
+
+[data-admin-theme="dark"] .admin-transition-title {
+  color: #fff;
+}
+
+.admin-transition-sub {
+  font-size: 16px;
+  color: #64748b;
+  margin-bottom: 32px;
+  font-weight: 500;
+  opacity: 0;
+}
+
+[data-admin-theme="dark"] .admin-transition-sub {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.admin-transition-loader {
+  width: 180px;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  margin: 0 auto;
+  overflow: hidden;
+  position: relative;
+  opacity: 0;
+}
+
+[data-admin-theme="dark"] .admin-transition-loader {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.admin-transition-loader-fill {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  width: 100%;
+  transform: translateX(-100%);
+}
+
+[data-admin-theme="dark"] .admin-transition-loader-fill {
+  background: linear-gradient(90deg, #fbbf24, #fcd34d);
+}
+
+/* Staggered Animations Trigger */
+.admin-transition-overlay.is-active .admin-transition-icon {
+  animation: admin-reveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 0.1s;
+}
+
+.admin-transition-overlay.is-active .admin-transition-title {
+  animation: admin-reveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 0.2s;
+}
+
+.admin-transition-overlay.is-active .admin-transition-sub {
+  animation: admin-reveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 0.3s;
+}
+
+.admin-transition-overlay.is-active .admin-transition-loader {
+  animation: admin-fade-in 0.6s ease-out forwards;
+  animation-delay: 0.4s;
+}
+
+.admin-transition-overlay.is-active .admin-transition-loader-fill {
+  animation: admin-load 0.8s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  animation-delay: 0.5s;
+}
+
+@keyframes admin-reveal {
+  0% { opacity: 0; transform: translateY(15px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes admin-blur-in {
+  0% { opacity: 0; transform: translateY(10px); filter: blur(10px); }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+@keyframes admin-fade-in {
+  to { opacity: 1; }
+}
+
+@keyframes admin-load {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(0); }
+}
+
+/* 4. Admin Skeleton UI */
+.admin-skeleton-root {
+  display: flex;
+  min-height: 100vh;
+  background: #f8fafc;
+  overflow: hidden;
+}
+
+[data-admin-theme="dark"] .admin-skeleton-root {
+  background: #0f172a;
+}
+
+.admin-skeleton-sidebar {
+  width: 260px;
+  background: #fff;
+  border-right: 1px solid #e2e8f0;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+[data-admin-theme="dark"] .admin-skeleton-sidebar {
+  background: #1e293b;
+  border-right-color: #334155;
+}
+
+.admin-skeleton-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.admin-skeleton-main {
+  flex: 1;
+  padding: 40px;
+}
+
+.admin-skeleton-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 48px;
+}
+
+.admin-skeleton-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 32px;
+}
+
+.admin-skeleton-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 32px;
+}
+
+[data-admin-theme="dark"] .admin-skeleton-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.admin-skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}

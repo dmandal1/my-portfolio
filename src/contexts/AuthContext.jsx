@@ -21,6 +21,12 @@ export function AuthProvider({ children }) {
   }, []);
 
   const checkTokenAndSetup = useCallback(async () => {
+    // Skip token check if we are on the installation page to avoid 500/503 errors
+    if (window.location.hash.includes("/install")) {
+      setLoading(false);
+      return;
+    }
+
     const token = getToken();
     if (token) {
       try {
@@ -43,7 +49,10 @@ export function AuthProvider({ children }) {
               social_links: fullUser.social_links
             });
           } catch (err) {
-            console.error("Failed to fetch full user profile:", err);
+            // Silence common initialization errors during site setup (500/503)
+            if (!err.message?.includes("500") && !err.message?.includes("503")) {
+              console.error("Failed to fetch full user profile:", err);
+            }
             // Fallback to JWT payload
             setCurrentUser({
               email: payload.email,

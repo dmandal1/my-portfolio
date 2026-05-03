@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import pkg from "../../../package.json";
 import { useAuth } from "../../contexts/AuthContext";
 import { saveAdminPanelSettings, changeAdminPassword, getMenuLinks, saveMenuLinks } from "../../api/apiService";
@@ -369,7 +369,13 @@ export default function AdminSettings() {
   const { currentUser }             = useAuth();
   const sharedSettings              = useAdminSettings();
   const [settings, setSettings]     = useState(loadAdminSettings);
-  const [activeTab, setActiveTab]   = useState("general");
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const activeTab = searchParams.get("tab") || "general";
+
+  const setActiveTab = (tabId) => {
+    navigate(`?tab=${tabId}`, { replace: true });
+  };
   const [dirty, setDirty]           = useState(false);
   const [savedAt, setSavedAt]       = useState("");
   const [importJson, setImportJson] = useState("");

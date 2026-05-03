@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import AdminSidebar from "./components/AdminSidebar";
 import { useToast } from "./components/AdminToast";
 import {
@@ -1637,7 +1637,13 @@ function BlogConfigTab({ toast }) {
 /* ── Main page ──────────────────────────────────────────────────────────── */
 export default function AdminPortfolio() {
   const toast = useToast();
-  const [activeTab, setActiveTab] = useState("profile");
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const activeTab = searchParams.get("tab") || "profile";
+
+  const setActiveTab = (tabId) => {
+    navigate(`?tab=${tabId}`, { replace: true });
+  };
 
   const TAB_CONTENT = {
     profile:          <ProfileTab toast={toast} />,

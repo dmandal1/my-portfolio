@@ -59,18 +59,104 @@
   --sh-p: 0 4px 14px rgba(21, 101, 192, 0.35);
   --sh-p2: 0 8px 28px rgba(21, 101, 192, 0.45);
 
-  /* Radius — WP is conservative */
-  --r-xs: 2px;
-  --r-sm: 3px;
-  --r: 4px;
-  --r-lg: 6px;
-  --r-xl: 8px;
-  --r-pill: 999px;
-
-  /* Motion — WP is subtle */
+  /* ── Motion — WP is subtle ── */
   --t: 0.15s ease;
   --t-sl: 0.25s ease;
   --t-sp: 0.35s cubic-bezier(0.2, 0.8, 0.3, 1);
+  --t-premium: 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* ── Premium Refresh & Loading States ──────────────────────── */
+
+/* Workspace Sync Progress Bar (Top of main content) */
+.workspace-sync-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    var(--ap-l), 
+    var(--ap), 
+    var(--ap-l), 
+    transparent
+  );
+  background-size: 200% 100%;
+  z-index: 100;
+  animation: admin-progress-slide 1.5s infinite linear;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.workspace-sync-bar.is-active {
+  opacity: 1;
+}
+
+@keyframes admin-progress-slide {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+/* Liquid Refresh Spin (Sophisticated Easing) */
+.fa-sync-alt.fa-spin,
+.fa-spinner.fa-spin {
+  animation: admin-refresh-spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite !important;
+}
+
+@keyframes admin-refresh-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Container Refresh Pulse (Apply to cards during loading) */
+.is-refreshing {
+  position: relative;
+  pointer-events: none;
+}
+
+.is-refreshing::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 5;
+  border-radius: inherit;
+  animation: admin-pulse-frost 2s infinite ease-in-out;
+}
+
+@keyframes admin-pulse-frost {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+[data-admin-theme="dark"] .is-refreshing::after {
+  background: rgba(15, 23, 42, 0.25);
+}
+
+/* Subtle Shimmer for refreshing elements */
+.refresh-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.refresh-shimmer::before {
+  content: "";
+  position: absolute;
+  top: 0; left: -100%;
+  width: 50%; height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.2), 
+    transparent
+  );
+  z-index: 6;
+  animation: admin-shimmer 1.5s infinite;
+}
+
+@keyframes admin-shimmer {
+  to { left: 200%; }
 }
 
 /* ── Form Sectioning ────────────────────────── */
