@@ -2,6 +2,17 @@
 
 A high-end, premium portfolio template featuring a fully-integrated **Admin Dashboard CMS**. This project is designed for software developers who want a beautiful, glassmorphic portfolio combined with the power of a professional content management system.
 
+**[🔗 View Live Demo](https://deepakmandal.dev)**
+
+---
+
+## 📸 Visual Tour
+
+| **Premium Portfolio** | **Admin Dashboard** |
+| :---: | :---: |
+| ![Portfolio Home](https://via.placeholder.com/600x400?text=Portfolio+Home+Preview) | ![Admin Dashboard](https://via.placeholder.com/600x400?text=Admin+Dashboard+Preview) |
+| *Glassmorphic UI & Animations* | *Powerful Content Management* |
+
 ---
 
 ## ✨ Key Features
@@ -25,40 +36,27 @@ A high-end, premium portfolio template featuring a fully-integrated **Admin Dash
 ## 🛠️ Tech Stack
 
 - **Frontend**: [React](https://reactjs.org/), [Vite](https://vitejs.dev/), [Styled Components](https://styled-components.com/)
-- **Backend**: PHP/MySQL (API Layer)
-- **Deployment**: Integrated FTP Deployment Scripts
-- **Animations**: [Anime.js](https://animejs.com/), CSS3 Transitions
+- **Backend**: PHP 8.x / MySQL (Professional API Layer)
+- **Deployment**: Node.js FTP Deployment Pipeline
+- **Animations**: CSS3 Keyframes & Framer Motion
 
 ---
 
-## 🚀 Getting Started
+## 📂 Project Structure
 
-### 1. Prerequisites
-- **Node.js** (v16+)
-- **NPM** or **Yarn**
-- **PHP/MySQL Host** (For the Admin Panel/Database)
-
-### 2. Local Installation
-```bash
-# Clone the repository
-git clone https://github.com/dmandal1/my-portfolio.git
-
-# Install dependencies
-npm install
-
-# Start the development server
-npm start
+```text
+├── src/                # Frontend Source Code
+│   ├── components/     # Reusable UI Components
+│   ├── containers/     # Page Layouts & Logic
+│   ├── pages/          # Individual Pages (Home, Admin, etc.)
+│   ├── shared/         # Data Files & Helpers
+│   └── portfolio.js    # YOUR PRIMARY CONFIG FILE
+├── backend/            # PHP API & Database Scripts
+├── scripts/            # Deployment & Maintenance Scripts
+├── public/             # Static Assets & Icons
+├── .env.example        # Environment Template
+└── git_data_fetcher.js # GitHub Stats Automation
 ```
-
-### 3. Configuration
-1.  **Environment Variables**: Create a `.env` file in the root directory based on `.env.example`.
-    - `VITE_API_URL`: Path to your backend API.
-    - `FTP_HOST`, `FTP_USER`, `FTP_PASSWORD`: Credentials for deployment.
-2.  **Personal Information**: Edit `src/portfolio.js` to update your name, skills, and links.
-3.  **GitHub Data**: Update `git_data_fetcher.mjs` with your username and run:
-    ```bash
-    node git_data_fetcher.mjs
-    ```
 
 ---
 
@@ -84,16 +82,39 @@ This project includes a built-in **Setup Wizard** to help you get your database 
 
 ---
 
-## 📤 Deployment
+## 🚀 Getting Started
 
-The project includes a simplified deployment pipeline:
+### 1. Prerequisites
+- **Node.js** (v16+)
+- **NPM** or **Yarn**
+
+### 2. Local Installation
+```bash
+# Clone the repository
+git clone https://github.com/dmandal1/my-portfolio.git
+
+# Install dependencies
+npm install
+
+# Start the development server
+npm start
+```
+
+### 3. Configuration
+1.  **Environment Variables**: Create a `.env` file based on `.env.example`.
+2.  **Personal Information**: Update `src/portfolio.js`.
+3.  **GitHub Data**: Update `git_data_fetcher.mjs` and run:
+    ```bash
+    node git_data_fetcher.mjs
+    ```
+
+---
+
+## 📤 Deployment
 
 ```bash
 # Deploy only the frontend
 npm run deploy:frontend
-
-# Deploy only the backend
-npm run deploy:backend
 
 # Deploy everything
 npm run deploy
@@ -104,13 +125,9 @@ npm run deploy
 ## ⚙️ Maintenance Mode
 You can enable maintenance mode via the **Admin Settings**. 
 - **Visitor View**: Sees a premium maintenance countdown and status bar.
-- **Admin Bypass**: You can always access `/admin` even when maintenance mode is active, ensuring you are never locked out.
+- **Admin Bypass**: Admins can always access `/admin`, ensuring you are never locked out.
 
 ---
 
 ## 📄 License
 This project is licensed under the MIT License.
-
-## 👏 Acknowledgments
-- Inspired by the MasterPortfolio template.
-- Icons by [FontAwesome](https://fontawesome.com/) and [Iconify](https://iconify.design/).
