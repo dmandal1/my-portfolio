@@ -558,16 +558,7 @@ export default function AdminSettings() {
       const time = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
       setSavedAt(time);
       setDirty(false);
-      const cloudTargets = Object.entries(writeReport || {})
-        .filter(([, status]) => status === "ok")
-        .map(([name]) => name)
-        .join(", ");
-      toast?.addToast(
-        cloudTargets
-          ? `Settings saved successfully: ${cloudTargets}.`
-          : "Settings saved and synced successfully.",
-        "success",
-      );
+      toast?.addToast("Settings saved successfully.", "success");
     } catch (error) {
       console.error("[AdminSettings] Cloud save failed:", error);
       const time = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
