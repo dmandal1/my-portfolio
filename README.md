@@ -10,7 +10,7 @@ A high-end, premium portfolio template featuring a fully-integrated **Admin Dash
 
 | **Premium Portfolio** | **Admin Dashboard** |
 | :---: | :---: |
-| ![Portfolio Home](https://via.placeholder.com/600x400?text=Portfolio+Home+Preview) | ![Admin Dashboard](https://via.placeholder.com/600x400?text=Admin+Dashboard+Preview) |
+| ![Portfolio Home](images/portfolio_preview.png) | ![Admin Dashboard](images/admin_preview.png) |
 | *Glassmorphic UI & Animations* | *Powerful Content Management* |
 
 ---
