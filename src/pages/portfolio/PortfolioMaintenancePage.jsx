@@ -382,10 +382,10 @@ export default function PortfolioMaintenancePage({ settings = {}, theme = {} }) 
                 </div>
               ) : (
                 <>
-                  <CountdownCard label="Days"    value={countdown.days}    />
-                  <CountdownCard label="Hours"   value={countdown.hours}   />
-                  <CountdownCard label="Minutes" value={countdown.minutes} />
-                  <CountdownCard label="Seconds" value={countdown.seconds} />
+                  <div style={{ animationDelay: "0.45s" }}><CountdownCard label="Days"    value={countdown.days}    /></div>
+                  <div style={{ animationDelay: "0.52s" }}><CountdownCard label="Hours"   value={countdown.hours}   /></div>
+                  <div style={{ animationDelay: "0.59s" }}><CountdownCard label="Minutes" value={countdown.minutes} /></div>
+                  <div style={{ animationDelay: "0.66s" }}><CountdownCard label="Seconds" value={countdown.seconds} /></div>
                 </>
               )}
             </div>

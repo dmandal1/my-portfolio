@@ -53,8 +53,9 @@ function PortfolioGuard({ children }) {
   // Allow Admin and Install routes to bypass maintenance mode so the user isn't locked out.
   const isAdminPath = window.location.hash.startsWith("#/admin");
   const isInstallPath = window.location.hash.startsWith("#/install");
+  const isBlogPath = window.location.hash.startsWith("#/blogs");
 
-  if (enabled && !isAdminPath && !isInstallPath) {
+  if (enabled && !isAdminPath && !isInstallPath && !isBlogPath) {
     return <PortfolioMaintenancePage settings={settings} />;
   }
   return children;

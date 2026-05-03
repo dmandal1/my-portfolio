@@ -3,22 +3,28 @@ require_once __DIR__ . '/cors.php';
 require_once __DIR__ . '/config.php';
 
 // This is a public endpoint, no requireAuth() needed for reading RSS
-$db = getDb();
+try {
+    $db = getDb();
+    
+    // Fetch latest published posts
+    $stmt = $db->query("
+        SELECT id, title, slug, subtitle, excerpt, content, created_at, cover_image 
+        FROM blogs 
+        WHERE published = 1 
+        ORDER BY created_at DESC 
+        LIMIT 20
+    ");
+    $posts = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
 
-// Fetch latest published posts
-$stmt = $db->query("
-    SELECT id, title, slug, subtitle, excerpt, content, created_at, cover_image 
-    FROM blogs 
-    WHERE published = 1 
-    ORDER BY created_at DESC 
-    LIMIT 20
-");
-$posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Fetch site metadata
-$profileStmt = $db->query("SELECT content FROM portfolio_data WHERE section_name = 'portfolioProfile' LIMIT 1");
-$profileData = $profileStmt->fetchColumn();
-$profile = json_decode($profileData ?: '{}', true);
+    // Fetch site metadata
+    $profileStmt = $db->query("SELECT content FROM portfolio_data WHERE section_name = 'portfolioProfile' LIMIT 1");
+    $profileData = $profileStmt ? $profileStmt->fetchColumn() : null;
+    $profile = json_decode($profileData ?: '{}', true);
+} catch (Exception $e) {
+    // Fallback to empty data if DB fails
+    $posts = [];
+    $profile = [];
+}
 
 $siteTitle = $profile['logo_name'] ?? $profile['title'] ?? 'My Professional Portfolio';
 $siteDesc  = $profile['role'] ?? 'Latest insights and articles';
