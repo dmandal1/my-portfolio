@@ -133,7 +133,7 @@ You can enable maintenance mode via the **Admin Settings**.
 
 ## ❤️ Credits & Inspiration
 
-This project is inspired by and draws core concepts from **[masterPortfolio](https://github.com/dmandal1/masterPortfolio)**. It extends those ideas with a premium glassmorphic UI refresh, integrated PHP/MySQL backend CMS, and enterprise security features.
+This project is inspired by and draws core concepts from **[masterPortfolio](https://github.com/ashutosh1919/masterPortfolio)**. It extends those ideas with a premium glassmorphic UI refresh, integrated PHP/MySQL backend CMS, and enterprise security features.
 
 ## 📄 License
 This project is licensed under the MIT License.
