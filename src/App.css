@@ -258,13 +258,8 @@ body {
 /* Transition handled via inline styles and component-specific CSS */
 
 
-/* Page-level blog post elements match body/header/footer */
-[data-portfolio-theme="dark"] .bp-pagehead,
-[data-portfolio-theme="dark"] .bp-article {
-  background: var(--pf-bg);
-  border-color: var(--pf-border);
-  color: var(--pf-text);
-}
+/* Blog post pagehead blends with header; article uses variable-based background */
+
 
 /* Inner elements use surface bg */
 [data-portfolio-theme="dark"] .blogs-featured,
@@ -275,8 +270,6 @@ body {
 [data-portfolio-theme="dark"] .bc-body,
 [data-portfolio-theme="dark"] .bc-img-placeholder,
 [data-portfolio-theme="dark"] .bp-widget,
-[data-portfolio-theme="dark"] .bp-author-card-v2,
-[data-portfolio-theme="dark"] .bp-comment,
 [data-portfolio-theme="dark"] .bp-comment-form,
 [data-portfolio-theme="dark"] .bp-reply-form,
 [data-portfolio-theme="dark"] .bp-related-card,
@@ -294,7 +287,6 @@ body {
 [data-portfolio-theme="dark"] .bp-widget,
 [data-portfolio-theme="dark"] .bp-comment-form,
 [data-portfolio-theme="dark"] .bp-comment,
-[data-portfolio-theme="dark"] .bp-author-card-v2,
 [data-portfolio-theme="dark"] .bp-related-card,
 [data-portfolio-theme="dark"] .blogs-pagination-controls {
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
@@ -564,15 +556,8 @@ body {
   color: var(--pf-muted);
 }
 
-/* ── Author stats strip ── */
-[data-portfolio-theme="dark"] .bp-author-stats {
-  background: var(--pf-surface-2);
-  border-color: var(--pf-border);
-}
+/* Author stats & divider handled via --bp-soft/--bp-border variables in BlogPost.css */
 
-[data-portfolio-theme="dark"] .bp-author-stat-divider {
-  background: var(--pf-border);
-}
 
 /* ── Rating action buttons ── */
 [data-portfolio-theme="dark"] .bp-rating-action-btn {
@@ -820,6 +805,7 @@ body {
   --bp-soft: var(--pf-surface-2);
   --bp-border: var(--pf-border);
   --bp-bg: var(--pf-bg);
+  --bp-card: var(--pf-surface);
   --bp-text: var(--pf-text);
   --bp-muted: var(--pf-muted);
   --bp-accent: #60a5fa;
@@ -913,19 +899,8 @@ body {
   color: var(--pf-text);
 }
 
-[data-portfolio-theme="dark"] .bp-author-role-badge {
-  background: var(--pf-surface-2);
-  border-color: var(--pf-border);
-  color: var(--pf-accent);
-}
+/* Author card text elements handled via CSS variables in BlogPost.css */
 
-[data-portfolio-theme="dark"] .bp-author-name-lg {
-  color: var(--pf-text);
-}
-
-[data-portfolio-theme="dark"] .bp-author-bio {
-  color: var(--pf-muted);
-}
 
 /* Animations */
 @keyframes fade_down {
