@@ -22070,7 +22070,11 @@ body:has(.adel-overlay, .amodal-overlay, .adb-modal-overlay, .acat-modal-overlay
   display: grid;
   grid-template-columns: 1fr 1fr 160px 1fr auto;
   gap: 16px;
-  align-items: flex-end;
+  align-items: flex-start;
+}
+
+.ared-form-actions {
+  margin-top: 24px;
 }
 
 @media (max-width: 1200px) {
@@ -22079,6 +22083,7 @@ body:has(.adel-overlay, .amodal-overlay, .adb-modal-overlay, .acat-modal-overlay
   }
   .ared-form-actions {
     grid-column: span 2;
+    margin-top: 0;
   }
 }
 
@@ -22088,6 +22093,7 @@ body:has(.adel-overlay, .amodal-overlay, .adb-modal-overlay, .acat-modal-overlay
   }
   .ared-form-actions {
     grid-column: span 1;
+    margin-top: 0;
   }
 }
 
@@ -22122,8 +22128,40 @@ body:has(.adel-overlay, .amodal-overlay, .adb-modal-overlay, .acat-modal-overlay
 .ared-empty .aempty-icon {
   font-size: 56px;
   color: var(--ap);
-  opacity: 0.15;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
+}
+
+.ared-loading .aempty-icon i {
+  color: var(--ap);
+  opacity: 0.6;
+}
+
+.aseo-empty {
+  padding: 80px 40px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.aseo-empty .aempty-icon {
+  font-size: 56px;
+  color: var(--ap);
+  margin-bottom: 20px;
+}
+
+.aseo-loading .aempty-icon i {
+  color: var(--ap);
+  opacity: 0.6;
+}
+
+.ainbox-loading-centered {
+  padding: 60px 20px !important;
+}
+
+.ainbox-loading-centered .aempty-icon i {
+  color: var(--ap);
+  opacity: 0.6;
 }
 
 /* Ensure form icons are centered */

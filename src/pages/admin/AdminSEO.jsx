@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllBlogsAdmin, updateBlog } from '../../api/apiService';
+import { createPortal } from 'react-dom';
 import AdminSidebar from './components/AdminSidebar';
 import { useToast } from './components/AdminToast';
 
@@ -44,14 +45,20 @@ export default function AdminSEO() {
   const [saving, setSaving]   = useState(false);
   const [sortBy, setSortBy]   = useState('score');  // score | title | date
 
-  useEffect(() => {
-    let cancelled = false;
+  async function load() {
     setLoading(true);
-    getAllBlogsAdmin()
-      .then(data => { if (!cancelled) setBlogs(data); })
-      .catch(() => toast?.addToast('Failed to load posts.', 'error'))
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+    try {
+      const data = await getAllBlogsAdmin();
+      setBlogs(data);
+    } catch {
+      toast?.addToast('Failed to load posts.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    load();
   }, []);
 
   const rows = useMemo(() => {
@@ -160,7 +167,7 @@ export default function AdminSEO() {
                   <option value="date">Sort: Newest</option>
                 </select>
               </div>
-              <button className={`arefresh-btn ${loading ? "is-refreshing" : ""}`} onClick={() => window.location.reload()} title="Refresh Data">
+              <button className={`arefresh-btn ${loading ? "is-refreshing" : ""}`} onClick={load} title="Refresh Data">
                 <i className="fas fa-sync-alt" />
               </button>
             </div>
@@ -203,9 +210,12 @@ export default function AdminSEO() {
         {/* Table */}
         <div className="acard" style={{ padding: 0, overflow: 'hidden' }}>
           {loading ? (
-            <div className="atable-loading">
-              <i className="fas fa-spinner fa-spin" />
-              <span>Analyzing SEO data...</span>
+            <div className="aempty aseo-empty aseo-loading">
+              <div className="aempty-icon">
+                <i className="fas fa-spinner fa-spin" />
+              </div>
+              <h3 className="aempty-title">Analyzing SEO data...</h3>
+              <p className="aempty-sub">Scanning posts for meta tags and completeness.</p>
             </div>
           ) : rows.length === 0 ? (
             <div className="aempty areo-empty">
@@ -293,7 +303,7 @@ export default function AdminSEO() {
         </div>
 
         {/* Edit drawer / modal */}
-        {editing && (
+        {editing && createPortal(
           <div className="amodal-overlay">
             <div className="amodal-card aseo-modal">
               <div className="amodal-header">
@@ -313,7 +323,7 @@ export default function AdminSEO() {
                   { key: 'canonicalUrl',    label: 'Canonical URL',    max: null,       hint: 'Leave blank to use default page URL',    multiline: false },
                 ].map(({ key, label, max, hint, multiline }) => (
                   <div key={key} className="aform-group">
-                    <label htmlFor={`seo-field-${key}`} className="aform-label">{label}</label>
+                    <label htmlFor={`seo-field-${key}`} className="acat-label">{label}</label>
                     {multiline
                       ? <textarea
                           id={`seo-field-${key}`}
@@ -347,7 +357,8 @@ export default function AdminSEO() {
                 </button>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
         </div>
       </main>

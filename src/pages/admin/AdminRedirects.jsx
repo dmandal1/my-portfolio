@@ -171,7 +171,7 @@ export default function AdminRedirects() {
               </select>
             </div>
             <div className="aform-group">
-              <label htmlFor="redirect-note" className="aform-label">Note (optional)</label>
+              <label htmlFor="redirect-note" className="acat-label">Note (optional)</label>
               <input 
                 id="redirect-note"
                 name="redirect-note"
@@ -193,9 +193,12 @@ export default function AdminRedirects() {
         {/* Table */}
         <div className="acard" style={{ padding: 0, overflow: 'hidden' }}>
           {loading ? (
-            <div className="atable-loading">
-              <i className="fas fa-spinner fa-spin" />
-              <span>Loading redirects...</span>
+            <div className="aempty ared-empty ared-loading">
+              <div className="aempty-icon">
+                <i className="fas fa-spinner fa-spin" />
+              </div>
+              <h3 className="aempty-title">Loading redirects...</h3>
+              <p className="aempty-sub">Fetching the latest URL mapping data.</p>
             </div>
           ) : filtered.length === 0 ? (
             <div className="aempty ared-empty">

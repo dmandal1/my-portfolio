@@ -87,9 +87,9 @@ export default function AdminInbox() {
               <h1 className="apage-title">Contact Inbox</h1>
               <p className="apage-subtitle">Manage and respond to messages from your visitors</p>
             </div>
-            <div style={{ display: "flex", gap: 12 }}>
-              <button className="abtn abtn-ghost" onClick={loadMessages} disabled={loading}>
-                <i className={`fas fa-sync-alt${loading ? " fa-spin" : ""}`} style={{ marginRight: 6 }} /> Refresh
+            <div className="atopbar-right-group">
+              <button className={`arefresh-btn ${loading ? "is-refreshing" : ""}`} onClick={loadMessages} title="Refresh Inbox">
+                <i className="fas fa-sync-alt" />
               </button>
             </div>
           </div>
@@ -106,7 +106,15 @@ export default function AdminInbox() {
                 </div>
               </div>
               <div className="ainbox-list">
-                {loading ? (
+                {loading && messages.length === 0 ? (
+                  <div className="aempty ainbox-loading-centered">
+                    <div className="aempty-icon">
+                      <i className="fas fa-spinner fa-spin" />
+                    </div>
+                    <h3 className="aempty-title">Loading inbox...</h3>
+                    <p className="aempty-sub">Fetching your messages from the server.</p>
+                  </div>
+                ) : loading ? (
                   <div className="ainbox-loading-state">
                     {[1, 2, 3, 4, 5].map(i => (
                       <div key={i} className="ainbox-item-skel">

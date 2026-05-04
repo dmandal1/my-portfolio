@@ -428,7 +428,8 @@ export default function AdminSettings() {
   useEffect(() => {
     async function loadMenu() {
       try {
-        const links = await getMenuLinks();
+        const rawLinks = await getMenuLinks();
+        const links = Array.isArray(rawLinks) ? rawLinks : Object.values(rawLinks || {});
         if (links && links.length > 0) {
           setMenuLinks(links);
         } else {
@@ -558,6 +559,9 @@ export default function AdminSettings() {
       const time = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
       setSavedAt(time);
       setDirty(false);
+      if (menuLinksDirty) {
+        await handleMenuSave();
+      }
       toast?.addToast("Settings saved successfully.", "success");
     } catch (error) {
       console.error("[AdminSettings] Cloud save failed:", error);

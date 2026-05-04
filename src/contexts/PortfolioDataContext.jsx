@@ -116,29 +116,30 @@ export function PortfolioDataProvider({ children }) {
           { to: "/contact",    label: "Contact Me" },
         ];
 
-        setData({
-          profile:         profile         || defaultProfile,
-          seo:             seo             || defaultSeo,
-          contactInfo:     contactInfo     || defaultContactInfo,
-          socialLinks:     socialLinks?.length  > 0 ? socialLinks  : defaultSocialLinks,
-          degrees:         degrees?.length       > 0 ? degrees       : defaultDegrees.degrees,
-          competitiveSites:competitive?.length   > 0 ? competitive   : defaultCompetitiveSites.competitiveSites,
-          projects:        projects?.length      > 0 ? { ...defaultBigProjects, projects } : defaultBigProjects,
-          skills:          skills?.length        > 0 ? skills        : defaultSkills.data,
-          certifications:  certifications?.length > 0 ? certifications : defaultCertifications.certifications,
-          experiences:     expSections,
-          experienceHeader: experienceHeader || {
-            title:       defaultExperience.title,
-            subtitle:    defaultExperience.subtitle,
-            description: defaultExperience.description,
-          },
-          contactPageData:  contactPageData  || defaultContactPageData,
-          projectsHeader:   projectsHeader   || defaultProjectsHeader,
-          openSource:       openSource       || defaultOpenSource,
-          podcastSection:   podcastSection   || defaultPodcastSection,
-          blogSectionConfig: blogSectionConfig || defaultBlogSection,
-          menuLinks:        menuLinks?.length > 0 ? menuLinks : defaultMenuLinks,
-        });
+          const finalMenuLinks = Array.isArray(menuLinks) ? menuLinks : Object.values(menuLinks || {});
+          setData({
+            profile:         profile         || defaultProfile,
+            seo:             seo             || defaultSeo,
+            contactInfo:     contactInfo     || defaultContactInfo,
+            socialLinks:     socialLinks?.length  > 0 ? socialLinks  : defaultSocialLinks,
+            degrees:         degrees?.length       > 0 ? degrees       : defaultDegrees.degrees,
+            competitiveSites:competitive?.length   > 0 ? competitive   : defaultCompetitiveSites.competitiveSites,
+            projects:        projects?.length      > 0 ? { ...defaultBigProjects, projects } : defaultBigProjects,
+            skills:          skills?.length        > 0 ? skills        : defaultSkills.data,
+            certifications:  certifications?.length > 0 ? certifications : defaultCertifications.certifications,
+            experiences:     expSections,
+            experienceHeader: experienceHeader || {
+              title:       defaultExperience.title,
+              subtitle:    defaultExperience.subtitle,
+              description: defaultExperience.description,
+            },
+            contactPageData:  contactPageData  || defaultContactPageData,
+            projectsHeader:   projectsHeader   || defaultProjectsHeader,
+            openSource:       openSource       || defaultOpenSource,
+            podcastSection:   podcastSection   || defaultPodcastSection,
+            blogSectionConfig: blogSectionConfig || defaultBlogSection,
+            menuLinks:        finalMenuLinks.length > 0 ? finalMenuLinks : defaultMenuLinks,
+          });
       } catch { /* keep portfolio.js defaults on any error */ }
     }
     load();
