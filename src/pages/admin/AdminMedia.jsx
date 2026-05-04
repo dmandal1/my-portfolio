@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import AdminSidebar from "./components/AdminSidebar";
 import { useAdminSettings } from "./components/useAdminSettings";
 import { useToast } from "./components/AdminToast";
@@ -54,10 +55,9 @@ export default function AdminMedia() {
   const [items, setItems]           = useState([]);
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState("");
-  const [search, setSearch]         = useState("");
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [dateFilter, setDateFilter] = useState("all");
+  const [search, setSearch]           = useState("");
+  const [typeFilter, setTypeFilter]   = useState("all");
+  const [dateFilter, setDateFilter]   = useState("all");
   const [sortOrder, setSortOrder]   = useState("newest");
   const [openPill, setOpenPill]     = useState(null); // "type" | "date" | "sort" | null
   const [viewMode, setViewMode]     = useState("grid"); // "grid" | "list"
@@ -88,10 +88,7 @@ export default function AdminMedia() {
 
   useEffect(() => { load(); }, [load]);
 
-  /* focus search input when it opens */
-  useEffect(() => {
-    if (searchOpen) searchRef.current?.focus();
-  }, [searchOpen]);
+
 
   /* close pill dropdowns on outside click */
   useEffect(() => {
@@ -306,23 +303,25 @@ export default function AdminMedia() {
 
               {/* Right controls */}
               <div className="aml-controls">
-                {/* Inline search */}
-                <div className={`aml-search${searchOpen ? " aml-search--open" : ""}`}>
+                {/* Inline search (Always visible) */}
+                <div className="aml-search aml-search--open">
                   <label htmlFor="media-search" className="sr-only">Search Media</label>
-                  {searchOpen && (
-                    <input
-                      id="media-search"
-                      name="media-search"
-                      ref={searchRef}
-                      className="aml-search-input"
-                      placeholder="Search files…"
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      onKeyDown={(e) => e.key === "Escape" && (setSearchOpen(false), setSearch(""))}
-                    />
-                  )}
-                  {searchOpen && search && (
+                  <input
+                    id="media-search"
+                    name="media-search"
+                    ref={searchRef}
+                    className="aml-search-input"
+                    placeholder="Search files…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    onKeyDown={(e) => e.key === "Escape" && setSearch("")}
+                  />
+                  {search ? (
                     <button className="aml-search-clear" onClick={() => setSearch("")}>×</button>
+                  ) : (
+                    <button className="aml-search-clear" style={{ cursor: "default" }}>
+                      <i className="fas fa-search" style={{ fontSize: 13, color: "#94a3b8" }} />
+                    </button>
                   )}
                 </div>
 
@@ -345,16 +344,6 @@ export default function AdminMedia() {
                     <i className="fas fa-list" />
                   </button>
                 </div>
-
-                {/* Search toggle */}
-                <button
-                  type="button"
-                  className="aml-icon-btn"
-                  onClick={() => { setSearchOpen((v) => !v); if (searchOpen) setSearch(""); }}
-                  title="Search"
-                >
-                  <i className="fas fa-sliders-h" />
-                </button>
               </div>
             </div>
 
@@ -559,7 +548,7 @@ export default function AdminMedia() {
       </main>
 
       {/* ── Delete confirmation modal ── */}
-      {deleteTarget && (
+      {deleteTarget && createPortal(
         <div className="adel-overlay" onClick={() => setDeleteTarget(null)}>
           <div className="adel-modal" onClick={(e) => e.stopPropagation()}>
             <div className="adel-icon-wrap">
@@ -588,7 +577,8 @@ export default function AdminMedia() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

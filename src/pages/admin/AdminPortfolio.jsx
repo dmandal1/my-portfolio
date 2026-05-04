@@ -1,4 +1,5 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import AdminSidebar from "./components/AdminSidebar";
 import { useToast } from "./components/AdminToast";
@@ -96,7 +97,7 @@ function SaveBtn({ saving, label = "Save Changes" }) {
 
 function DelModal({ target, title, onCancel, onConfirm, deleting }) {
   if (!target) return null;
-  return (
+  return createPortal(
     <div className="adel-overlay" onClick={() => !deleting && onCancel()}>
       <div className="adel-modal" onClick={(e) => e.stopPropagation()}>
         <div className="adel-icon-wrap"><div className="adel-icon-ring" /><div className="adel-icon"><i className="fas fa-trash-alt" /></div></div>
@@ -109,7 +110,8 @@ function DelModal({ target, title, onCancel, onConfirm, deleting }) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

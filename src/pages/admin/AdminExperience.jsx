@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import AdminSidebar from "./components/AdminSidebar";
 import { useToast } from "./components/AdminToast";
@@ -546,7 +547,7 @@ export default function AdminExperience() {
         </div>
       </main>
 
-      {delTarget && (
+      {delTarget && createPortal(
         <div className="adel-overlay" onClick={() => !deleting && setDelTarget(null)}>
           <div className="adel-modal" onClick={(e) => e.stopPropagation()}>
             <div className="adel-icon-wrap">
@@ -566,7 +567,8 @@ export default function AdminExperience() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

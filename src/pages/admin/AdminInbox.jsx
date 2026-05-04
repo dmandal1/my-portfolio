@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import AdminSidebar from "./components/AdminSidebar";
 import { useToast } from "./components/AdminToast";
@@ -10,6 +11,17 @@ export default function AdminInbox() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState(null);
+  const [deleteModal, setDeleteModal] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    if (deleteModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [deleteModal]);
 
   const loadMessages = useCallback(async () => {
     setLoading(true);
@@ -27,20 +39,27 @@ export default function AdminInbox() {
     loadMessages();
   }, [loadMessages]);
 
-  const handleDelete = async (id, e) => {
+  const handleDelete = (id, e) => {
     if (e) e.stopPropagation();
-    if (!window.confirm("Are you sure you want to delete this message?")) return;
-    
+    const msg = messages.find(m => m.id === id);
+    if (msg) setDeleteModal(msg);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteModal) return;
+    setIsDeleting(true);
     try {
-      await deleteContactMessage(id);
+      await deleteContactMessage(deleteModal.id);
       toast?.addToast("Message deleted", "success");
-      if (selectedMessage?.id === id) setSelectedMessage(null);
+      if (selectedMessage?.id === deleteModal.id) setSelectedMessage(null);
       await loadMessages();
     } catch (err) {
       toast?.addToast("Failed to delete message", "error");
+    } finally {
+      setIsDeleting(false);
+      setDeleteModal(null);
     }
   };
-
   const handleSelectMessage = async (msg) => {
     setSelectedMessage(msg);
     if (!msg.is_read) {
@@ -178,6 +197,29 @@ export default function AdminInbox() {
 
         </div>
       </main>
+
+      {/* ── Confirm delete modal ── */}
+      {deleteModal && createPortal(
+        <div className="adel-overlay" onClick={() => setDeleteModal(null)}>
+          <div className="adel-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="adel-icon-wrap">
+              <div className="adel-icon-ring" />
+              <div className="adel-icon">
+                <i className="fas fa-exclamation-triangle" />
+              </div>
+            </div>
+            <h3 className="adel-title">Delete message from {deleteModal.name}?</h3>
+            <p className="adel-msg">This action cannot be undone. The message will be permanently removed from your inbox.</p>
+            <div className="adel-actions">
+              <button className="adel-btn-cancel" onClick={() => setDeleteModal(null)}>Cancel</button>
+              <button className="adel-btn-confirm" onClick={confirmDelete} disabled={isDeleting}>
+                {isDeleting ? "Deleting..." : "OK"}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }

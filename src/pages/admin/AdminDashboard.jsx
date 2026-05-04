@@ -1,4 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { subscribeToBlogs, deleteBlog, updateBlog, getCategories, getTags, approvePendingPost, rejectPendingPost, publishScheduledPosts } from "../../api/apiService";
 import AdminSidebar from "./components/AdminSidebar";
@@ -1291,7 +1292,7 @@ export default function AdminDashboard() {
       </main>
 
       {/* ── Confirm modal ── */}
-      {modal && (
+      {modal && createPortal(
         <div className="adel-overlay" onClick={() => setModal(null)}>
           <div className="adel-modal" onClick={(e) => e.stopPropagation()}>
             <div className="adel-icon-wrap">
@@ -1311,7 +1312,8 @@ export default function AdminDashboard() {
               <button className="adel-btn-confirm" onClick={confirmDelete}>Yes, Delete</button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

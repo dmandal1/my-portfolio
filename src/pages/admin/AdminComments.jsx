@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import AdminSidebar from "./components/AdminSidebar";
 import { getAllBlogsAdmin, getComments, addComment, deleteComment } from "../../api/apiService";
@@ -398,7 +399,7 @@ export default function AdminComments() {
       </main>
 
       {/* ── Delete confirm modal ── */}
-      {deleteTarget && (
+      {deleteTarget && createPortal(
         <div className="adel-overlay" onClick={() => setDeleteTarget(null)}>
           <div className="adel-modal" onClick={(e) => e.stopPropagation()}>
             <div className="adel-icon-wrap">
@@ -416,7 +417,8 @@ export default function AdminComments() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

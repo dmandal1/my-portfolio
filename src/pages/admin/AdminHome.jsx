@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useNavigate } from "react-router-dom";
 import { 
   subscribeToBlogs, 
@@ -1367,7 +1368,7 @@ export default function AdminHome() {
       </main>
 
       {/* ── Confirm delete post modal ── */}
-      {modal && (
+      {modal && createPortal(
         <div className="adel-overlay" onClick={() => setModal(null)}>
           <div className="adel-modal" onClick={(e) => e.stopPropagation()}>
             <div className="adel-icon-wrap">
@@ -1381,11 +1382,12 @@ export default function AdminHome() {
               <button className="adel-btn-confirm" onClick={confirmDelete}>Yes, Delete</button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ── Reply to comment modal ── */}
-      {replyModal && (
+      {replyModal && createPortal(
         <div className="adel-overlay" onClick={() => setReplyModal(null)}>
           <div className="areply-modal" onClick={(e) => e.stopPropagation()}>
             <div className="areply-modal-header">
@@ -1424,11 +1426,12 @@ export default function AdminHome() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ── Confirm delete comment modal ── */}
-      {commentDeleteModal && (
+      {commentDeleteModal && createPortal(
         <div className="adel-overlay" onClick={() => setCommentDeleteModal(null)}>
           <div className="adel-modal" onClick={(e) => e.stopPropagation()}>
             <div className="adel-icon-wrap">
@@ -1444,7 +1447,8 @@ export default function AdminHome() {
               <button className="adel-btn-confirm" onClick={confirmDeleteComment}>Yes, Delete</button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

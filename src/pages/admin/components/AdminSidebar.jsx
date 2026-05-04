@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
 import { getAllBlogsAdmin, saveAdminPanelSettings, getContactMessages, uploadAvatar, updateAdminProfile } from "../../../api/apiService";
@@ -394,7 +395,7 @@ export default function AdminSidebar() {
 
   return (
     <>
-      {loggingOut && (
+      {loggingOut && createPortal(
         <div className="aLogout-overlay">
           <div className="aLogout-content">
             <div className="aLogout-icon">
@@ -406,7 +407,8 @@ export default function AdminSidebar() {
               <div className="aLogout-loader-fill" />
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ══ FULL-WIDTH TOP HEADER ══════════════════════════════ */}
