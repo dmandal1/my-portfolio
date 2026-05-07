@@ -1,5 +1,86 @@
 /* AdminProfile.css — Premium Glassmorphic Theme */
 
+.aprof-nav {
+  display: flex;
+  gap: 8px;
+  background: var(--acard-alt);
+  padding: 8px;
+  border-radius: 18px;
+  border: 1px solid var(--abdr);
+  margin-bottom: 24px;
+  width: fit-content;
+  backdrop-filter: blur(10px);
+}
+
+.aprof-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 24px;
+  border-radius: 14px;
+  border: none;
+  background: transparent;
+  color: var(--atxt2);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.aprof-nav-item i {
+  font-size: 16px;
+  opacity: 0.7;
+  transition: transform 0.3s ease;
+}
+
+.aprof-nav-item span {
+  position: relative;
+  z-index: 1;
+}
+
+.aprof-nav-item:hover {
+  color: var(--atxt);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.aprof-nav-item:hover i {
+  transform: translateY(-1px);
+  opacity: 1;
+}
+
+.aprof-nav-item.is-active {
+  color: #fff;
+  background: var(--ap);
+  box-shadow: 0 4px 15px var(--ap-glow);
+}
+
+.aprof-nav-item.is-active i {
+  opacity: 1;
+  color: #fff;
+}
+
+.aprof-nav-indicator {
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background: var(--ap);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--ap);
+}
+
+.animate-slide-in {
+  animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
 .aprof-container {
   display: grid;
   grid-template-columns: 320px 1fr;
@@ -251,9 +332,10 @@
 
 .aprof-section-title {
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 850;
   color: var(--atxt);
   margin: 0;
+  letter-spacing: -0.02em;
 }
 
 /* Grid for account info */
@@ -441,8 +523,9 @@
 
 .aprof-pw-text {
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 /* Recent Security Activity */

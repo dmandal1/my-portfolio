@@ -50,6 +50,7 @@ export default function AdminProfile() {
     social: { facebook: '', twitter: '', instagram: '', linkedin: '', email: '', github: '', website: '' }
   });
   const [profileSaving, setProfileSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState('account'); // 'account' | 'public' | 'security'
 
   // Sync profile fields from currentUser
   useEffect(() => {
@@ -242,6 +243,24 @@ export default function AdminProfile() {
             </div>
           </div>
 
+          <div className="aprof-nav">
+            {[
+              { id: 'account', label: 'Account', icon: 'fas fa-id-card' },
+              { id: 'public', label: 'Public Profile', icon: 'fas fa-user-circle' },
+              { id: 'security', label: 'Security', icon: 'fas fa-shield-alt' }
+            ].map(tab => (
+              <button 
+                key={tab.id}
+                className={`aprof-nav-item ${activeTab === tab.id ? 'is-active' : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                <i className={tab.icon} />
+                <span>{tab.label}</span>
+                {activeTab === tab.id && <div className="aprof-nav-indicator" />}
+              </button>
+            ))}
+          </div>
+
           <div className="aprof-container">
 
             {/* Left: Sidebar */}
@@ -324,70 +343,72 @@ export default function AdminProfile() {
 
             {/* Right: Main Content */}
             <div className="aprof-main">
+              {activeTab === 'account' && (
+                <section className="aprof-section animate-slide-in">
+                  <div className="aprof-section-head">
+                    <div className="aprof-section-icon"><i className="fas fa-id-card" /></div>
+                    <h3 className="aprof-section-title">Account Information</h3>
+                  </div>
 
-              {/* Account Details */}
-              <section className="aprof-section">
-                <div className="aprof-section-head">
-                  <div className="aprof-section-icon"><i className="fas fa-id-card" /></div>
-                  <h3 className="aprof-section-title">Account Information</h3>
-                </div>
-
-                <div className="aprof-info-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                  {/* Editable: Display Name */}
-                  <div className="aprof-info-box" style={{ gridColumn: 'span 1', position: 'relative' }}>
-                    <div className="aprof-info-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span>Display Name</span>
-                      <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--ap)', background: 'var(--ap-soft)', padding: '2px 8px', borderRadius: 99, textTransform: 'uppercase' }}>Auto-Save</span>
-                    </div>
-                    <div style={{ position: 'relative', marginTop: 8 }}>
-                      <input
-                        className="aprof-input"
-                        style={{ 
-                          width: '100%',
-                          height: 42, 
-                          fontSize: 14, 
-                          fontWeight: 700, 
-                          paddingRight: 40, 
-                          border: '1.5px solid var(--abdr)',
-                          background: 'var(--acard)',
-                          borderRadius: 10,
-                          paddingLeft: 12
-                        }}
-                        value={profileForm.displayName}
-                        onChange={e => setProfileForm(f => ({ ...f, displayName: e.target.value }))}
-                        placeholder="Your display name"
-                        onBlur={handleUpdateProfile}
-                      />
-                      <div style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--ap)', opacity: 0.5, fontSize: 12 }}>
-                        <i className={profileSaving ? "fas fa-spinner fa-spin" : "fas fa-check-circle"} />
+                  <div className="aprof-info-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                    <div className="aprof-info-box" style={{ gridColumn: 'span 1', position: 'relative' }}>
+                      <div className="aprof-info-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>Display Name</span>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--ap)', background: 'var(--ap-soft)', padding: '2px 8px', borderRadius: 99, textTransform: 'uppercase' }}>Auto-Save</span>
+                      </div>
+                      <div style={{ position: 'relative', marginTop: 8 }}>
+                        <input
+                          className="aprof-input"
+                          style={{ 
+                            width: '100%',
+                            height: 42, 
+                            fontSize: 14, 
+                            fontWeight: 700, 
+                            paddingRight: 40, 
+                            border: '1.5px solid var(--abdr)',
+                            background: 'var(--acard)',
+                            borderRadius: 10,
+                            paddingLeft: 12
+                          }}
+                          value={profileForm.displayName}
+                          onChange={e => setProfileForm(f => ({ ...f, displayName: e.target.value }))}
+                          placeholder="Your display name"
+                          onBlur={handleUpdateProfile}
+                        />
+                        <div style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--ap)', opacity: 0.5, fontSize: 12 }}>
+                          <i className={profileSaving ? "fas fa-spinner fa-spin" : "fas fa-check-circle"} />
+                        </div>
                       </div>
                     </div>
+                    {[
+                      { label: 'Email Address', val: currentUser?.email || '—' },
+                      { label: 'Primary Role', val: 'Super Administrator' },
+                      { label: 'Account Status', val: 'Active' },
+                    ].map(({ label, val }) => (
+                      <div key={label} className="aprof-info-box">
+                        <div className="aprof-info-label">{label}</div>
+                        <div className="aprof-info-value">{val}</div>
+                      </div>
+                    ))}
                   </div>
-                  {/* Static: other fields */}
-                  {[
-                    { label: 'Email Address', val: currentUser?.email || '—' },
-                    { label: 'Primary Role', val: 'Super Administrator' },
-                    { label: 'Account Status', val: 'Active' },
-                  ].map(({ label, val }) => (
-                    <div key={label} className="aprof-info-box">
-                      <div className="aprof-info-label">{label}</div>
-                      <div className="aprof-info-value">{val}</div>
+
+                  <div style={{ marginTop: 24, padding: '16px 20px', background: 'rgba(59,130,246,0.05)', borderRadius: 16, border: '1.5px dashed var(--abdr)', display: 'flex', gap: 14, alignItems: 'center' }}>
+                    <div style={{ width: 40, height: 40, background: 'var(--ap-soft)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <i className="fas fa-info-circle" style={{ color: 'var(--ap)', fontSize: 18 }} />
                     </div>
-                  ))}
-                </div>
+                    <p style={{ margin: 0, fontSize: 13, color: 'var(--atxt2)', lineHeight: 1.5, fontWeight: 500 }}>
+                      Email management is restricted to database-level changes for enhanced security. Contact the system architect to modify core identity fields.
+                    </p>
+                  </div>
+                </section>
+              )}
 
-                <div style={{ marginTop: 20, padding: '14px 18px', background: 'var(--ap-soft)', borderRadius: 16, border: '1px solid var(--abdr)', display: 'flex', gap: 12, alignItems: 'center' }}>
-                  <i className="fas fa-info-circle" style={{ color: 'var(--ap)', fontSize: 18 }} />
-                  <p style={{ margin: 0, fontSize: 13, color: 'var(--atxt2)', lineHeight: 1.4 }}>
-                    Email management is restricted to database-level changes for enhanced security. Contact the system architect to modify core identity fields.
-                  </p>
-                </div>
-
-                {/* Public Profile Metadata */}
-                <div style={{ marginTop: 32 }}>
-                  <h4 style={{ fontSize: 15, fontWeight: 700, color: 'var(--atxt)', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <i className="fas fa-globe-americas" style={{ color: 'var(--ap)' }} /> Public Author Profile
-                  </h4>
+              {activeTab === 'public' && (
+                <section className="aprof-section animate-slide-in">
+                  <div className="aprof-section-head">
+                    <div className="aprof-section-icon" style={{ background: 'rgba(16,185,129,0.1)', color: '#10b981' }}><i className="fas fa-globe-americas" /></div>
+                    <h3 className="aprof-section-title">Public Author Profile</h3>
+                  </div>
                   
                   <div className="aprof-form">
                     <div className="aprof-input-group">
@@ -404,14 +425,14 @@ export default function AdminProfile() {
                       <label className="aprof-label">Author Bio</label>
                       <textarea 
                         className="aprof-input" 
-                        style={{ minHeight: 100, resize: 'vertical' }}
+                        style={{ minHeight: 120, resize: 'vertical', padding: '15px' }}
                         value={profileForm.bio}
                         onChange={e => setProfileForm(f => ({ ...f, bio: e.target.value }))}
                         placeholder="Tell your readers about yourself..."
                       />
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
                       <div className="aprof-input-group">
                         <label className="aprof-label"><i className="fab fa-facebook" /> Facebook</label>
                         <input className="aprof-input" value={profileForm.social.facebook} onChange={e => setProfileForm(f => ({ ...f, social: { ...f.social, facebook: e.target.value } }))} placeholder="https://facebook.com/..." />
@@ -438,7 +459,7 @@ export default function AdminProfile() {
                       </div>
                       <div className="aprof-input-group">
                         <label className="aprof-label"><i className="fas fa-globe" /> Website</label>
-                        <input className="aprof-input" value={profileForm.social.website} onChange={e => setProfileForm(f => ({ ...f, social: { ...f.social, website: e.target.value } }))} placeholder="https://..." />
+                        <input className="aprof-input" value={profileForm.social.website} onChange={e => setProfileForm(f => ({ ...f, social: { ...f.social, website: e.target.value } }))} placeholder="https://yourwebsite.com" />
                       </div>
                     </div>
 
@@ -448,153 +469,172 @@ export default function AdminProfile() {
                         onClick={handleUpdateProfile} 
                         disabled={profileSaving}
                         style={{
-                          height: 48,
-                          padding: '0 32px',
-                          borderRadius: 14,
-                          fontWeight: 700,
-                          fontSize: 14,
+                          height: 52,
+                          padding: '0 40px',
+                          borderRadius: 16,
+                          fontWeight: 800,
+                          fontSize: 15,
                           display: 'flex',
                           alignItems: 'center',
-                          gap: 10,
-                          transition: 'all 0.3s ease',
+                          gap: 12,
+                          boxShadow: '0 10px 20px var(--ap-glow)',
                           cursor: profileSaving ? 'not-allowed' : 'pointer'
                         }}
                       >
                         {profileSaving ? (
-                          <><i className="fas fa-spinner fa-spin" /> Saving Changes...</>
+                          <><i className="fas fa-spinner fa-spin" /> Syncing Profile...</>
                         ) : (
-                          <><i className="fas fa-cloud-upload-alt" /> Save Public Profile</>
+                          <><i className="fas fa-save" /> Save Changes</>
                         )}
                       </button>
                     </div>
                   </div>
-                </div>
-              </section>
+                </section>
+              )}
 
-              {/* Change Password */}
-              <section className="aprof-section">
-                <div className="aprof-section-head">
-                  <div className="aprof-section-icon" style={{ background: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}><i className="fas fa-key" /></div>
-                  <h3 className="aprof-section-title">Security &amp; Credentials</h3>
-                </div>
-
-                {pwError && (
-                  <div style={{ padding: '14px 18px', background: 'rgba(239,68,68,0.08)', borderRadius: 16, border: '1px solid rgba(239,68,68,0.2)', color: '#ef4444', fontSize: 14, marginBottom: 24, display: 'flex', gap: 10, alignItems: 'center' }}>
-                    <i className="fas fa-exclamation-circle" /> {pwError}
-                  </div>
-                )}
-
-                <form className="aprof-form" onSubmit={handlePasswordChange}>
-                  <div className="aprof-input-group">
-                    <label className="aprof-label" htmlFor="old_pw">Current Password</label>
-                    <div className="aprof-input-wrap">
-                      <input 
-                        className="aprof-input" 
-                        id="old_pw" 
-                        name="old_pw" 
-                        type={showOldPw ? "text" : "password"} 
-                        placeholder="••••••••" 
-                        value={pwForm.old} 
-                        onChange={e => setPwForm(f => ({ ...f, old: e.target.value }))} 
-                        autoComplete="current-password" 
-                      />
-                      <button 
-                        type="button" 
-                        className="aprof-pw-toggle" 
-                        onClick={() => setShowOldPw(!showOldPw)}
-                      >
-                        <i className={showOldPw ? "fas fa-eye-slash" : "fas fa-eye"} />
-                      </button>
+              {activeTab === 'security' && (
+                <div className="animate-slide-in" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                  <section className="aprof-section">
+                    <div className="aprof-section-head">
+                      <div className="aprof-section-icon" style={{ background: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}><i className="fas fa-key" /></div>
+                      <h3 className="aprof-section-title">Security &amp; Credentials</h3>
                     </div>
-                  </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-                    <div className="aprof-input-group">
-                      <label className="aprof-label" htmlFor="new_pw">New Password</label>
-                      <div className="aprof-input-wrap">
-                        <input 
-                          className="aprof-input" 
-                          id="new_pw" 
-                          name="new_pw" 
-                          type={showNextPw ? "text" : "password"} 
-                          placeholder="Min. 8 characters" 
-                          value={pwForm.next} 
-                          onChange={e => setPwForm(f => ({ ...f, next: e.target.value }))} 
-                          autoComplete="new-password" 
-                        />
-                        <button 
-                          type="button" 
-                          className="aprof-pw-toggle" 
-                          onClick={() => setShowNextPw(!showNextPw)}
-                        >
-                          <i className={showNextPw ? "fas fa-eye-slash" : "fas fa-eye"} />
-                        </button>
+                    {pwError && (
+                      <div style={{ padding: '14px 18px', background: 'rgba(239,68,68,0.08)', borderRadius: 16, border: '1px solid rgba(239,68,68,0.2)', color: '#ef4444', fontSize: 14, marginBottom: 24, display: 'flex', gap: 10, alignItems: 'center' }}>
+                        <i className="fas fa-exclamation-circle" /> {pwError}
                       </div>
-                      {pwForm.next && (
-                        <div className="aprof-pw-strength">
-                          <div className="aprof-pw-bar">
-                            <div className="aprof-pw-fill" style={{ width: `${pwStrength}%`, background: pwColor }} />
-                          </div>
-                          <div className="aprof-pw-text" style={{ color: pwColor }}>Strength: {pwLabel}</div>
+                    )}
+
+                    <form className="aprof-form" onSubmit={handlePasswordChange}>
+                      <div className="aprof-input-group">
+                        <label className="aprof-label" htmlFor="old_pw">Current Password</label>
+                        <div className="aprof-input-wrap">
+                          <input 
+                            className="aprof-input" 
+                            id="old_pw" 
+                            name="old_pw" 
+                            type={showOldPw ? "text" : "password"} 
+                            placeholder="••••••••" 
+                            value={pwForm.old} 
+                            onChange={e => setPwForm(f => ({ ...f, old: e.target.value }))} 
+                            autoComplete="current-password" 
+                          />
+                          <button type="button" className="aprof-pw-toggle" onClick={() => setShowOldPw(!showOldPw)}>
+                            <i className={showOldPw ? "fas fa-eye-slash" : "fas fa-eye"} />
+                          </button>
                         </div>
-                      )}
-                    </div>
+                      </div>
 
-                    <div className="aprof-input-group">
-                      <label className="aprof-label" htmlFor="confirm_pw">Confirm Password</label>
-                      <div className="aprof-input-wrap">
-                        <input 
-                          className="aprof-input" 
-                          id="confirm_pw" 
-                          name="confirm_pw" 
-                          type={showConfirmPw ? "text" : "password"} 
-                          placeholder="Repeat new password" 
-                          value={pwForm.confirm} 
-                          onChange={e => setPwForm(f => ({ ...f, confirm: e.target.value }))} 
-                          autoComplete="new-password"
-                          style={{ borderColor: pwForm.confirm && pwForm.next !== pwForm.confirm ? '#ef4444' : '' }}
-                        />
-                        <button 
-                          type="button" 
-                          className="aprof-pw-toggle" 
-                          onClick={() => setShowConfirmPw(!showConfirmPw)}
-                        >
-                          <i className={showConfirmPw ? "fas fa-eye-slash" : "fas fa-eye"} />
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+                        <div className="aprof-input-group">
+                          <label className="aprof-label" htmlFor="new_pw">New Password</label>
+                          <div className="aprof-input-wrap">
+                            <input 
+                              className="aprof-input" 
+                              id="new_pw" 
+                              name="new_pw" 
+                              type={showNextPw ? "text" : "password"} 
+                              placeholder="Min. 8 characters" 
+                              value={pwForm.next} 
+                              onChange={e => setPwForm(f => ({ ...f, next: e.target.value }))} 
+                              autoComplete="new-password" 
+                            />
+                            <button type="button" className="aprof-pw-toggle" onClick={() => setShowNextPw(!showNextPw)}>
+                              <i className={showNextPw ? "fas fa-eye-slash" : "fas fa-eye"} />
+                            </button>
+                          </div>
+                          {pwForm.next && (
+                            <div className="aprof-pw-strength">
+                              <div className="aprof-pw-bar">
+                                <div className="aprof-pw-fill" style={{ width: `${pwStrength}%`, background: pwColor }} />
+                              </div>
+                              <div className="aprof-pw-text" style={{ color: pwColor }}>Strength: {pwLabel}</div>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="aprof-input-group">
+                          <label className="aprof-label" htmlFor="confirm_pw">Confirm Password</label>
+                          <div className="aprof-input-wrap">
+                            <input 
+                              className="aprof-input" 
+                              id="confirm_pw" 
+                              name="confirm_pw" 
+                              type={showConfirmPw ? "text" : "password"} 
+                              placeholder="Repeat new password" 
+                              value={pwForm.confirm} 
+                              onChange={e => setPwForm(f => ({ ...f, confirm: e.target.value }))} 
+                              autoComplete="new-password"
+                              style={{ borderColor: pwForm.confirm && pwForm.next !== pwForm.confirm ? '#ef4444' : '' }}
+                            />
+                            <button type="button" className="aprof-pw-toggle" onClick={() => setShowConfirmPw(!showConfirmPw)}>
+                              <i className={showConfirmPw ? "fas fa-eye-slash" : "fas fa-eye"} />
+                            </button>
+                          </div>
+                          {pwForm.confirm && pwForm.next !== pwForm.confirm && (
+                            <div style={{ fontSize: 12, color: '#ef4444', fontWeight: 600, marginTop: 4 }}>Passwords do not match</div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+                        <button className="abtn abtn-primary" type="submit" disabled={pwSaving || !pwForm.old || !pwForm.next || !pwForm.confirm || pwForm.next !== pwForm.confirm} style={{ height: 52, padding: '0 32px', borderRadius: 14, fontSize: 15 }}>
+                          {pwSaving ? <><i className="fas fa-spinner fa-spin" /> Updating...</> : <><i className="fas fa-shield-alt" /> Update Credentials</>}
                         </button>
                       </div>
-                      {pwForm.confirm && pwForm.next !== pwForm.confirm && (
-                        <div style={{ fontSize: 12, color: '#ef4444', fontWeight: 600, marginTop: 4 }}>Passwords do not match</div>
+                    </form>
+
+                    <hr style={{ margin: '40px 0', border: 'none', borderTop: '1.5px dashed var(--abdr)' }} />
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', background: 'var(--acard-alt)', borderRadius: 20, border: '1px solid var(--abdr)' }}>
+                      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                        <div style={{ width: 54, height: 54, background: currentUser?.twoFactorEnabled ? 'rgba(16,185,129,0.1)' : 'rgba(59,130,246,0.1)', color: currentUser?.twoFactorEnabled ? '#10b981' : '#3b82f6', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, boxShadow: 'inset 0 0 10px rgba(0,0,0,0.05)' }}>
+                          <i className="fas fa-fingerprint" />
+                        </div>
+                        <div>
+                          <h4 style={{ margin: '0 0 2px', fontSize: 16, fontWeight: 800, color: 'var(--atxt)' }}>Two-Factor Authentication</h4>
+                          <p style={{ margin: 0, fontSize: 13, color: 'var(--atxt2)', fontWeight: 500 }}>{currentUser?.twoFactorEnabled ? 'Account is currently secured with 2FA.' : 'Add an extra layer of security to your account.'}</p>
+                        </div>
+                      </div>
+                      {currentUser?.twoFactorEnabled ? (
+                        <button className="abtn abtn-sm abtn-danger" onClick={handleDisable2FA} disabled={twoFactorLoading} style={{ height: 40, padding: '0 20px', borderRadius: 10 }}>
+                          {twoFactorLoading ? <i className="fas fa-spinner fa-spin" /> : 'Disable 2FA'}
+                        </button>
+                      ) : (
+                        <button className="abtn abtn-primary abtn-sm" onClick={start2FASetup} disabled={twoFactorLoading} style={{ height: 40, padding: '0 20px', borderRadius: 10 }}>
+                          {twoFactorLoading ? <i className="fas fa-spinner fa-spin" /> : 'Enable 2FA'}
+                        </button>
                       )}
                     </div>
-                  </div>
+                  </section>
 
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
-                    <button className="abtn abtn-primary" type="submit" disabled={pwSaving || !pwForm.old || !pwForm.next || !pwForm.confirm || pwForm.next !== pwForm.confirm} style={{ height: 52, padding: '0 32px', borderRadius: 14, fontSize: 15 }}>
-                      {pwSaving ? <><i className="fas fa-spinner fa-spin" /> Updating...</> : <><i className="fas fa-shield-alt" /> Update Credentials</>}
-                    </button>
-                  </div>
-                </form>
-
-                <hr style={{ margin: '32px 0', border: 'none', borderTop: '1px solid var(--abdr)' }} />
-
-                {/* 2FA Section */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <h4 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 700, color: 'var(--atxt)' }}>Two-Factor Authentication</h4>
-                    <p style={{ margin: 0, fontSize: 13, color: 'var(--atxt2)' }}>Add an extra layer of security to your account.</p>
-                  </div>
-                  {currentUser?.twoFactorEnabled ? (
-                    <button className="abtn abtn-sm abtn-danger" onClick={handleDisable2FA} disabled={twoFactorLoading}>
-                      {twoFactorLoading ? <i className="fas fa-spinner fa-spin" /> : 'Disable 2FA'}
-                    </button>
-                  ) : (
-                    <button className="abtn abtn-primary abtn-sm" onClick={start2FASetup} disabled={twoFactorLoading}>
-                      {twoFactorLoading ? <i className="fas fa-spinner fa-spin" /> : 'Enable 2FA'}
-                    </button>
-                  )}
+                  <section className="aprof-section" style={{ background: 'var(--acard-alt)', borderStyle: 'dashed' }}>
+                    <div className="aprof-section-head">
+                      <div className="aprof-section-icon" style={{ background: 'rgba(16,185,129,0.1)', color: '#10b981' }}><i className="fas fa-user-shield" /></div>
+                      <h3 className="aprof-section-title">Security Best Practices</h3>
+                    </div>
+                    <div className="aprof-info-grid">
+                      {[
+                        { icon: 'fas fa-key', title: 'Unique Passwords', desc: 'Use complex phrases with symbols.' },
+                        { icon: 'fas fa-history', title: 'Regular Rotation', desc: 'Change your password every 90 days.' },
+                        { icon: 'fas fa-mobile-alt', title: '2FA Recommended', desc: 'Keep your login second-factor active.' },
+                        { icon: 'fas fa-sign-out-alt', title: 'Public Sessions', desc: 'Always logout from public devices.' },
+                      ].map(({ icon, title, desc }) => (
+                        <div key={title} style={{ display: 'flex', gap: 15, alignItems: 'flex-start' }}>
+                          <div style={{ width: 32, height: 32, background: 'var(--acard)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981', flexShrink: 0, boxShadow: 'var(--sh-xs)' }}>
+                            <i className={icon} />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--atxt)', marginBottom: 2 }}>{title}</div>
+                            <div style={{ fontSize: 12, color: 'var(--atxt2)', lineHeight: 1.4 }}>{desc}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
                 </div>
-
-              </section>
+              )}
 
               {/* 2FA Setup Modal — rendered via portal into document.body */}
               {show2FAWizard && createPortal(
@@ -699,56 +739,6 @@ export default function AdminProfile() {
                 </div>,
                 document.body
               )}
-
-              {/* Security Best Practices */}
-              <section className="aprof-section" style={{ background: 'var(--acard-alt)' }}>
-                <div className="aprof-section-head">
-                  <div className="aprof-section-icon" style={{ background: 'rgba(16,185,129,0.1)', color: '#10b981' }}><i className="fas fa-user-shield" /></div>
-                  <h3 className="aprof-section-title">Security Best Practices</h3>
-                </div>
-                <div className="aprof-info-grid">
-                  {[
-                    { icon: 'fas fa-key', title: 'Unique Passwords', desc: 'Use complex phrases with symbols.' },
-                    { icon: 'fas fa-history', title: 'Regular Rotation', desc: 'Change your password every 90 days.' },
-                    { icon: 'fas fa-mobile-alt', title: '2FA Recommended', desc: 'Keep your login second-factor active.' },
-                    { icon: 'fas fa-sign-out-alt', title: 'Public Sessions', desc: 'Always logout from public devices.' },
-                  ].map(({ icon, title, desc }) => (
-                    <div key={title} style={{ display: 'flex', gap: 15, alignItems: 'flex-start' }}>
-                      <div style={{ width: 32, height: 32, background: 'var(--acard)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981', flexShrink: 0, boxShadow: 'var(--sh-xs)' }}>
-                        <i className={icon} />
-                      </div>
-                      <div>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--atxt)', marginBottom: 2 }}>{title}</div>
-                        <div style={{ fontSize: 12, color: 'var(--atxt2)', lineHeight: 1.4 }}>{desc}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              {/* Recent Security Activity */}
-              <section className="aprof-section" style={{ background: 'var(--acard-alt)' }}>
-                <div className="aprof-section-head">
-                  <div className="aprof-section-icon" style={{ background: 'rgba(59,130,246,0.1)', color: '#3b82f6' }}><i className="fas fa-history" /></div>
-                  <h3 className="aprof-section-title">Recent Security Activity</h3>
-                </div>
-                <div className="aprof-activity-list">
-                  {[
-                    { icon: 'fas fa-shield-alt', text: currentUser?.twoFactorEnabled ? '2FA Protection enabled' : '2FA Protection is recommended', time: 'Active' },
-                    { icon: 'fas fa-key', text: 'Password last verified', time: 'Today' },
-                    { icon: 'fas fa-sync-alt', text: 'Profile identity synchronized', time: 'Just now' },
-                  ].map((act, i) => (
-                    <div key={i} className="aprof-activity-item">
-                      <div className="aprof-act-icon"><i className={act.icon} /></div>
-                      <div className="aprof-act-content">
-                        <div className="aprof-act-text">{act.text}</div>
-                        <div className="aprof-act-time">{act.time}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-
             </div>
           </div>
         </div>
@@ -790,7 +780,7 @@ export default function AdminProfile() {
           box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
           display: flex;
           align-items: center;
-          gap: 8,
+          gap: 8px;
           cursor: default;
           position: relative;
           overflow: hidden;
