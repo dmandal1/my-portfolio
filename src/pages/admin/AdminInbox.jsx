@@ -182,16 +182,28 @@ export default function AdminInbox() {
     return () => window.removeEventListener('mousedown', close);
   }, []);
 
-  // Compute rect after every render where imgSelection changes (useLayoutEffect = after DOM commit)
+  // Compute rect after every render — clip to editor's visible area so overlay never overflows the compose/reply box
+  const computeClippedRect = (img) => {
+    const raw = img.getBoundingClientRect();
+    const editor = img.closest('.ainbox-compose-editor, .ainbox-reply-editor-direct');
+    if (!editor) return raw;
+    const edRect = editor.getBoundingClientRect();
+    const top    = Math.max(raw.top,    edRect.top);
+    const left   = Math.max(raw.left,   edRect.left);
+    const bottom = Math.min(raw.bottom, edRect.bottom);
+    const right  = Math.min(raw.right,  edRect.right);
+    return { top, left, bottom, right, width: Math.max(0, right - left), height: Math.max(0, bottom - top) };
+  };
+
   useLayoutEffect(() => {
     if (!imgSelection?.img) { setImgRect(null); return; }
-    setImgRect(imgSelection.img.getBoundingClientRect());
+    setImgRect(computeClippedRect(imgSelection.img));
   }, [imgSelection]);
 
   // Keep overlay in sync when the container scrolls or window resizes
   useEffect(() => {
     if (!imgSelection?.img) return;
-    const sync = () => setImgRect(imgSelection.img.getBoundingClientRect());
+    const sync = () => setImgRect(computeClippedRect(imgSelection.img));
     window.addEventListener('scroll', sync, true);
     window.addEventListener('resize', sync);
     return () => {
@@ -204,11 +216,13 @@ export default function AdminInbox() {
     if (!imgSelection?.img) return;
     const img = imgSelection.img;
     if (type === 'small') {
-      img.style.width = '180px'; img.style.height = 'auto';
+      img.style.width = '180px'; img.style.height = 'auto'; img.style.maxHeight = '';
     } else if (type === 'fit') {
-      img.style.width = '100%'; img.style.height = 'auto';
+      img.style.width = '100%'; img.style.height = 'auto'; img.style.maxHeight = '';
     } else if (type === 'original') {
-      img.style.width = `${img.naturalWidth}px`; img.style.height = 'auto';
+      const editor = img.closest('.ainbox-compose-editor, .ainbox-reply-editor-direct');
+      const maxW = editor ? editor.clientWidth - 32 : img.naturalWidth;
+      img.style.width = `${Math.min(img.naturalWidth, maxW)}px`; img.style.height = 'auto'; img.style.maxHeight = '';
     }
     setImgActiveSize(type);
     // Shallow-copy to trigger re-render → useLayoutEffect re-computes rect after DOM commit
@@ -229,10 +243,13 @@ export default function AdminInbox() {
     const aspectRatio = startW / img.getBoundingClientRect().height;
 
     const onMove = (ev) => {
+      const editor = img.closest('.ainbox-compose-editor, .ainbox-reply-editor-direct');
+      const maxW = editor ? editor.clientWidth - 32 : window.innerWidth;
       const dx = ev.clientX - startX;
-      const newW = Math.max(40, corner.includes('e') ? startW + dx : startW - dx);
+      const newW = Math.min(maxW, Math.max(40, corner.includes('e') ? startW + dx : startW - dx));
       img.style.width = `${newW}px`;
       img.style.height = `${newW / aspectRatio}px`;
+      img.style.maxHeight = 'none';
       setImgSelection(prev => prev ? { ...prev } : null);
     };
     const onUp = () => {
@@ -733,11 +750,10 @@ export default function AdminInbox() {
           <div className={`ainbox-container is-view-${viewMode}`}>
             {/* Folder Nav */}
             <div className="ainbox-nav">
-              <button className="abtn abtn-primary abtn-lg ainbox-compose-btn" onClick={() => setShowCompose(true)}>
-                <i className="fas fa-pencil-alt" style={{ marginRight: 8 }} />
+              <button className="abtn abtn-primary ainbox-compose-btn" onClick={() => setShowCompose(true)} style={{ width: '100%', marginBottom: 14, borderRadius: 12, padding: '10px 16px', fontWeight: 700, fontSize: 13.5, justifyContent: 'center', gap: 8 }}>
+                <i className="fas fa-pen" />
                 <span>Compose</span>
               </button>
-              <div style={{ height: 12 }} />
               <button className={`ainbox-nav-item ${folder === "inbox" ? "is-active" : ""}`} onClick={() => { setFolder("inbox"); setViewMode("list"); }}>
                 <i className="fas fa-inbox" />
                 <span>Inbox</span>
@@ -752,6 +768,7 @@ export default function AdminInbox() {
                 <span>Drafts</span>
                 {draftCount > 0 && <span className="ainbox-nav-count">{draftCount}</span>}
               </button>
+              <div className="ainbox-nav-divider" />
               <button className={`ainbox-nav-item ${folder === "trash" ? "is-active" : ""}`} onClick={() => { setFolder("trash"); setViewMode("list"); }}>
                 <i className="fas fa-trash-alt" />
                 <span>Trash</span>
@@ -1261,7 +1278,6 @@ export default function AdminInbox() {
 
                     <div className="ainbox-footer-tools">
                       <button type="button" className={`awp-tbtn ${showFormatting ? 'is-active' : ''}`} onClick={() => setShowFormatting(!showFormatting)} title="Formatting options"><i className="fas fa-font" /></button>
-                      <button type="button" className="awp-tbtn" onClick={() => { setShowFormatting(false); generateAIDraft(); }} title="Help me write"><i className="fas fa-magic" /></button>
                       <button type="button" className="awp-tbtn" onClick={() => composeFileInputRef.current?.click()} title="Attach files"><i className="fas fa-paperclip" /></button>
                       <button type="button" className="awp-tbtn" onMouseDown={(e) => { e.preventDefault(); handleInsertLink(); }} title="Insert link"><i className="fas fa-link" /></button>
                       <div style={{ position: "relative" }}>
@@ -1314,12 +1330,14 @@ export default function AdminInbox() {
             ))}
           </div>
 
-          {/* Floating toolbar — Gmail-style white card below image */}
+          {/* Floating toolbar — flips above when no space below */}
           <div
             className="aimg-toolbar"
             style={{
-              top: imgRect.bottom + 8,
-              left: Math.min(imgRect.left, window.innerWidth - 420),
+              top: window.innerHeight - imgRect.bottom > 52
+                ? imgRect.bottom + 8
+                : imgRect.top - 48,
+              left: Math.min(Math.max(imgRect.left, 8), window.innerWidth - 420),
             }}
           >
             {imgAltEdit ? (
