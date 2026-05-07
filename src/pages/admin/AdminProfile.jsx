@@ -278,7 +278,7 @@ export default function AdminProfile() {
                     </div>
                     {avatarUploading && <div className="aprof-avatar-loader"><i className="fas fa-spinner fa-spin" /></div>}
                   </div>
-                  <div className={`aprof-status-badge ${currentUser?.twoFactorEnabled ? 'is-secure' : ''}`} title={currentUser?.twoFactorEnabled ? '2FA Active' : '2FA Inactive'} />
+                  <div className="aprof-status-badge is-secure" data-tip="Active" />
                   <input
                     type="file"
                     ref={fileInputRef}
@@ -383,11 +383,14 @@ export default function AdminProfile() {
                     {[
                       { label: 'Email Address', val: currentUser?.email || '—' },
                       { label: 'Primary Role', val: 'Super Administrator' },
-                      { label: 'Account Status', val: 'Active' },
-                    ].map(({ label, val }) => (
+                      { label: 'Account Status', val: 'Active', isActive: true },
+                    ].map(({ label, val, isActive }) => (
                       <div key={label} className="aprof-info-box">
                         <div className="aprof-info-label">{label}</div>
-                        <div className="aprof-info-value">{val}</div>
+                        <div className="aprof-info-value" style={isActive ? { color: '#10b981', display: 'flex', alignItems: 'center', gap: 6 } : {}}>
+                          {isActive && <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981', display: 'inline-block', flexShrink: 0 }} />}
+                          {val}
+                        </div>
                       </div>
                     ))}
                   </div>

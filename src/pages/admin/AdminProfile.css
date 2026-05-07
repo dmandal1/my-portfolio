@@ -199,16 +199,41 @@
 
 .aprof-status-badge {
   position: absolute;
-  bottom: 2px;
-  right: 2px;
-  width: 20px;
-  height: 20px;
+  bottom: 5px;
+  right: 5px;
+  width: 16px;
+  height: 16px;
   background: #94a3b8;
-  border: 3px solid var(--acard);
+  border: 2.5px solid var(--acard);
   border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
   transition: all 0.3s ease;
-  z-index: 2;
+  z-index: 3;
+  cursor: default;
+}
+
+.aprof-status-badge::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) scale(0.85);
+  background: #1e293b;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 4px 9px;
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s, transform 0.15s;
+  z-index: 100;
+}
+
+.aprof-status-badge:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
 }
 
 .aprof-status-badge.is-secure {
