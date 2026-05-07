@@ -585,13 +585,29 @@ export const updateAdminProfile = (data) =>
   });
 
 // ── Contact Messages ──────────────────────────────────────────────────────
-export const getContactMessages = () => apiFetch('/messages.php');
+export const getContactMessages = () => apiFetch('/messages.php?folder=inbox');
+export const getSentMessages = () => apiFetch('/messages.php?folder=sent');
+export const getTrashMessages = () => apiFetch('/messages.php?folder=trash');
 export const submitContactMessage = (data) => 
   apiFetch('/messages.php', { method: 'POST', body: JSON.stringify(data) });
-export const deleteContactMessage = (id) => 
-  apiFetch(`/messages.php?id=${id}`, { method: 'DELETE' });
+export const replyToMessage = (data) => 
+  apiFetch('/messages.php?action=reply', { method: 'POST', body: JSON.stringify(data) });
+export const deleteContactMessage = (id, permanent = false) => 
+  apiFetch(`/messages.php?id=${id}${permanent ? '&permanent=1' : ''}`, { method: 'DELETE' });
+export const bulkDeleteMessages = (ids, permanent = false) => 
+  apiFetch(`/messages.php?ids=${ids.join(',')}${permanent ? '&permanent=1' : ''}`, { method: 'DELETE' });
+export const restoreMessage = (id) => 
+  apiFetch(`/messages.php?id=${id}&restore=1`, { method: 'PUT' });
 export const markContactMessageRead = (id) => 
   apiFetch(`/messages.php?id=${id}`, { method: 'PUT' });
+export const bulkMarkRead = (ids) => 
+  apiFetch(`/messages.php?ids=${ids.join(',')}`, { method: 'PUT' });
+export const sendNewEmail = (formData) => apiUpload('/messages.php?action=sendNew', formData);
+export const getDrafts = () => apiFetch('/messages.php?folder=drafts');
+export const saveDraft = (data) => apiFetch('/messages.php?action=saveDraft', { method: 'POST', body: JSON.stringify(data) });
+export const deleteDraft = (id) => apiFetch(`/messages.php?action=deleteDraft&id=${id}`, { method: 'DELETE' });
+export const toggleStar = (id) => 
+  apiFetch('/messages.php?action=toggleStar', { method: 'POST', body: JSON.stringify({ id }) });
 
 // ── Newsletter ────────────────────────────────────────────────────────────
 export const subscribeNewsletter = (email) => 
