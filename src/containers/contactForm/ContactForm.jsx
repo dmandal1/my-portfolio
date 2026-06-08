@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import emailjs from "@emailjs/browser";
 import "./ContactForm.css";
 import { Fade } from "../../components/animations/Reveal";
+import { isValidPhoneNumber } from "libphonenumber-js";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_ALLOWED_CHARS = /^[\d\s\-()\\.]+$/;
@@ -22,13 +23,17 @@ function validate(form) {
   if (!form.phone.trim()) {
     errors.phone = "Phone number is required.";
   } else {
-    const digits = form.phone.replace(/\D/g, "");
     if (!PHONE_ALLOWED_CHARS.test(form.phone.trim())) {
       errors.phone = "Only digits, spaces, dashes, and parentheses are allowed.";
-    } else if (digits.length < 6) {
-      errors.phone = "Phone number must have at least 6 digits.";
-    } else if (digits.length > 15) {
-      errors.phone = "Phone number must have at most 15 digits.";
+    } else {
+      try {
+        const fullNumber = `${form.countryCode}${form.phone.replace(/\D/g, "")}`;
+        if (!isValidPhoneNumber(fullNumber)) {
+          errors.phone = "Please enter a valid phone number for the selected country.";
+        }
+      } catch (err) {
+        errors.phone = "Invalid phone number.";
+      }
     }
   }
   if (!form.subject.trim()) errors.subject = "Subject is required.";
@@ -204,7 +209,11 @@ export default function ContactForm({ theme }) {
   }, [status]);
 
   function handleChange(e) {
-    const updated = { ...form, [e.target.name]: e.target.value };
+    let value = e.target.value;
+    if (e.target.name === "phone") {
+      value = value.replace(/\D/g, "").slice(0, 15);
+    }
+    const updated = { ...form, [e.target.name]: value };
     setForm(updated);
     if (touched[e.target.name]) {
       setErrors(validate(updated));

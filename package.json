@@ -29,6 +29,7 @@
     "gh-pages": "^6.3.0",
     "graphql": "^16.13.2",
     "highlight.js": "^11.11.1",
+    "libphonenumber-js": "^1.13.2",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.5",
     "react-bootstrap": "^2.10.10",

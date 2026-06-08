@@ -45,6 +45,9 @@ export default function AdminInbox() {
   const [showFormatting, setShowFormatting] = useState(false);
   const [showMoreFormatting, setShowMoreFormatting] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [emojiCat, setEmojiCat] = useState(0);
+  const [emojiSearch, setEmojiSearch] = useState("");
+  const emojiRef = useRef(null);
   const composeEditorRef = useRef(null);
   const composeFileInputRef = useRef(null);
   const imageInputRef = useRef(null);
@@ -84,6 +87,14 @@ export default function AdminInbox() {
   const [savedRange, setSavedRange] = useState(null);
   const linkPopoverRef = useRef(null);
   const linkUrlInputRef = useRef(null);
+  const [composeLinkOpen, setComposeLinkOpen] = useState(false);
+  const [composeLinkText, setComposeLinkText] = useState("");
+  const [composeLinkUrl, setComposeLinkUrl] = useState("");
+  const [composeSavedRange, setComposeSavedRange] = useState(null);
+  const composeLinkUrlRef = useRef(null);
+  const composeLinkBtnRef = useRef(null);
+  const composeLinkPopoverRef = useRef(null);
+  const [composeLinkBtnRect, setComposeLinkBtnRect] = useState(null);
   
   // Attachment State
   const [replyAttachments, setReplyAttachments] = useState([]);
@@ -156,6 +167,67 @@ export default function AdminInbox() {
     openLinkPopover();
   };
 
+  const openComposeLinkPopover = () => {
+    const editor = composeEditorRef.current;
+    if (!editor) return;
+    const sel = window.getSelection();
+    setComposeLinkText(sel?.toString() || "");
+    setComposeLinkUrl("");
+    setComposeSavedRange(sel && sel.rangeCount > 0 ? sel.getRangeAt(0).cloneRange() : null);
+    if (composeLinkBtnRef.current) {
+      setComposeLinkBtnRect(composeLinkBtnRef.current.getBoundingClientRect());
+    }
+    setComposeLinkOpen(true);
+    setTimeout(() => composeLinkUrlRef.current?.focus(), 100);
+  };
+
+  const insertComposeLinkFromDraft = () => {
+    if (!composeLinkUrl) { setComposeLinkOpen(false); return; }
+    const editor = composeEditorRef.current;
+    if (!editor) return;
+    
+    let sel = window.getSelection();
+    let range;
+
+    if (composeSavedRange) {
+      sel.removeAllRanges();
+      sel.addRange(composeSavedRange);
+      range = composeSavedRange;
+    } else {
+      editor.focus();
+      sel = window.getSelection();
+      if (sel.rangeCount > 0) {
+        range = sel.getRangeAt(0);
+      } else {
+        range = document.createRange();
+        range.selectNodeContents(editor);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    }
+
+    const linkNode = document.createElement("a");
+    const finalUrl = composeLinkUrl.includes("://") ? composeLinkUrl : `https://${composeLinkUrl}`;
+    linkNode.href = finalUrl;
+    linkNode.textContent = composeLinkText || composeLinkUrl;
+    linkNode.target = "_blank";
+    linkNode.rel = "noopener noreferrer";
+    
+    range.deleteContents();
+    range.insertNode(linkNode);
+    
+    range.setStartAfter(linkNode);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    
+    setComposeLinkOpen(false);
+    setComposeLinkText("");
+    setComposeLinkUrl("");
+    editor.focus();
+  };
+
   // ── Image click → show toolbar + handles ───────────────────
   const handleEditorImgClick = (e) => {
     if (e.target.tagName === 'IMG') {
@@ -181,6 +253,41 @@ export default function AdminInbox() {
     window.addEventListener('mousedown', close);
     return () => window.removeEventListener('mousedown', close);
   }, []);
+
+  // Close emoji picker on outside click
+  useEffect(() => {
+    if (!showEmojiPicker) return;
+    const handler = (e) => {
+      if (emojiRef.current && !emojiRef.current.contains(e.target)) {
+        setShowEmojiPicker(false);
+      }
+    };
+    window.addEventListener('mousedown', handler);
+    return () => window.removeEventListener('mousedown', handler);
+  }, [showEmojiPicker]);
+
+  // Close compose link popover on outside click
+  useEffect(() => {
+    if (!composeLinkOpen) return;
+    const handler = (e) => {
+      if (composeLinkBtnRef.current?.contains(e.target)) return;
+      if (composeLinkPopoverRef.current?.contains(e.target)) return;
+      setComposeLinkOpen(false);
+    };
+    window.addEventListener('mousedown', handler);
+    return () => window.removeEventListener('mousedown', handler);
+  }, [composeLinkOpen]);
+
+  // Close reply link popover on outside click
+  useEffect(() => {
+    if (!linkPopoverOpen) return;
+    const handler = (e) => {
+      if (linkPopoverRef.current?.contains(e.target)) return;
+      setLinkPopoverOpen(false);
+    };
+    window.addEventListener('mousedown', handler);
+    return () => window.removeEventListener('mousedown', handler);
+  }, [linkPopoverOpen]);
 
   // Compute rect after every render — clip to editor's visible area so overlay never overflows the compose/reply box
   const computeClippedRect = (img) => {
@@ -332,12 +439,28 @@ export default function AdminInbox() {
       return;
     }
     
-    const sel = window.getSelection();
-    sel.removeAllRanges();
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    let sel = window.getSelection();
+    let range;
+
     if (savedRange) {
+      sel.removeAllRanges();
       sel.addRange(savedRange);
+      range = savedRange;
     } else {
-      editorRef.current?.focus();
+      editor.focus();
+      sel = window.getSelection();
+      if (sel.rangeCount > 0) {
+        range = sel.getRangeAt(0);
+      } else {
+        range = document.createRange();
+        range.selectNodeContents(editor);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
     }
 
     const linkNode = document.createElement("a");
@@ -347,14 +470,18 @@ export default function AdminInbox() {
     linkNode.target = "_blank";
     linkNode.rel = "noopener noreferrer";
 
-    const range = sel.getRangeAt(0);
     range.deleteContents();
     range.insertNode(linkNode);
+    
+    range.setStartAfter(linkNode);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
     
     setLinkPopoverOpen(false);
     setLinkText("");
     setLinkUrl("");
-    editorRef.current?.focus();
+    editor.focus();
   };
 
   const generateAIDraft = async () => {
@@ -478,14 +605,56 @@ export default function AdminInbox() {
   };
 
   const handleInsertEmoji = (emoji) => {
-    if (!composeEditorRef.current) return;
-    composeEditorRef.current.focus();
+    const editor = composeEditorRef.current || editorRef.current;
+    if (!editor) return;
+    editor.focus();
     document.execCommand("insertText", false, emoji);
-    setShowEmojiPicker(false);
   };
 
-  const EMOJI_LIST = [
-    "😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚","😋","😛","😝","😜","🤪","🤨","🧐","🤓","😎","🤩","🥳","😏","😒","😞","😔","😟","😕","🙁","☹️","😣","😖","😫","😩","🥺","😢","😭","😤","😠","😡","🤬","🤯","😳","🥵","🥶","😱","😨","😰","😥","😓","🤗","🤔","🤭","🤫","🤥","😶","😐","😑","😬","🙄","😯","😦","😧","😮","😲","🥱","😴","🤤","😪","😵","🤐","🥴","🤢","🤮","🤧","😷","🤒","🤕","🤑","🤠","😈","👿","👹","👺","🤡","💩","👻","💀","☠️","👽","👾","🤖","🎃","😺","😸","😹","😻","😼","😽","🙀","😿","😾","👋","🤚","🖐","✋","🖖","👌","🤏","✌️","🤞","🤟","🤘","🤙","👈","👉","👆","🖕","👇","☝️","👍","👎","✊","👊","🤛","🤜","👏","🙌","👐","🤲","🤝","🙏","✍️","💅","🤳","💪","🦾","🦵","🦿","🦶","👂","🦻","👃","🧠","🦷","🦴","👀","👁","👅","👄"
+  const INBOX_EMOJI_CATS = [
+    { icon: "😊", label: "Smileys & People", items: [
+      ["😀","smile grin happy"],["😃","smile open happy"],["😄","grin happy laugh"],["😁","grin big happy"],["😆","laugh happy squint"],["😅","sweat nervous laugh"],["🤣","rofl laugh"],["😂","joy laugh cry tears funny"],["🙂","slight smile"],["🙃","upside down smile"],["😉","wink"],["😊","blush smile happy"],["😇","halo angel innocent"],["🥰","hearts love adore"],["😍","heart eyes love"],["🤩","star eyes excited"],["😘","kiss blow love"],["😗","kiss whistle"],["😚","kiss closed eyes"],["😙","kiss smiling"],["🥲","smile tear bittersweet"],["😋","yum tongue tasty"],["😛","tongue playful"],["😜","wink tongue playful"],["🤪","zany crazy"],["😝","tongue squint"],["🤑","money dollar rich"],["🤗","hug open hands"],["🤭","hand mouth oops"],["🤫","shush quiet"],["🤔","thinking ponder"],["🤐","zipper mouth silent"],["🤨","raised eyebrow skeptical"],["😐","neutral expressionless"],["😑","expressionless blank"],["😶","no mouth silent"],["😏","smirk sly"],["😒","unamused unhappy"],["🙄","eye roll annoyed"],["😬","grimace awkward"],["🤥","lying pinocchio"],["😌","relieved peaceful"],["😔","pensive sad"],["😪","sleepy tired"],["🤤","drool hungry"],["😴","sleeping zzz tired"],["😷","mask sick ill"],["🤒","sick thermometer"],["🤕","hurt injury bandage"],["🤢","nausea sick gross"],["🤮","vomit sick"],["🤧","sneeze sick"],["🥵","hot sweating"],["🥶","cold freezing"],["🥴","woozy drunk dizzy"],["😵","dizzy dead"],["🤯","mind blown"],["🤠","cowboy hat"],["🥳","party celebrate"],["😎","cool sunglasses"],["🤓","nerd glasses smart"],["🧐","monocle curious"],["😕","confused"],["😟","worried"],["🙁","slightly sad"],["☹️","frown sad"],["😮","surprised"],["😲","astonished shocked"],["😳","flushed embarrassed"],["🥺","pleading puppy"],["😦","frowning"],["😧","anguished"],["😨","fearful scared"],["😰","anxious sweat scared"],["😥","sad relieved"],["😢","cry tear sad"],["😭","sob cry loudly"],["😱","scream fear"],["😖","confounded frustrated"],["😣","persevere struggle"],["😞","disappointed"],["😓","downcast sweat"],["😩","weary tired"],["😫","tired exhausted"],["🥱","yawn bored"],["😤","steam huff annoyed"],["😡","angry mad pouting"],["😠","angry mad"],["🤬","cursing rage"],["😈","devil evil smile"],["👿","angry devil"],["💀","skull death"],["☠️","skull crossbones"],["💩","poop pile"],["🤡","clown joker"],["👻","ghost spooky"],["👽","alien ufo"],["🤖","robot android ai"],
+      ["👋","wave hello bye"],["🤚","raised hand stop"],["🖐️","raised hand five"],["✋","raised hand stop"],["🖖","vulcan salute"],["👌","ok perfect"],["🤌","pinched fingers"],["✌️","peace victory two"],["🤞","crossed fingers luck"],["🤟","love you sign"],["🤘","rock horns metal"],["🤙","call shaka"],["👈","point left"],["👉","point right"],["👆","point up"],["👇","point down"],["☝️","index point up"],["👍","thumbs up like"],["👎","thumbs down dislike"],["✊","fist raised"],["👊","fist punch"],["🤛","left fist"],["🤜","right fist"],["👏","clap applause"],["🙌","raised hands celebrate"],["🫶","heart hands love"],["👐","open hands"],["🤲","palms up prayer"],["🤝","handshake deal"],["🙏","pray thanks please"],["✍️","writing pen"],["💅","nail polish fancy"],["💪","muscle strong flex"],["🧠","brain think smart"],["👀","eyes look see"],["👄","lips mouth kiss"],
+    ]},
+    { icon: "🐶", label: "Animals & Nature", items: [
+      ["🐶","dog puppy pet"],["🐱","cat kitten pet"],["🐭","mouse rodent"],["🐹","hamster"],["🐰","rabbit bunny"],["🦊","fox"],["🐻","bear"],["🐼","panda bear"],["🐨","koala"],["🐯","tiger"],["🦁","lion"],["🐮","cow moo"],["🐷","pig oink"],["🐸","frog"],["🐵","monkey"],["🙈","see no evil monkey"],["🙉","hear no evil monkey"],["🙊","speak no evil monkey"],["🐔","chicken hen"],["🐧","penguin"],["🐦","bird"],["🐤","chick baby bird"],["🦆","duck"],["🦅","eagle bird"],["🦉","owl"],["🦇","bat"],["🐺","wolf"],["🐴","horse"],["🦄","unicorn magic"],["🐝","bee honey"],["🦋","butterfly"],["🐌","snail slow"],["🐞","ladybug beetle"],["🐜","ant insect"],["🐢","turtle slow"],["🐍","snake reptile"],["🦎","lizard"],["🐙","octopus sea"],["🐬","dolphin sea"],["🐳","whale sea"],["🦈","shark sea"],["🐘","elephant"],["🦒","giraffe"],["🐑","sheep wool"],
+      ["🌵","cactus desert"],["🎄","christmas tree"],["🌲","evergreen tree"],["🌳","deciduous tree"],["🌴","palm tree tropical"],["🌱","seedling sprout"],["🌿","herb leaf"],["☘️","shamrock luck"],["🍀","four leaf clover luck"],["🍃","leaf wind"],["🍂","fallen leaf autumn"],["🍁","maple leaf autumn"],["🍄","mushroom fungi"],["💐","bouquet flowers"],["🌷","tulip flower"],["🌹","rose love"],["🌺","hibiscus flower"],["🌸","cherry blossom"],["🌼","blossom flower"],["🌻","sunflower"],["🌞","sun face"],["🌙","moon crescent night"],["⭐","star yellow"],["🌟","glowing star shine"],["✨","sparkles magic"],["⚡","lightning electric"],["❄️","snowflake cold ice"],["🌈","rainbow colorful"],["🔥","fire hot flame"],["💧","droplet water"],["🌊","wave ocean sea"],
+    ]},
+    { icon: "💻", label: "Coding & Tech", items: [
+      ["💻","laptop computer coding"],["🖥️","desktop monitor screen"],["⌨️","keyboard type code"],["🖱️","mouse cursor click"],["💾","floppy disk save"],["💿","cd disc"],["🔋","battery power"],["🔌","plug power"],["📡","satellite signal"],["📶","signal wifi"],["🌐","globe internet web"],["🤖","robot ai bot"],["🎮","game controller"],["🕹️","joystick arcade"],["🧩","puzzle component module"],["🧠","brain ai intelligence"],["💡","idea lightbulb solution"],["⚡","lightning fast performance"],["🔥","fire trending performance"],["💥","explosion crash boom"],["✨","sparkles magic feature"],["🚀","rocket launch deploy ship"],["☁️","cloud server storage"],["🔧","wrench tool fix config"],["🔩","bolt screw hardware"],["⚙️","gear settings cog"],["🛠️","tools build"],["🔗","link chain url"],["🧲","magnet attract"],
+      ["📊","bar chart graph analytics"],["📈","chart up growth"],["📉","chart down decrease"],["📋","clipboard list task"],["📝","memo note write"],["📄","page document file"],["📁","folder directory"],["📂","open folder"],["🗑️","trash delete remove"],["📌","pushpin sticky"],["✂️","scissors cut"],["🔍","magnify search zoom"],["📱","phone mobile smartphone"],["📺","tv television screen"],
+      ["🐛","bug error debug"],["🪲","beetle bug error"],["🐞","ladybug debug"],["🧪","test tube testing"],["🔬","microscope research"],["📦","package npm module"],
+      ["✅","check done success"],["❌","cross fail error"],["⚠️","warning alert caution"],["ℹ️","info information"],["❓","question unknown"],["❗","exclamation important"],["🔴","red error stop"],["🟠","orange warning"],["🟡","yellow caution"],["🟢","green success ok"],["🔵","blue info"],["🔄","refresh reload sync"],["♾️","infinity loop"],["⏱️","stopwatch timer"],["⌛","hourglass wait loading"],["🎯","target goal hit"],["🏆","trophy win best"],["🔐","locked security"],["🔑","key auth access"],["🔒","locked secure"],["🔓","unlocked access"],["🛡️","shield security protect"],
+    ]},
+    { icon: "🍕", label: "Food & Drink", items: [
+      ["🍏","green apple fruit"],["🍎","red apple fruit"],["🍊","orange tangerine"],["🍋","lemon yellow fruit"],["🍌","banana fruit"],["🍉","watermelon summer"],["🍇","grapes fruit"],["🍓","strawberry fruit"],["🫐","blueberry fruit"],["🍒","cherry fruit"],["🍑","peach fruit"],["🥭","mango tropical"],["🍍","pineapple tropical"],["🥥","coconut tropical"],["🥝","kiwi fruit"],["🍅","tomato red"],["🥑","avocado"],["🌶️","pepper hot spicy"],["🥦","broccoli vegetable"],["🍄","mushroom fungi"],
+      ["🍞","bread loaf"],["🥐","croissant pastry"],["🧀","cheese dairy"],["🥚","egg"],["🥞","pancake breakfast"],["🥓","bacon meat"],["🍗","chicken drumstick"],["🍔","burger hamburger"],["🍟","fries chips"],["🍕","pizza slice"],["🌮","taco mexican"],["🌯","wrap burrito"],["🍱","bento box japanese"],["🍣","sushi japanese"],["🍜","noodles ramen"],["🍝","pasta spaghetti"],["🍛","curry rice"],["🍲","stew pot"],["🥗","salad healthy"],["🍰","cake slice"],["🎂","birthday cake"],["🧁","cupcake muffin"],["🍩","donut"],["🍪","cookie biscuit"],["🍫","chocolate candy"],["🍬","candy sweet"],["🍭","lollipop candy"],["🍦","soft ice cream"],["🍨","ice cream"],
+      ["☕","coffee hot tea"],["🍵","tea hot green"],["🥤","cup straw drink"],["🧋","bubble tea boba"],["🍺","beer pint"],["🍻","cheers beer"],["🥂","champagne toast"],["🍷","wine red"],["🍸","cocktail martini"],["🍹","tropical drink"],["🍾","champagne celebrate"],
+    ]},
+    { icon: "⚽", label: "Activities", items: [
+      ["⚽","soccer football sport"],["🏀","basketball sport"],["🏈","football american"],["⚾","baseball sport"],["🎾","tennis sport"],["🏐","volleyball sport"],["🎱","billiards pool"],["🏓","ping pong"],["⛳","golf hole flag"],["🎣","fishing rod"],["🎿","ski skiing"],["🎯","dart target bullseye"],["🎮","game controller gaming"],["🎲","dice game random"],["🧩","puzzle piece jigsaw"],["🎭","theatre drama masks"],["🎨","art palette paint"],["🎬","clapper film movie"],["📷","camera photo"],["🏋️","weightlifting gym"],["🤸","gymnastics"],["🏄","surfing wave"],["🚴","cycling bike"],["🏊","swimming pool"],["🧘","yoga meditation"],["🥊","boxing glove"],["🏆","trophy award win"],["🥇","gold medal first"],
+      ["🎵","music note sound"],["🎶","music notes sound"],["🎤","microphone sing"],["🎧","headphones music"],["🎸","guitar rock"],["🎹","piano keyboard"],["🥁","drums percussion"],["🎺","trumpet music"],["🎻","violin string"],["🎉","party celebrate confetti"],["🎊","confetti celebrate"],["🎈","balloon party celebrate"],
+    ]},
+    { icon: "🚗", label: "Travel & Places", items: [
+      ["🚗","car vehicle red"],["🚕","taxi cab yellow"],["🏎️","racing car fast"],["🚓","police car"],["🚑","ambulance emergency"],["🚒","fire truck"],["🚌","bus transport"],["🚛","truck delivery cargo"],["🚜","tractor farm"],["🏍️","motorcycle bike"],["🛵","scooter moped"],["🚲","bicycle bike"],["🛣️","motorway road"],["⛽","fuel gas petrol"],["🚧","construction barrier"],["🚨","police siren alert"],["🚦","traffic light signal"],
+      ["✈️","airplane flight travel"],["🛫","airplane departure"],["🛬","airplane arrival"],["💺","seat airline"],["🚀","rocket launch space"],["🛸","ufo flying saucer"],["🚁","helicopter"],["⛵","sailboat sea"],["🚤","speedboat sea"],["🚢","ship cruise ocean"],
+      ["🏠","house home"],["🏢","office building"],["🏥","hospital medical"],["🏦","bank money"],["🏨","hotel stay"],["🏫","school education"],["🏰","castle medieval"],["🗼","eiffel tower paris"],["🗽","statue liberty"],["🌃","night city stars"],["🏙️","cityscape skyline"],["🌄","sunrise mountain"],["🌅","sunrise sea"],["🗺️","map world travel"],["🏔️","snow mountain"],["🌋","volcano"],["🏖️","beach sand sea"],["🏝️","island tropical"],
+    ]},
+    { icon: "💡", label: "Objects", items: [
+      ["💡","lightbulb idea bright"],["🔦","flashlight torch"],["🕯️","candle flame light"],["💸","money flying cash"],["💵","dollar bill money"],["💰","money bag rich"],["💳","credit card payment"],["💎","diamond gem precious"],["🔧","wrench tool repair"],["🔩","bolt screw nut"],["⚙️","gear settings cog"],["🧲","magnet attract"],["🪜","ladder climb steps"],["🧰","toolbox tools"],["🔑","key lock access"],["🔒","locked closed"],["🔓","unlocked open"],["🚪","door entrance"],["🪞","mirror reflect"],["🛋️","couch sofa furniture"],["🛏️","bed sleep room"],["🚿","shower clean"],["🧹","broom sweep clean"],["🧼","soap clean wash"],
+      ["🎩","top hat magic fancy"],["🧢","cap hat baseball"],["👗","dress clothing fashion"],["👜","handbag purse"],["🎒","backpack bag school"],["🧳","luggage suitcase travel"],["👓","glasses spectacles"],["🕶️","sunglasses cool shades"],
+      ["📦","package box delivery"],["📝","memo note write"],["📄","page document"],["📋","clipboard list"],["📁","folder directory"],["📊","bar chart graph"],["📌","pin tack sticky"],["📍","pin location"],["✂️","scissors cut"],["🔍","magnify search zoom"],["📱","phone mobile"],["⏱️","stopwatch timer"],["⏰","alarm clock"],["⌛","hourglass time"],["🔋","battery power"],["🔌","plug power electric"],
+    ]},
+    { icon: "❤️", label: "Symbols", items: [
+      ["❤️","heart love red"],["🧡","orange heart"],["💛","yellow heart"],["💚","green heart"],["💙","blue heart"],["💜","purple heart"],["🖤","black heart"],["🤍","white heart"],["🤎","brown heart"],["💔","broken heart sad"],["❤️‍🔥","heart fire passion"],["💕","two hearts love"],["💞","revolving hearts love"],["💓","beating heart love"],["💗","growing heart love"],["💖","sparkling heart love"],["💘","heart arrow love"],["💝","heart ribbon love"],
+      ["⭐","star favorite"],["🌟","glowing star"],["💫","dizzy star spin"],["✨","sparkles magic"],["🔥","fire hot trending"],["⚡","lightning bolt fast"],["💥","explosion crash"],["🎉","party celebrate confetti"],["🎊","confetti celebrate"],["🎈","balloon party"],["🎀","ribbon bow gift"],["🎁","gift present"],
+      ["✅","check green done success"],["☑️","check box done"],["❌","x cross wrong error"],["⭕","circle hollow red"],["🛑","stop sign halt"],["🚫","prohibited no"],["💯","hundred percent perfect"],["⚠️","warning caution"],["❓","question unknown"],["❗","exclamation important"],["ℹ️","info information"],["🆗","ok button"],["🆕","new button"],["🆒","cool button"],["🆘","sos emergency help"],
+      ["🔀","shuffle random"],["🔁","repeat loop"],["▶️","play button"],["⏩","fast forward"],["⏸️","pause"],["⏹️","stop"],["🔇","mute sound"],["🔈","speaker low"],["🔊","speaker high volume"],["🔔","bell notification"],["🔕","bell mute"],["📢","loudspeaker"],["📣","megaphone"],
+      ["♠️","spade card"],["♥️","heart card"],["♦️","diamond card"],["🔮","crystal ball magic"],["☮️","peace sign"],["☯️","yin yang balance"],["♾️","infinity loop"],["©️","copyright"],["®️","registered"],["™️","trademark"],
+    ]},
+    { icon: "🚩", label: "Flags", items: [
+      ["🏳️","white flag surrender"],["🏴","black flag"],["🚩","red flag warning"],["🏁","checkered flag finish"],["🏴‍☠️","pirate flag skull"],["🏳️‍🌈","rainbow flag pride"],["🇺🇸","usa flag american"],["🇬🇧","uk great britain flag"],["🇮🇳","india flag"],["🇨🇳","china flag"],["🇯🇵","japan flag"],["🇩🇪","germany flag"],["🇫🇷","france flag"],["🇧🇷","brazil flag"],["🇷🇺","russia flag"],["🇰🇷","south korea flag"],["🇦🇺","australia flag"],["🇨🇦","canada flag"],["🇮🇹","italy flag"],["🇪🇸","spain flag"],["🇲🇽","mexico flag"],["🇸🇦","saudi arabia flag"],["🇦🇪","uae flag"],["🇵🇰","pakistan flag"],["🇧🇩","bangladesh flag"],["🇳🇬","nigeria flag"],["🇿🇦","south africa flag"],["🇮🇩","indonesia flag"],["🇹🇷","turkey flag"],["🇺🇦","ukraine flag"],["🇵🇭","philippines flag"],["🇹🇭","thailand flag"],["🇻🇳","vietnam flag"],["🇲🇾","malaysia flag"],["🇸🇬","singapore flag"],["🏴󠁧󠁢󠁥󠁮󠁧󠁿","england flag"],["🏴󠁧󠁢󠁳󠁣󠁴󠁿","scotland flag"],["🏴󠁧󠁢󠁷󠁬󠁳󠁿","wales flag"],
+    ]},
   ];
 
   const highlightText = (text, query) => {
@@ -1279,20 +1448,54 @@ export default function AdminInbox() {
                     <div className="ainbox-footer-tools">
                       <button type="button" className={`awp-tbtn ${showFormatting ? 'is-active' : ''}`} onClick={() => setShowFormatting(!showFormatting)} title="Formatting options"><i className="fas fa-font" /></button>
                       <button type="button" className="awp-tbtn" onClick={() => composeFileInputRef.current?.click()} title="Attach files"><i className="fas fa-paperclip" /></button>
-                      <button type="button" className="awp-tbtn" onMouseDown={(e) => { e.preventDefault(); handleInsertLink(); }} title="Insert link"><i className="fas fa-link" /></button>
-                      <div style={{ position: "relative" }}>
-                        <button type="button" className={`awp-tbtn ${showEmojiPicker ? 'is-active' : ''}`} onClick={() => setShowEmojiPicker(!showEmojiPicker)} title="Insert emoji"><i className="far fa-smile" /></button>
-                        {showEmojiPicker && (
-                          <div className="ainbox-emoji-picker">
-                            <div className="emoji-grid">
-                              {EMOJI_LIST.map((emoji, i) => (
-                                <button key={i} type="button" onClick={() => handleInsertEmoji(emoji)} className="emoji-item">
-                                  {emoji}
-                                </button>
-                              ))}
+                      <button ref={composeLinkBtnRef} type="button" className={`awp-tbtn${composeLinkOpen ? ' is-active' : ''}`} onMouseDown={(e) => { e.preventDefault(); openComposeLinkPopover(); }} title="Insert link"><i className="fas fa-link" /></button>
+                      <div style={{ position: "relative" }} ref={emojiRef}>
+                        <button type="button" className={`awp-tbtn ${showEmojiPicker ? 'is-active' : ''}`} onClick={() => { setShowEmojiPicker(o => !o); setEmojiSearch(""); setEmojiCat(0); }} title="Insert emoji"><i className="far fa-smile" /></button>
+                        {showEmojiPicker && (() => {
+                          const q = emojiSearch.trim().toLowerCase();
+                          const allItems = INBOX_EMOJI_CATS.flatMap(c => c.items);
+                          const displayItems = q ? allItems.filter(([, n]) => n.includes(q)) : INBOX_EMOJI_CATS[emojiCat].items;
+                          return (
+                            <div className="awp-emoji-pop ainbox-emoji-pop" onMouseDown={e => e.stopPropagation()}>
+                              <div className="awp-emoji-searchbar">
+                                <i className="fas fa-search awp-emoji-searchicon" />
+                                <input
+                                  className="awp-emoji-searchinput"
+                                  placeholder="Search emoji…"
+                                  value={emojiSearch}
+                                  onChange={e => setEmojiSearch(e.target.value)}
+                                  onMouseDown={e => e.stopPropagation()}
+                                  onKeyDown={e => e.stopPropagation()}
+                                  autoComplete="off"
+                                  autoFocus
+                                />
+                                {emojiSearch && (
+                                  <button className="awp-emoji-searchclear" type="button" onMouseDown={e => e.preventDefault()} onClick={() => setEmojiSearch("")}>
+                                    <i className="fas fa-times" />
+                                  </button>
+                                )}
+                              </div>
+                              <div className="awp-emoji-grid">
+                                {!q && <div className="awp-emoji-catlabel">{INBOX_EMOJI_CATS[emojiCat].label}</div>}
+                                {displayItems.length === 0
+                                  ? <div className="awp-emoji-noresult">No emoji found</div>
+                                  : <div className="awp-emoji-grid-inner">
+                                      {displayItems.map(([ch, n]) => (
+                                        <button key={ch} type="button" className="awp-emoji-btn" title={n} onMouseDown={e => e.preventDefault()} onClick={() => handleInsertEmoji(ch)}>{ch}</button>
+                                      ))}
+                                    </div>
+                                }
+                              </div>
+                              {!q && (
+                                <div className="awp-emoji-catbar">
+                                  {INBOX_EMOJI_CATS.map((cat, i) => (
+                                    <button key={cat.label} type="button" className={`awp-emoji-catbtn${emojiCat === i ? " is-active" : ""}`} title={cat.label} onMouseDown={e => e.preventDefault()} onClick={() => setEmojiCat(i)}>{cat.icon}</button>
+                                  ))}
+                                </div>
+                              )}
                             </div>
-                          </div>
-                        )}
+                          );
+                        })()}
                       </div>
                       <button type="button" className="awp-tbtn" onMouseDown={(e) => { e.preventDefault(); handleInsertImage('compose'); }} title="Insert photo"><i className="far fa-image" /></button>
                       <input type="file" ref={composeFileInputRef} onChange={(e) => setComposeAttachments(prev => [...prev, ...Array.from(e.target.files)])} multiple style={{ display: "none" }} />
@@ -1370,6 +1573,44 @@ export default function AdminInbox() {
             )}
           </div>
         </>,
+        document.body
+      )}
+
+      {/* Compose link popover — portal so it escapes overflow:hidden on compose window */}
+      {composeLinkOpen && composeLinkBtnRect && createPortal(
+        <div
+          ref={composeLinkPopoverRef}
+          className="arply-link-popover"
+          style={{
+            position: 'fixed',
+            bottom: window.innerHeight - composeLinkBtnRect.top + 8,
+            left: Math.min(
+              Math.max(composeLinkBtnRect.left + composeLinkBtnRect.width / 2 - 160, 8),
+              window.innerWidth - 328
+            ),
+            zIndex: 9999,
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <div className="arply-link-pop-head">
+            <span><i className="fas fa-link" style={{ marginRight: 8, color: 'var(--ap)' }} />Insert Link</span>
+            <button type="button" className="arply-link-pop-close" onClick={() => setComposeLinkOpen(false)}><i className="fas fa-times" /></button>
+          </div>
+          <div className="arply-link-pop-body">
+            <div className="arply-link-field">
+              <label>Text to display</label>
+              <input type="text" value={composeLinkText} onChange={(e) => setComposeLinkText(e.target.value)} placeholder="Link text" onMouseDown={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()} />
+            </div>
+            <div className="arply-link-field">
+              <label>Link URL</label>
+              <input type="text" ref={composeLinkUrlRef} value={composeLinkUrl} onChange={(e) => setComposeLinkUrl(e.target.value)} placeholder="https://example.com" onMouseDown={(e) => e.stopPropagation()} onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') insertComposeLinkFromDraft(); }} />
+            </div>
+            <div className="arply-link-pop-actions">
+              <button type="button" className="arply-link-cancel" onClick={() => setComposeLinkOpen(false)}>Cancel</button>
+              <button type="button" className="arply-link-insert" onClick={insertComposeLinkFromDraft}><i className="fas fa-link" /> Insert</button>
+            </div>
+          </div>
+        </div>,
         document.body
       )}
 
