@@ -3,6 +3,7 @@ require_once __DIR__ . '/cors.php';
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/jwt_helper.php';
 require_once __DIR__ . '/mail_helper.php';
+require_once __DIR__ . '/rate_limit.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     errorResponse('Method not allowed', 405);
@@ -36,6 +37,8 @@ ensureColumn($db, 'admin_users', 'profile_image', "VARCHAR(500) DEFAULT '' AFTER
 ensureColumn($db, 'admin_users', 'two_factor_secret', "VARCHAR(100) DEFAULT '' AFTER profile_image");
 ensureColumn($db, 'admin_users', 'two_factor_enabled', "TINYINT(1) DEFAULT 0 AFTER two_factor_secret");
 
+checkRateLimit('login', 5, 60);
+
 $stmt = $db->prepare('SELECT id, email, password_hash, two_factor_enabled, created_at FROM admin_users WHERE email = ? LIMIT 1');
 $stmt->execute([$email]);
 $user = $stmt->fetch();
@@ -43,6 +46,8 @@ $user = $stmt->fetch();
 if (!$user || !password_verify($password, $user['password_hash'])) {
     errorResponse('Invalid email or password', 401);
 }
+
+resetRateLimit('login');
 
 // ── 2FA Check ──
 if ($user['two_factor_enabled']) {

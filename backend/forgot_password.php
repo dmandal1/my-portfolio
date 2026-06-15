@@ -3,6 +3,7 @@ require_once __DIR__ . '/cors.php';
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/jwt_helper.php';
 require_once __DIR__ . '/mail_helper.php';
+require_once __DIR__ . '/rate_limit.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
@@ -32,6 +33,7 @@ if ($method === 'POST') {
 
     // 1. Request Reset
     if ($action === 'request') {
+        checkRateLimit('forgot_password_request', 3, 300);
         $email = trim($body['email'] ?? '');
         if (!$email) errorResponse('Email is required.');
 
@@ -174,6 +176,7 @@ if ($method === 'POST') {
 
     // 2. Verify OTP (Step 2 of 3)
     if ($action === 'verify-otp') {
+        checkRateLimit('forgot_password_verify', 5, 300);
         $otp = trim($body['otp'] ?? '');
         if (!$otp) errorResponse('OTP is required.');
 
@@ -185,11 +188,14 @@ if ($method === 'POST') {
             errorResponse('Invalid or expired OTP.', 400);
         }
 
+        resetRateLimit('forgot_password_verify');
+
         jsonResponse(['success' => true, 'message' => 'OTP verified. Please set your new password.']);
     }
 
     // 3. Reset Password (Step 3 of 3)
     if ($action === 'reset') {
+        checkRateLimit('forgot_password_verify', 5, 300);
         $otp = trim($body['otp'] ?? '');
         $password = $body['password'] ?? '';
 
@@ -203,6 +209,8 @@ if ($method === 'POST') {
         if (!$user) {
             errorResponse('Invalid or expired OTP.', 400);
         }
+
+        resetRateLimit('forgot_password_verify');
 
         $hash = password_hash($password, PASSWORD_DEFAULT);
         $stmt = $db->prepare('UPDATE admin_users SET password_hash = ?, reset_token = "", reset_token_expiry = NULL WHERE id = ?');

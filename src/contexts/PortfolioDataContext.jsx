@@ -16,25 +16,7 @@ import {
   blogSection as defaultBlogSection,
   podcastSection as defaultPodcastSection,
 } from "../portfolio";
-import {
-  getPortfolioProfile,
-  getPortfolioSeo,
-  getPortfolioContact,
-  getSocialLinks,
-  getEducation,
-  getCompetitiveSites,
-  getPortfolioProjects,
-  getSkillGroups,
-  getCertifications,
-  getExperiences,
-  getExperienceHeader,
-  getContactPageData,
-  getProjectsHeader,
-  getOpenSourceConfig,
-  getPodcastSection,
-  getBlogSectionConfig,
-  getMenuLinks,
-} from "../api/apiService";
+import { getPortfolioData } from "../api/apiService";
 
 const PortfolioDataContext = createContext(null);
 
@@ -67,31 +49,27 @@ export function PortfolioDataProvider({ children }) {
 
     async function load() {
       try {
-        const [
-          profile, seo, contactInfo, socialLinks,
-          degrees, competitive, projects, skills,
-          certifications, experiences, experienceHeader,
-          contactPageData, projectsHeader,
-          openSource, podcastSection, blogSectionConfig, menuLinks,
-        ] = await Promise.all([
-          getPortfolioProfile(),
-          getPortfolioSeo(),
-          getPortfolioContact(),
-          getSocialLinks(),
-          getEducation(),
-          getCompetitiveSites(),
-          getPortfolioProjects(),
-          getSkillGroups(),
-          getCertifications(),
-          getExperiences(),
-          getExperienceHeader(),
-          getContactPageData(),
-          getProjectsHeader(),
-          getOpenSourceConfig(),
-          getPodcastSection(),
-          getBlogSectionConfig(),
-          getMenuLinks(),
-        ]);
+        const portfolioData = await getPortfolioData();
+        const { sections = {}, collections = {} } = portfolioData || {};
+
+        const profile          = sections.portfolioProfile;
+        const seo              = sections.portfolioSeo;
+        const contactInfo      = sections.portfolioContact;
+        const experienceHeader = sections.portfolioExperienceHeader;
+        const contactPageData  = sections.portfolioContactPageData;
+        const projectsHeader   = sections.portfolioProjectsHeader;
+        const openSource       = sections.portfolioOpenSource;
+        const podcastSection   = sections.portfolioPodcast;
+        const blogSectionConfig = sections.portfolioBlogSection;
+        const menuLinks        = sections.portfolioMenuLinks;
+
+        const socialLinks      = collections.portfolioSocialLinks || [];
+        const degrees          = collections.portfolioEducation || [];
+        const competitive      = collections.portfolioCompetitiveSites || [];
+        const projects         = collections.portfolioProjects || [];
+        const skills           = collections.portfolioSkills || [];
+        const certifications   = collections.portfolioCertifications || [];
+        const experiences      = collections.portfolioExperiences || [];
 
         // Build experience sections from flat array
         const EXP_ORDER = ["Work", "Internships", "Volunteerships"];

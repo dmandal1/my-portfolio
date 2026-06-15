@@ -537,6 +537,8 @@ export const createExperience        = (d) => _exp.create(d);
 export const updateExperience        = (id, d) => _exp.update(id, d);
 export const deleteExperience        = (id) => _exp.remove(id);
 
+export const getPortfolioData        = () => apiFetch('/portfolio.php?all=1');
+
 // ── Database management ────────────────────────────────────────────────────
 export const getDatabaseStats = () => apiFetch('/database.php?action=stats');
 

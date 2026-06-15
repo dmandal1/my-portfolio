@@ -6,6 +6,24 @@ require_once __DIR__ . '/jwt_helper.php';
 $method = $_SERVER['REQUEST_METHOD'];
 $db     = getDb();
 
+require_once __DIR__ . '/cache_helper.php';
+
+// Invalidate cache on write operations
+if ($method === 'POST' || $method === 'PUT' || $method === 'DELETE') {
+    clearCache();
+}
+
+// Serve from cache if available (GET requests only, exclude admin)
+$cacheKey = '';
+if ($method === 'GET' && !isset($_GET['admin'])) {
+    $cacheKey = 'blogs_' . trim($_SERVER['REQUEST_URI'], '/');
+    $cached = getCache($cacheKey);
+    if ($cached !== null) {
+        echo $cached;
+        exit;
+    }
+}
+
 // ── Helper: convert DB row to blog shape ──────────────────────────────────
 function rowToBlog(array $row): array {
     $row['published']      = (bool)$row['published'];
@@ -46,7 +64,9 @@ if ($method === 'GET') {
         $stmt->execute([$id]);
         $row = $stmt->fetch();
         if (!$row) errorResponse('Blog not found', 404);
-        jsonResponse(rowToBlog($row));
+        $resData = rowToBlog($row);
+        setCache($cacheKey, json_encode($resData));
+        jsonResponse($resData);
     }
 
     // Get by slug
@@ -61,12 +81,16 @@ if ($method === 'GET') {
         }
         $row = $stmt->fetch();
         if (!$row) errorResponse('Blog not found', 404);
-        jsonResponse(rowToBlog($row));
+        $resData = rowToBlog($row);
+        setCache($cacheKey, json_encode($resData));
+        jsonResponse($resData);
     }
 
     // Get all published blogs
     $rows = $db->query('SELECT * FROM blogs WHERE published = 1 ORDER BY created_at DESC')->fetchAll();
-    jsonResponse(array_map('rowToBlog', $rows));
+    $resData = array_map('rowToBlog', $rows);
+    setCache($cacheKey, json_encode($resData));
+    jsonResponse($resData);
 }
 
 // ── POST ───────────────────────────────────────────────────────────────────

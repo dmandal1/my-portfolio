@@ -315,16 +315,28 @@ define('UPLOADS_URL', '/uploads/');
 function getDb(): PDO {
     static \$pdo = null;
     if (\$pdo === null) {
-        \$pdo = new PDO(
-            'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4',
-            DB_USER,
-            DB_PASS,
-            [
-                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES   => false,
-            ]
-        );
+        \$maxRetries = 2;
+        \$retryDelay = 200; // ms
+        for (\$i = 0; \$i < \$maxRetries; \$i++) {
+            try {
+                \$pdo = new PDO(
+                    'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4',
+                    DB_USER,
+                    DB_PASS,
+                    [
+                        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                        PDO::ATTR_EMULATE_PREPARES   => false,
+                    ]
+                );
+                break;
+            } catch (PDOException \$e) {
+                if (\$i === \$maxRetries - 1) {
+                    errorResponse('Database connection failed. Please try again later.', 503);
+                }
+                usleep(\$retryDelay * 1000);
+            }
+        }
     }
     return \$pdo;
 }

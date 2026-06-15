@@ -6,16 +6,76 @@ require_once __DIR__ . '/jwt_helper.php';
 $method = $_SERVER['REQUEST_METHOD'];
 $db     = getDb();
 
+require_once __DIR__ . '/cache_helper.php';
+
+// Invalidate cache on write operations
+if ($method === 'POST' || $method === 'PUT' || $method === 'DELETE') {
+    clearCache();
+}
+
+// Serve from cache if available (GET requests only)
+$cacheKey = '';
+if ($method === 'GET') {
+    $cacheKey = 'portfolio_' . trim($_SERVER['REQUEST_URI'], '/');
+    $cached = getCache($cacheKey);
+    if ($cached !== null) {
+        echo $cached;
+        exit;
+    }
+}
+
 $section    = $_GET['section']    ?? '';
 $collection = $_GET['collection'] ?? '';
 $id         = $_GET['id']         ?? '';
+
+// ── Batch GET: all sections and collections ─────────────────────────────────
+if ($method === 'GET' && isset($_GET['all'])) {
+    // Fetch all sections
+    $sectionsStmt = $db->query('SELECT section_name, data_json FROM portfolio_sections');
+    $sectionsRows = $sectionsStmt->fetchAll();
+    $sections = [];
+    foreach ($sectionsRows as $row) {
+        $sections[$row['section_name']] = json_decode($row['data_json'] ?? '', true) ?? [];
+    }
+
+    // Fetch all collection items
+    $itemsStmt = $db->query(
+        'SELECT id, collection_name, order_index, data_json, created_at, updated_at
+         FROM portfolio_items ORDER BY collection_name ASC, order_index ASC'
+    );
+    $itemsRows = $itemsStmt->fetchAll();
+    
+    $collections = [];
+    foreach ($itemsRows as $row) {
+        $coll = $row['collection_name'];
+        if (!isset($collections[$coll])) {
+            $collections[$coll] = [];
+        }
+        $d = json_decode($row['data_json'] ?? '', true) ?? [];
+        $collections[$coll][] = array_merge($d, [
+            'id'         => $row['id'],
+            'order'      => (int)$row['order_index'],
+            'created_at' => $row['created_at'],
+            'updated_at' => $row['updated_at'],
+        ]);
+    }
+
+    $resData = [
+        'sections'    => $sections,
+        'collections' => $collections,
+    ];
+    setCache($cacheKey, json_encode($resData));
+    jsonResponse($resData);
+}
 
 // ── Single-doc sections (GET) ──────────────────────────────────────────────
 if ($method === 'GET' && $section) {
     $stmt = $db->prepare('SELECT data_json FROM portfolio_sections WHERE section_name = ?');
     $stmt->execute([$section]);
     $row = $stmt->fetch();
-    jsonResponse($row ? (json_decode($row['data_json'], true) ?? []) : []);
+    $resData = $row ? (json_decode($row['data_json'] ?? '', true) ?? []) : [];
+    setCache($cacheKey, json_encode($resData));
+    jsonResponse($resData);
 }
 
 // ── Single-doc sections (POST/PUT) ────────────────────────────────────────
@@ -57,6 +117,7 @@ if ($method === 'GET' && $collection) {
         ]);
     }, $rows);
 
+    setCache($cacheKey, json_encode($items));
     jsonResponse($items);
 }
 
