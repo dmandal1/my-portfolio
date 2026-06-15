@@ -4,6 +4,7 @@ import {
   subscribeToBlogs,
   subscribeToCategories,
   subscribeToCommentsOverview,
+  getVisitorAnalytics,
 } from "../../api/apiService";
 import AdminSidebar from "./components/AdminSidebar";
 import "./Admin.css";
@@ -129,6 +130,32 @@ export default function AdminAnalytics() {
   const [range,          setRange]          = useState("all");
   const [activeSection,  setActiveSection]  = useState("overview");
   const [selectedCategory, setSelectedCategory] = useState(null); /* null = no filter */
+  const [visitorData, setVisitorData] = useState(null);
+  const [visitorLoading, setVisitorLoading] = useState(true);
+
+  useEffect(() => {
+    if (activeSection !== "visitors") return;
+
+    let cancelled = false;
+    setVisitorLoading(true);
+    getVisitorAnalytics(range)
+      .then((res) => {
+        if (!cancelled) {
+          setVisitorData(res);
+          setVisitorLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch visitor analytics:", err);
+        if (!cancelled) {
+          setVisitorLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeSection, range]);
 
   useEffect(() => {
     let cancelled = false;
@@ -301,6 +328,7 @@ export default function AdminAnalytics() {
   const SECTIONS = [
     { id: "overview",   label: "Overview",   icon: "fas fa-th-large"  },
     { id: "posts",      label: "Posts",      icon: "fas fa-file-alt"  },
+    { id: "visitors",   label: "Visitors",   icon: "fas fa-users"     },
     { id: "engagement", label: "Engagement", icon: "fas fa-comments"  },
     { id: "content",    label: "Content",    icon: "fas fa-tags"      },
   ];
@@ -462,6 +490,215 @@ export default function AdminAnalytics() {
                   ) : (
                     <EmptyState text="No category data yet." />
                   )}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* ══ VISITORS ══ */}
+          {activeSection === "visitors" && (
+            <>
+              <div className="aan-cards">
+                <MetricCard icon="fas fa-eye"            label="Total Views"   value={visitorLoading ? "..." : num(visitorData?.totalViews)}    sub="total page views logged" tone="blue"    loading={visitorLoading} />
+                <MetricCard icon="fas fa-users"          label="Unique Visitors" value={visitorLoading ? "..." : num(visitorData?.uniques)}       sub="unique browser sessions" tone="green"   loading={visitorLoading} />
+                <MetricCard icon="fas fa-chart-bar"      label="Pages / Session" value={visitorLoading ? "..." : (visitorData?.uniques ? (visitorData.totalViews / visitorData.uniques).toFixed(1) : "0.0")} sub="avg page views per user" tone="purple"  loading={visitorLoading} />
+                <MetricCard icon="fas fa-calendar-day"   label="Daily Average"   value={visitorLoading ? "..." : num(visitorData?.trends?.length ? Math.round(visitorData.totalViews / visitorData.trends.length) : 0)} sub="avg hits per day" tone="default" loading={visitorLoading} />
+              </div>
+
+              <div className="aan-grid-2">
+                {/* Traffic Trend */}
+                <div className="aan-panel">
+                  <PanelHead icon="fas fa-chart-line" title="Traffic Trend (Views & Uniques)" badge={visitorData?.trends?.length || 0} />
+                  {visitorLoading ? (
+                    <BarsSkeleton />
+                  ) : visitorData?.trends?.length ? (
+                    <div className="aan-rank-list">
+                      {visitorData.trends.slice(-10).reverse().map((day) => {
+                        const maxViews = Math.max(...visitorData.trends.map(t => t.views), 1);
+                        return (
+                          <div className="aan-rank-row" key={day.date}>
+                            <span className="aan-rank-name">
+                              <strong>{new Date(day.date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</strong>
+                            </span>
+                            <div className="aan-rank-bar">
+                              <div className="aan-rank-fill" style={{ width: `${pct(day.views, maxViews)}%` }} />
+                            </div>
+                            <strong className="aan-rank-count">
+                              {num(day.views)} views <span style={{ fontWeight: 400, opacity: 0.8, fontSize: 12 }}>({num(day.uniques)} unique)</span>
+                            </strong>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <EmptyState text="No traffic data recorded in this range." />
+                  )}
+                </div>
+
+                {/* Device breakdown */}
+                <div className="aan-panel">
+                  <PanelHead icon="fas fa-laptop" title="Device Distribution" badge={visitorData?.devices?.length || 0} />
+                  {visitorLoading ? (
+                    <BarsSkeleton />
+                  ) : visitorData?.devices?.length ? (
+                    <div className="aan-rank-list">
+                      {visitorData.devices.map((device) => (
+                        <div className="aan-rank-row" key={device.device_type}>
+                          <span className="aan-rank-name" style={{ textTransform: "capitalize" }}>
+                            <i className={device.device_type === "mobile" ? "fas fa-mobile-alt" : device.device_type === "tablet" ? "fas fa-tablet-alt" : "fas fa-desktop"} style={{ marginRight: 8, opacity: 0.7 }} />
+                            {device.device_type}
+                          </span>
+                          <div className="aan-rank-bar">
+                            <div className="aan-rank-fill" style={{ width: `${pct(device.views, visitorData.totalViews)}%`, background: "var(--ap)" }} />
+                          </div>
+                          <strong className="aan-rank-count">{num(device.views)} ({pct(device.views, visitorData.totalViews)}%)</strong>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <EmptyState text="No device data available." />
+                  )}
+                </div>
+              </div>
+
+              <div className="aan-grid-2" style={{ marginTop: 24 }}>
+                {/* Browser breakdown */}
+                <div className="aan-panel">
+                  <PanelHead icon="fas fa-compass" title="Browsers" badge={visitorData?.browsers?.length || 0} />
+                  {visitorLoading ? (
+                    <BarsSkeleton />
+                  ) : visitorData?.browsers?.length ? (
+                    <div className="aan-rank-list">
+                      {visitorData.browsers.map((browser) => (
+                        <div className="aan-rank-row" key={browser.browser}>
+                          <span className="aan-rank-name">
+                            <i className="fas fa-window-maximize" style={{ marginRight: 8, opacity: 0.7 }} />
+                            {browser.browser}
+                          </span>
+                          <div className="aan-rank-bar">
+                            <div className="aan-rank-fill" style={{ width: `${pct(browser.views, visitorData.totalViews)}%` }} />
+                          </div>
+                          <strong className="aan-rank-count">{num(browser.views)} ({pct(browser.views, visitorData.totalViews)}%)</strong>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <EmptyState text="No browser data available." />
+                  )}
+                </div>
+
+                {/* Country breakdown */}
+                <div className="aan-panel">
+                  <PanelHead icon="fas fa-globe" title="Countries" badge={visitorData?.countries?.length || 0} />
+                  {visitorLoading ? (
+                    <BarsSkeleton />
+                  ) : visitorData?.countries?.length ? (
+                    <div className="aan-rank-list">
+                      {visitorData.countries.map((country) => (
+                        <div className="aan-rank-row" key={country.country_code}>
+                          <span className="aan-rank-name">
+                            <i className="fas fa-flag" style={{ marginRight: 8, opacity: 0.7 }} />
+                            {country.country_code}
+                          </span>
+                          <div className="aan-rank-bar">
+                            <div className="aan-rank-fill" style={{ width: `${pct(country.views, visitorData.totalViews)}%` }} />
+                          </div>
+                          <strong className="aan-rank-count">{num(country.views)} ({pct(country.views, visitorData.totalViews)}%)</strong>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <EmptyState text="No country data available." />
+                  )}
+                </div>
+              </div>
+
+              {/* Pages & Referrers Grid */}
+              <div className="aan-grid-2" style={{ marginTop: 24 }}>
+                {/* Top Paths Table */}
+                <div className="aan-panel">
+                  <PanelHead icon="fas fa-link" title="Top Visited Pages" badge={visitorData?.topPaths?.length || 0} />
+                  <div className="aan-table-wrap">
+                    <table className="aan-table">
+                      <thead>
+                        <tr>
+                          <th style={{ width: 36 }}>#</th>
+                          <th>Page Path</th>
+                          <th>Views</th>
+                          <th>Uniques</th>
+                          <th>Share</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {visitorLoading ? (
+                          Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} cols={5} />)
+                        ) : visitorData?.topPaths?.length ? (
+                          visitorData.topPaths.map((pathItem, idx) => (
+                            <tr key={pathItem.page_path}>
+                              <td><span className="aan-rank-badge">{idx + 1}</span></td>
+                              <td><code style={{ fontSize: 13 }}>{pathItem.page_path}</code></td>
+                              <td><strong>{num(pathItem.views)}</strong></td>
+                              <td>{num(pathItem.uniques)}</td>
+                              <td>
+                                <div className="aan-reach-bar" style={{ display: "inline-block", width: 60, marginRight: 8 }}>
+                                  <div className="aan-reach-fill" style={{ width: `${pct(pathItem.views, visitorData.totalViews)}%` }} />
+                                </div>
+                                {pct(pathItem.views, visitorData.totalViews)}%
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr><td colSpan="5" className="aan-empty">No visits logged.</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Top Referrers Table */}
+                <div className="aan-panel">
+                  <PanelHead icon="fas fa-directions" title="Top Referrers" badge={visitorData?.referrers?.length || 0} />
+                  <div className="aan-table-wrap">
+                    <table className="aan-table">
+                      <thead>
+                        <tr>
+                          <th style={{ width: 36 }}>#</th>
+                          <th>Referrer Source</th>
+                          <th>Views</th>
+                          <th>Share</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {visitorLoading ? (
+                          Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} cols={4} />)
+                        ) : visitorData?.referrers?.length ? (
+                          visitorData.referrers.map((ref, idx) => (
+                            <tr key={ref.referrer}>
+                              <td><span className="aan-rank-badge">{idx + 1}</span></td>
+                              <td>
+                                <span style={{ fontSize: 13, wordBreak: "break-all" }}>
+                                  {ref.referrer === "Direct" ? (
+                                    <em>Direct Traffic</em>
+                                  ) : (
+                                    ref.referrer
+                                  )}
+                                </span>
+                              </td>
+                              <td><strong>{num(ref.views)}</strong></td>
+                              <td>
+                                <div className="aan-reach-bar" style={{ display: "inline-block", width: 60, marginRight: 8 }}>
+                                  <div className="aan-reach-fill" style={{ width: `${pct(ref.views, visitorData.totalViews)}%` }} />
+                                </div>
+                                {pct(ref.views, visitorData.totalViews)}%
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr><td colSpan="4" className="aan-empty">No referrer sources found.</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </>

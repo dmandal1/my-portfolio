@@ -1,5 +1,6 @@
-import React, { Component } from "react";
-import { Route, Routes, HashRouter, Outlet } from "react-router-dom";
+import React, { Component, useEffect } from "react";
+import { Route, Routes, HashRouter, Outlet, useLocation } from "react-router-dom";
+import { logPageView } from "../api/apiService";
 import Home from "../pages/home/HomeComponent";
 import Splash from "../pages/splash/Splash";
 import usePortfolioMaintenanceSettings from "../pages/portfolio/usePortfolioMaintenanceSettings";
@@ -358,8 +359,24 @@ const commonRoutes = (theme, onToggle) => (
   </>
 );
 
+function AnalyticsTracker() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const path = location.pathname;
+    // Skip tracking for admin and setup pages
+    if (path.startsWith("/admin") || path.startsWith("/install")) {
+      return;
+    }
+    logPageView(path, window.innerWidth, document.referrer || "");
+  }, [location]);
+
+  return null;
+}
+
 const MainContent = ({ theme, onToggle }) => (
   <HashRouter>
+    <AnalyticsTracker />
     <AdminTransition>
       <Routes>
         <Route

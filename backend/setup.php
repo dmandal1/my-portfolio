@@ -64,7 +64,8 @@ CREATE TABLE IF NOT EXISTS blogs (
     last_commented_at TIMESTAMP             NULL,
     scheduled_at     TIMESTAMP              NULL,
     created_at       TIMESTAMP              DEFAULT CURRENT_TIMESTAMP,
-    updated_at       TIMESTAMP              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at       TIMESTAMP              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FULLTEXT INDEX idx_blogs_search (title, subtitle, content)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS comments (
@@ -157,6 +158,19 @@ CREATE TABLE IF NOT EXISTS media_files (
     content_type VARCHAR(100) DEFAULT '',
     folder       VARCHAR(100) DEFAULT 'uploads',
     created_at   TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS visitor_analytics (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    page_path VARCHAR(255) NOT NULL,
+    referrer VARCHAR(500) DEFAULT '',
+    device_type VARCHAR(50) DEFAULT 'desktop',
+    browser VARCHAR(100) DEFAULT 'Other',
+    country_code VARCHAR(10) DEFAULT 'XX',
+    ip_hash VARCHAR(64) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_created_at (created_at),
+    INDEX idx_ip_hash (ip_hash)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 SQL;
 

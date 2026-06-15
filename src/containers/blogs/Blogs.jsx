@@ -111,6 +111,7 @@ export default function Blogs({ theme, publicSettings = {} }) {
   const [allCategories, setAllCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [categorySearch, setCategorySearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [page, setPage] = useState(1);
@@ -137,22 +138,46 @@ export default function Blogs({ theme, publicSettings = {} }) {
   const showCategoryWidget = publicSettings.publicBlogShowCategoryWidget !== false;
   const showRecentWidget = publicSettings.publicBlogShowRecentWidget !== false;
 
+  // 1. Fetch categories on mount
   useEffect(() => {
-    Promise.all([getAllPublishedBlogs(), getCategoryList().catch(() => [])])
-      .then(([data, categoriesData]) => {
-        setAllCategories(categoriesData);
+    getCategoryList()
+      .then((categoriesData) => {
+        setAllCategories(categoriesData || []);
+      })
+      .catch((err) => {
+        console.error("[Blogs] Failed to load categories:", err);
+      });
+  }, []);
+
+  // 2. Debounce search query
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  // 3. Fetch blogs on search change
+  useEffect(() => {
+    setLoading(true);
+    getAllPublishedBlogs(debouncedSearchQuery)
+      .then((data) => {
         if (data.length > 0) {
           setBlogs(data);
         } else {
-          setBlogs(blogSection.blogs.map((blog, index) => normalizeStaticBlog(blog, index, authorName)));
+          if (!debouncedSearchQuery) {
+            setBlogs(blogSection.blogs.map((blog, index) => normalizeStaticBlog(blog, index, authorName)));
+          } else {
+            setBlogs([]);
+          }
         }
       })
       .catch((err) => {
-        console.error("[Blogs] Failed to load published posts:", err);
+        console.error("[Blogs] Failed to fetch search results:", err);
         setBlogs(blogSection.blogs.map((blog, index) => normalizeStaticBlog(blog, index, authorName)));
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [debouncedSearchQuery, authorName]);
 
   useEffect(() => {
     const updateFeaturedVisibleCount = () => {

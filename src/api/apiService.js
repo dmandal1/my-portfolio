@@ -91,9 +91,10 @@ export function subscribeToAdminPanelSettings(callback, onError) {
 }
 
 // ── Blogs ──────────────────────────────────────────────────────────────────
-export async function getAllPublishedBlogs() {
+export async function getAllPublishedBlogs(query = '') {
   try {
-    const blogs = await apiFetch('/blogs.php');
+    const url = query ? `/blogs.php?q=${encodeURIComponent(query)}` : '/blogs.php';
+    const blogs = await apiFetch(url);
     return blogs.map(normalizeBlog).sort((a, b) => {
       const ta = a.createdAt ? new Date(a.createdAt) : new Date(0);
       const tb = b.createdAt ? new Date(b.createdAt) : new Date(0);
@@ -650,3 +651,19 @@ export const resetPassword = (token, password) =>
 export const getSystemHealth = () => apiFetch('/status.php?action=health');
 
 export const pruneMediaStorage = () => apiFetch('/database.php?action=prune', { method: 'POST' });
+
+// ── Visitor Analytics ──────────────────────────────────────────────────────
+export async function logPageView(path, screenWidth, referrer) {
+  try {
+    return await apiFetch('/analytics.php', {
+      method: 'POST',
+      body: JSON.stringify({ path, screenWidth, referrer }),
+    });
+  } catch {
+    return { ok: false };
+  }
+}
+
+export async function getVisitorAnalytics(range = 'all') {
+  return apiFetch(`/analytics.php?range=${encodeURIComponent(range)}`);
+}

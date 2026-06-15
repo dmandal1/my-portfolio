@@ -50,7 +50,8 @@ CREATE TABLE IF NOT EXISTS blogs (
     updated_at       TIMESTAMP              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_published (published),
     INDEX idx_slug      (slug(100)),
-    INDEX idx_created   (created_at)
+    INDEX idx_created   (created_at),
+    FULLTEXT INDEX idx_blogs_search (title, subtitle, content)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ── Comments ──────────────────────────────────────────────────────────────

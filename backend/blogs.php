@@ -86,8 +86,65 @@ if ($method === 'GET') {
         jsonResponse($resData);
     }
 
-    // Get all published blogs
-    $rows = $db->query('SELECT * FROM blogs WHERE published = 1 ORDER BY created_at DESC')->fetchAll();
+    // Get all published blogs (supporting search query)
+    $q = trim($_GET['q'] ?? '');
+    if ($q !== '') {
+        $searchTerm = $q;
+        if (!str_contains($searchTerm, '*') && !str_contains($searchTerm, '"') && !str_contains($searchTerm, '+') && !str_contains($searchTerm, '-')) {
+            $words = array_filter(explode(' ', $searchTerm));
+            $searchTerm = implode(' ', array_map(fn($w) => $w . '*', $words));
+        }
+
+        try {
+            $stmt = $db->prepare('
+                SELECT *, MATCH(title, subtitle, content) AGAINST(? IN BOOLEAN MODE) as score 
+                FROM blogs 
+                WHERE published = 1 AND MATCH(title, subtitle, content) AGAINST(? IN BOOLEAN MODE)
+                ORDER BY score DESC, created_at DESC
+            ');
+            $stmt->execute([$searchTerm, $searchTerm]);
+            $rows = $stmt->fetchAll();
+        } catch (PDOException $e) {
+            // Self-healing: if fulltext index is missing, create it and retry
+            if (str_contains($e->getMessage(), 'cannot find FULLTEXT index') || str_contains($e->getMessage(), 'FT_KEY') || $e->getCode() == 'HY000') {
+                try {
+                    $db->exec('ALTER TABLE blogs ADD FULLTEXT INDEX idx_blogs_search (title, subtitle, content)');
+                    // Retry query
+                    $stmt = $db->prepare('
+                        SELECT *, MATCH(title, subtitle, content) AGAINST(? IN BOOLEAN MODE) as score 
+                        FROM blogs 
+                        WHERE published = 1 AND MATCH(title, subtitle, content) AGAINST(? IN BOOLEAN MODE)
+                        ORDER BY score DESC, created_at DESC
+                    ');
+                    $stmt->execute([$searchTerm, $searchTerm]);
+                    $rows = $stmt->fetchAll();
+                } catch (\Throwable $ex) {
+                    // Fallback to LIKE
+                    $likeTerm = '%' . $q . '%';
+                    $stmt = $db->prepare('
+                        SELECT * FROM blogs 
+                        WHERE published = 1 AND (title LIKE ? OR subtitle LIKE ? OR content LIKE ?)
+                        ORDER BY created_at DESC
+                    ');
+                    $stmt->execute([$likeTerm, $likeTerm, $likeTerm]);
+                    $rows = $stmt->fetchAll();
+                }
+            } else {
+                // Fallback to LIKE
+                $likeTerm = '%' . $q . '%';
+                $stmt = $db->prepare('
+                    SELECT * FROM blogs 
+                    WHERE published = 1 AND (title LIKE ? OR subtitle LIKE ? OR content LIKE ?)
+                    ORDER BY created_at DESC
+                ');
+                $stmt->execute([$likeTerm, $likeTerm, $likeTerm]);
+                $rows = $stmt->fetchAll();
+            }
+        }
+    } else {
+        $rows = $db->query('SELECT * FROM blogs WHERE published = 1 ORDER BY created_at DESC')->fetchAll();
+    }
+
     $resData = array_map('rowToBlog', $rows);
     setCache($cacheKey, json_encode($resData));
     jsonResponse($resData);
