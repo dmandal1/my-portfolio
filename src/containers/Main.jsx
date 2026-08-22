@@ -30,6 +30,7 @@ import AdminAudit from "../pages/admin/AdminAudit";
 import AdminSystem from "../pages/admin/AdminSystem";
 import Install from "../pages/install/Install";
 import { PortfolioDataProvider } from "../contexts/PortfolioDataContext";
+import { LanguageProvider } from "../contexts/LanguageContext";
 import AdminContentAudit from "../pages/admin/AdminContentAudit";
 import AdminEditorialPlanner from "../pages/admin/AdminEditorialPlanner";
 import AdminSEO from "../pages/admin/AdminSEO";
@@ -406,11 +407,13 @@ export default class Main extends Component {
     const { theme, onToggle } = this.props;
     return (
       <AuthProvider>
-        <PortfolioDataProvider>
-          <AdminSettingsProvider>
-            <MainContent theme={theme} onToggle={onToggle} />
-          </AdminSettingsProvider>
-        </PortfolioDataProvider>
+        <LanguageProvider>
+          <PortfolioDataProvider>
+            <AdminSettingsProvider>
+              <MainContent theme={theme} onToggle={onToggle} />
+            </AdminSettingsProvider>
+          </PortfolioDataProvider>
+        </LanguageProvider>
       </AuthProvider>
     );
   }

@@ -17,6 +17,7 @@ import {
   podcastSection as defaultPodcastSection,
 } from "../portfolio";
 import { getPortfolioData } from "../api/apiService";
+import { useLanguage } from "./LanguageContext";
 
 const PortfolioDataContext = createContext(null);
 
@@ -44,12 +45,14 @@ export function PortfolioDataProvider({ children }) {
     blogSectionConfig: defaultBlogSection,
   });
 
+  const { language } = useLanguage();
+
   useEffect(() => {
     if (window.location.hash.startsWith("#/install")) return;
 
     async function load() {
       try {
-        const portfolioData = await getPortfolioData();
+        const portfolioData = await getPortfolioData(language);
         const { sections = {}, collections = {} } = portfolioData || {};
 
         const profile          = sections.portfolioProfile;
@@ -121,7 +124,7 @@ export function PortfolioDataProvider({ children }) {
       } catch { /* keep portfolio.js defaults on any error */ }
     }
     load();
-  }, []);
+  }, [language]);
 
   return (
     <PortfolioDataContext.Provider value={data}>

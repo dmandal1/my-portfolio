@@ -125,6 +125,35 @@
   box-shadow: 0 8px 18px rgba(21, 101, 192, 0.16);
 }
 
+.portfolio-language-toggle {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--toggle-border, currentColor);
+  border-radius: 50%;
+  background-color: var(--toggle-bg, transparent);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 700;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.3s ease,
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.language-toggle-label {
+  display: none;
+}
+
+.portfolio-language-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(21, 101, 192, 0.16);
+}
+
 /* Logo */
 .header .logo {
   display: flex;
@@ -324,6 +353,51 @@
   }
 
   .theme-toggle-label {
+    display: inline;
+    font-family: "Google Sans Regular";
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+
+  .language-toggle-item {
+    padding: 0;
+    position: relative;
+  }
+
+  .portfolio-language-toggle {
+    width: 100%;
+    height: auto;
+    padding: 14px 14px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    font-size: 0.95rem;
+    gap: 8px;
+    justify-content: flex-start;
+    font-family: "Google Sans Regular";
+    font-weight: 500;
+    letter-spacing: 0.2px;
+  }
+
+  .portfolio-language-toggle::after {
+    content: "";
+    position: absolute;
+    bottom: 10px;
+    left: 14px;
+    right: 14px;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #1565c0, #42a5f5);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .portfolio-language-toggle:hover::after {
+    transform: scaleX(1);
+  }
+
+  .language-toggle-label {
     display: inline;
     font-family: "Google Sans Regular";
     font-size: 0.95rem;

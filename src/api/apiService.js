@@ -435,59 +435,73 @@ export async function setAuthorRating(clientId, value) {
 }
 
 // ── Portfolio: single-doc sections ─────────────────────────────────────────
-async function getSection(name) {
+async function getSection(name, lang = "") {
   try {
-    return await apiFetch(`/portfolio.php?section=${encodeURIComponent(name)}`);
+    const query = lang ? `&lang=${encodeURIComponent(lang)}` : "";
+    return await apiFetch(`/portfolio.php?section=${encodeURIComponent(name)}${query}`);
   } catch { return null; }
 }
 
-async function saveSection(name, data) {
-  return apiFetch(`/portfolio.php?section=${encodeURIComponent(name)}`, {
+async function saveSection(name, data, lang = "") {
+  const query = lang ? `&lang=${encodeURIComponent(lang)}` : "";
+  return apiFetch(`/portfolio.php?section=${encodeURIComponent(name)}${query}`, {
     method: 'POST',
     body: JSON.stringify(data),
   });
 }
 
-export const getPortfolioProfile    = () => getSection('portfolioProfile');
-export const savePortfolioProfile   = (d) => saveSection('portfolioProfile', d);
-export const getPortfolioContact    = () => getSection('portfolioContact');
-export const savePortfolioContact   = (d) => saveSection('portfolioContact', d);
-export const getPortfolioSeo        = () => getSection('portfolioSeo');
-export const savePortfolioSeo       = (d) => saveSection('portfolioSeo', d);
-export const getExperienceHeader    = () => getSection('portfolioExperienceHeader');
-export const saveExperienceHeader   = (d) => saveSection('portfolioExperienceHeader', d);
-export const getContactPageData     = () => getSection('portfolioContactPageData');
-export const saveContactPageData    = (d) => saveSection('portfolioContactPageData', d);
+export const getPortfolioProfile    = (lang) => getSection('portfolioProfile', lang);
+export const savePortfolioProfile   = (d, lang) => saveSection('portfolioProfile', d, lang);
+export const getPortfolioContact    = (lang) => getSection('portfolioContact', lang);
+export const savePortfolioContact   = (d, lang) => saveSection('portfolioContact', d, lang);
+export const getPortfolioSeo        = (lang) => getSection('portfolioSeo', lang);
+export const savePortfolioSeo       = (d, lang) => saveSection('portfolioSeo', d, lang);
+export const getExperienceHeader    = (lang) => getSection('portfolioExperienceHeader', lang);
+export const saveExperienceHeader   = (d, lang) => saveSection('portfolioExperienceHeader', d, lang);
+export const getContactPageData     = (lang) => getSection('portfolioContactPageData', lang);
+export const saveContactPageData    = (d, lang) => saveSection('portfolioContactPageData', d, lang);
 
 export const getNewsletterSubscribers    = () => apiFetch('/newsletter.php');
 export const deleteNewsletterSubscriber = (id) => apiFetch(`/newsletter.php?id=${id}`, { method: 'DELETE' });
 export const sendNewsletterBroadcast     = (data) => apiFetch('/newsletter.php?action=broadcast', { method: 'POST', body: JSON.stringify(data) });
 
-export const getProjectsHeader      = () => getSection('portfolioProjectsHeader');
-export const saveProjectsHeader     = (d) => saveSection('portfolioProjectsHeader', d);
-export const getOpenSourceConfig    = () => getSection('portfolioOpenSource');
-export const saveOpenSourceConfig   = (d) => saveSection('portfolioOpenSource', d);
-export const getPodcastSection      = () => getSection('portfolioPodcast');
-export const savePodcastSection     = (d) => saveSection('portfolioPodcast', d);
-export const getBlogSectionConfig   = () => getSection('portfolioBlogSection');
-export const saveBlogSectionConfig  = (d) => saveSection('portfolioBlogSection', d);
-export const getMenuLinks           = () => getSection('portfolioMenuLinks');
-export const saveMenuLinks          = (d) => saveSection('portfolioMenuLinks', d);
+export const getProjectsHeader      = (lang) => getSection('portfolioProjectsHeader', lang);
+export const saveProjectsHeader     = (d, lang) => saveSection('portfolioProjectsHeader', d, lang);
+export const getOpenSourceConfig    = (lang) => getSection('portfolioOpenSource', lang);
+export const saveOpenSourceConfig   = (d, lang) => saveSection('portfolioOpenSource', d, lang);
+export const getPodcastSection      = (lang) => getSection('portfolioPodcast', lang);
+export const savePodcastSection     = (d, lang) => saveSection('portfolioPodcast', d, lang);
+export const getBlogSectionConfig   = (lang) => getSection('portfolioBlogSection', lang);
+export const saveBlogSectionConfig  = (d, lang) => saveSection('portfolioBlogSection', d, lang);
+export const getMenuLinks           = (lang) => getSection('portfolioMenuLinks', lang);
+export const saveMenuLinks          = (d, lang) => saveSection('portfolioMenuLinks', d, lang);
 
 // ── Portfolio: collection sections ─────────────────────────────────────────
 function makeCollection(collectionName) {
   const enc = encodeURIComponent(collectionName);
   return {
-    getAll:  () => apiFetch(`/portfolio.php?collection=${enc}`),
-    create:  (data) => apiFetch(`/portfolio.php?collection=${enc}`, {
-      method: 'POST', body: JSON.stringify(data),
-    }),
-    update:  (id, data) => apiFetch(`/portfolio.php?collection=${enc}&id=${encodeURIComponent(id)}`, {
-      method: 'PUT', body: JSON.stringify(data),
-    }),
-    remove:  (id) => apiFetch(`/portfolio.php?collection=${enc}&id=${encodeURIComponent(id)}`, {
-      method: 'DELETE',
-    }),
+    getAll:  (lang = "") => {
+      const query = lang ? `&lang=${encodeURIComponent(lang)}` : "";
+      return apiFetch(`/portfolio.php?collection=${enc}${query}`);
+    },
+    create:  (data, lang = "") => {
+      const query = lang ? `&lang=${encodeURIComponent(lang)}` : "";
+      return apiFetch(`/portfolio.php?collection=${enc}${query}`, {
+        method: 'POST', body: JSON.stringify(data),
+      });
+    },
+    update:  (id, data, lang = "") => {
+      const query = lang ? `&lang=${encodeURIComponent(lang)}` : "";
+      return apiFetch(`/portfolio.php?collection=${enc}&id=${encodeURIComponent(id)}${query}`, {
+        method: 'PUT', body: JSON.stringify(data),
+      });
+    },
+    remove:  (id, lang = "") => {
+      const query = lang ? `&lang=${encodeURIComponent(lang)}` : "";
+      return apiFetch(`/portfolio.php?collection=${enc}&id=${encodeURIComponent(id)}${query}`, {
+        method: 'DELETE',
+      });
+    },
   };
 }
 
@@ -497,48 +511,51 @@ const _competitive = makeCollection('portfolioCompetitiveSites');
 const _projects    = makeCollection('portfolioProjects');
 const _skills      = makeCollection('portfolioSkills');
 
-export const getSocialLinks         = () => _social.getAll();
-export const createSocialLink       = (d) => _social.create(d);
-export const updateSocialLink       = (id, d) => _social.update(id, d);
-export const deleteSocialLink       = (id) => _social.remove(id);
+export const getSocialLinks         = (lang) => _social.getAll(lang);
+export const createSocialLink       = (d, lang) => _social.create(d, lang);
+export const updateSocialLink       = (id, d, lang) => _social.update(id, d, lang);
+export const deleteSocialLink       = (id, lang) => _social.remove(id, lang);
 
-export const getEducation           = () => _education.getAll();
-export const createDegree           = (d) => _education.create(d);
-export const updateDegree           = (id, d) => _education.update(id, d);
-export const deleteDegree           = (id) => _education.remove(id);
+export const getEducation           = (lang) => _education.getAll(lang);
+export const createDegree           = (d, lang) => _education.create(d, lang);
+export const updateDegree           = (id, d, lang) => _education.update(id, d, lang);
+export const deleteDegree           = (id, lang) => _education.remove(id, lang);
 
-export const getCompetitiveSites    = () => _competitive.getAll();
-export const createCompetitiveSite  = (d) => _competitive.create(d);
-export const updateCompetitiveSite  = (id, d) => _competitive.update(id, d);
-export const deleteCompetitiveSite  = (id) => _competitive.remove(id);
+export const getCompetitiveSites    = (lang) => _competitive.getAll(lang);
+export const createCompetitiveSite  = (d, lang) => _competitive.create(d, lang);
+export const updateCompetitiveSite  = (id, d, lang) => _competitive.update(id, d, lang);
+export const deleteCompetitiveSite  = (id, lang) => _competitive.remove(id, lang);
 
-export const getPortfolioProjects   = () => _projects.getAll();
-export const createPortfolioProject = (d) => _projects.create(d);
-export const updatePortfolioProject = (id, d) => _projects.update(id, d);
-export const deletePortfolioProject = (id) => _projects.remove(id);
+export const getPortfolioProjects   = (lang) => _projects.getAll(lang);
+export const createPortfolioProject = (d, lang) => _projects.create(d, lang);
+export const updatePortfolioProject = (id, d, lang) => _projects.update(id, d, lang);
+export const deletePortfolioProject = (id, lang) => _projects.remove(id, lang);
 
-export const getSkillGroups         = () => _skills.getAll();
-export const createSkillGroup       = (d) => _skills.create(d);
-export const updateSkillGroup       = (id, d) => _skills.update(id, d);
-export const deleteSkillGroup       = (id) => _skills.remove(id);
+export const getSkillGroups         = (lang) => _skills.getAll(lang);
+export const createSkillGroup       = (d, lang) => _skills.create(d, lang);
+export const updateSkillGroup       = (id, d, lang) => _skills.update(id, d, lang);
+export const deleteSkillGroup       = (id, lang) => _skills.remove(id, lang);
 
 // ── Portfolio: Certifications ───────────────────────────────────────────────
 const _certs = makeCollection('portfolioCertifications');
 
-export const getCertifications       = () => _certs.getAll();
-export const createCertification     = (d) => _certs.create(d);
-export const updateCertification     = (id, d) => _certs.update(id, d);
-export const deleteCertification     = (id) => _certs.remove(id);
+export const getCertifications       = (lang) => _certs.getAll(lang);
+export const createCertification     = (d, lang) => _certs.create(d, lang);
+export const updateCertification     = (id, d, lang) => _certs.update(id, d, lang);
+export const deleteCertification     = (id, lang) => _certs.remove(id, lang);
 
 // ── Portfolio: Experience ───────────────────────────────────────────────────
 const _exp = makeCollection('portfolioExperiences');
 
-export const getExperiences          = () => _exp.getAll();
-export const createExperience        = (d) => _exp.create(d);
-export const updateExperience        = (id, d) => _exp.update(id, d);
-export const deleteExperience        = (id) => _exp.remove(id);
+export const getExperiences          = (lang) => _exp.getAll(lang);
+export const createExperience        = (d, lang) => _exp.create(d, lang);
+export const updateExperience        = (id, d, lang) => _exp.update(id, d, lang);
+export const deleteExperience        = (id, lang) => _exp.remove(id, lang);
 
-export const getPortfolioData        = () => apiFetch('/portfolio.php?all=1');
+export const getPortfolioData        = (lang = "") => {
+  const query = lang ? `?all=1&lang=${encodeURIComponent(lang)}` : "?all=1";
+  return apiFetch(`/portfolio.php${query}`);
+};
 
 // ── Database management ────────────────────────────────────────────────────
 export const getDatabaseStats = () => apiFetch('/database.php?action=stats');
