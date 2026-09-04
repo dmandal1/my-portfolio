@@ -67,18 +67,7 @@ class HeaderInner extends Component {
                   <span className="theme-toggle-label">{isDarkMode ? t("theme.light") : t("theme.dark")}</span>
                 </button>
               </li>
-              <li className="language-toggle-item">
-                <button
-                  type="button"
-                  className="portfolio-language-toggle"
-                  onClick={() => changeLanguage(language === "en" ? "es" : "en")}
-                  title={language === "en" ? "Cambiar a Español" : "Switch to English"}
-                  style={{ color: theme.text, "--toggle-border": theme.cardBorder || theme.imageDark, "--toggle-bg": theme.cardBackground || theme.body }}
-                >
-                  <i className="fas fa-globe" />
-                  <span className="language-toggle-label">{language === "en" ? "ES" : "EN"}</span>
-                </button>
-              </li>
+
             </ul>
           </header>
         </div>
