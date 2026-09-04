@@ -56,7 +56,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./deploy_folder/
           # The path on your Hostinger server where the live website files live
-          server-dir: ./
+          server-dir: ./public_html/
           # Exclude git files and production config from being overwritten
           exclude: |
             **/.git*
