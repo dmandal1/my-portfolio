@@ -1,0 +1,65 @@
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: 🎉 Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: 🔨 Install Dependencies & Build
+        run: |
+          npm ci
+          npm run build
+
+      - name: 📂 Prepare Deployment Folder
+        run: |
+          # Create a temporary folder to hold exactly what we want to upload
+          mkdir deploy_folder
+
+          # 1. Copy the React frontend build
+          cp -r dist/* deploy_folder/
+
+          # 2. Copy the PHP API backend into the api folder
+          cp -r backend deploy_folder/api
+
+          # 3. Create the .htaccess file for React Routing
+          cat << 'EOF' > deploy_folder/.htaccess
+          <IfModule mod_rewrite.c>
+            RewriteEngine On
+            RewriteBase /
+            RewriteCond %{REQUEST_URI} !^/api/ [NC]
+            RewriteCond %{REQUEST_FILENAME} !-f
+            RewriteCond %{REQUEST_FILENAME} !-d
+            RewriteRule ^.*$ /index.html [L]
+          </IfModule>
+          EOF
+
+      - name: 🚀 Sync files to Server via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./deploy_folder/
+          # Uses the root of the FTP user login or allows override
+          server-dir: ${{ secrets.FTP_SERVER_DIR || './' }}
+          # Exclude git files and production config from being overwritten
+          exclude: |
+            **/.git*
+            **/.git*/**
+            api/config.php
+            api/installed.lock
