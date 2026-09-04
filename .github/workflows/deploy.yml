@@ -55,8 +55,8 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./deploy_folder/
-          # Uses the root of the FTP user login or allows override
-          server-dir: ${{ secrets.FTP_SERVER_DIR || './' }}
+          # The path on your Hostinger server where the live website files live
+          server-dir: ./
           # Exclude git files and production config from being overwritten
           exclude: |
             **/.git*
