@@ -1305,6 +1305,14 @@ function ExperienceTab({ toast }) {
       <div className="acat-form-card">
         <div className="acat-form-head"><span className="acat-form-head-icon"><i className={`fas ${editId ? "fa-pencil-alt" : "fa-briefcase"}`} /></span><div><h2 className="acat-card-title">{editId ? "Edit Experience" : "Add Experience"}</h2></div></div>
         <form onSubmit={handleSubmit} className="acat-form">
+          <Field label="Section" htmlFor="exp-section">
+            <select id="exp-section" name="exp_section" className="ainput" value={form.section} onChange={e => f("section", e.target.value)}>
+              {EXP_SECTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </Field>
+          <Field label="Role Title *" htmlFor="exp-title"><input ref={titleRef} id="exp-title" name="exp_title" className="ainput" value={form.title} onChange={e => f("title", e.target.value)} placeholder="e.g. Software Engineer" required /></Field>
+          <Field label="Company Name *" htmlFor="exp-company"><input id="exp-company" name="exp_company" className="ainput" value={form.company} onChange={e => f("company", e.target.value)} placeholder="e.g. Google" required /></Field>
+          <Field label="Company URL" htmlFor="exp-company-url"><input id="exp-company-url" name="exp_company_url" className="ainput" value={form.company_url} onChange={e => f("company_url", e.target.value)} placeholder="e.g. https://google.com" /></Field>
           <Field label="Duration" htmlFor="exp-duration"><input id="exp-duration" name="exp_duration" className="ainput" value={form.duration} onChange={e => f("duration", e.target.value)} placeholder="e.g. Apr 2026 - Present" autoComplete="off" /></Field>
           <Field label="Location" htmlFor="exp-location"><input id="exp-location" name="exp_location" className="ainput" value={form.location} onChange={e => f("location", e.target.value)} placeholder="e.g. Noida, India" autoComplete="off" /></Field>
           <ImageUploadField ref={imageRef} label="Logo / Image" hint="Upload a file or enter a filename from public assets" value={form.logo_path} onChange={v => f("logo_path", v)} />
