@@ -51,6 +51,7 @@ jobs:
       - name: 🚀 Sync files to Server via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
+          #Hostinger FTP credentials stored in GitHub Secrets
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
