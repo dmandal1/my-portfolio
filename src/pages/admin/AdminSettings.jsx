@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import pkg from "../../../package.json";
 import { useAuth } from "../../contexts/AuthContext";
-import { saveAdminPanelSettings, changeAdminPassword, getMenuLinks, saveMenuLinks } from "../../api/apiService";
+import { saveAdminPanelSettings, changeAdminPassword, getMenuLinks, saveMenuLinks, uploadAvatar, updateAdminProfile } from "../../api/apiService";
 import AdminSidebar from "./components/AdminSidebar";
 import {
   applyAdminTheme,
@@ -366,7 +366,7 @@ function DateTimePicker({ value, onChange }) {
 /* ── Main component ── */
 export default function AdminSettings() {
   const toast                       = useToast();
-  const { currentUser }             = useAuth();
+  const { currentUser, updateUser } = useAuth();
   const sharedSettings              = useAdminSettings();
   const [settings, setSettings]     = useState(loadAdminSettings);
   const [searchParams] = useSearchParams();
@@ -615,6 +615,31 @@ export default function AdminSettings() {
     }
   }
 
+
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const avatarInputRef = useRef(null);
+
+  async function handleAvatarUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast?.addToast("Please select an image file", "error");
+      return;
+    }
+    setAvatarUploading(true);
+    try {
+      const url = await uploadAvatar(file);
+      await updateAdminProfile({ profile_image: url });
+      updateUser({ profileImage: url });
+      toast?.addToast("Profile picture updated", "success");
+    } catch (err) {
+      toast?.addToast("Failed to update profile picture", "error");
+    } finally {
+      setAvatarUploading(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = '';
+    }
+  }
+
   const user = {
     name: currentUser?.displayName || settings.defaultAuthor || settings.siteName,
     email: currentUser?.email || "Signed in administrator",
@@ -648,8 +673,32 @@ export default function AdminSettings() {
 
           {/* ── Profile banner ── */}
           <div className="ast-banner">
-            <div className="ast-banner-avatar">
-              {user.name.charAt(0).toUpperCase()}
+            {/* hidden input for avatar upload */}
+            <input 
+              type="file" 
+              accept="image/*" 
+              ref={avatarInputRef} 
+              onChange={handleAvatarUpload} 
+              style={{ display: 'none' }} 
+            />
+            <div 
+              className="ast-banner-avatar" 
+              style={{ cursor: 'pointer', position: 'relative', overflow: 'hidden' }}
+              onClick={() => avatarInputRef.current?.click()}
+              title="Click to upload profile picture"
+            >
+              {avatarUploading ? (
+                <i className="fas fa-spinner fa-spin" style={{ color: '#fff', fontSize: 24 }} />
+              ) : currentUser?.profileImage ? (
+                <img src={currentUser.profileImage} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                user.name.charAt(0).toUpperCase()
+              )}
+              {!avatarUploading && (
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.5)', height: '30%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <i className="fas fa-camera" style={{ color: '#fff', fontSize: 12 }} />
+                </div>
+              )}
             </div>
             <div className="ast-banner-info">
               <strong>{user.name}</strong>
