@@ -1,3 +1,4 @@
+import { marked } from "marked";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useParams, Link } from "react-router-dom";
@@ -1102,6 +1103,8 @@ export default function AdminPostEditor() {
   const [allTags, setAllTags]                 = useState([]);
   const [tagsLoading, setTagsLoading]         = useState(true);
   const [tagPanelOpen, setTagPanelOpen]       = useState(true);
+  const [markdownModalOpen, setMarkdownModalOpen] = useState(false);
+  const [markdownInput, setMarkdownInput] = useState("");
   const [tagSearch, setTagSearch]             = useState("");
   const [addTagOpen, setAddTagOpen]           = useState(false);
   const [newTagName, setNewTagName]           = useState("");
@@ -4265,6 +4268,22 @@ export default function AdminPostEditor() {
   /* ── Cancel pending auto-save on unmount ── */
   useEffect(() => () => clearTimeout(autoSaveTimer.current), []);
 
+  const insertMarkdownText = () => {
+    if (!markdownInput.trim()) {
+      setMarkdownModalOpen(false);
+      return;
+    }
+    const html = marked.parse(markdownInput);
+    restoreSelection();
+    contentEditableRef.current?.focus();
+    pushEditorHistorySnapshot();
+    document.execCommand("insertHTML", false, html);
+    setForm(p => ({ ...p, content: contentEditableRef.current?.innerHTML || "" }));
+    setMarkdownInput("");
+    setMarkdownModalOpen(false);
+    toast?.addToast("Markdown inserted!", "success");
+  };
+
   /* ── Save ── */
   // mode: "draft" | "publish" | "review"
   async function handleSave(mode = "draft") {
@@ -5687,6 +5706,36 @@ export default function AdminPostEditor() {
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => { if (findOpen) { clearFindHighlights(); setFindStats({ total: 0, current: 0 }); } setFindOpen(o => !o); }}
                   ><i className="fas fa-search-plus" /></button>
+
+                  <div className="awp-toolbar-sep" />
+                  
+                  {/* Markdown Insert */}
+                  <div className="awp-toolbar-group">
+                    <div className="awp-embed-wrap" style={{ position: "relative" }}>
+                      <button type="button" data-tip="Insert Markdown" className={`awp-tbtn${markdownModalOpen ? " is-active" : ""}`} onMouseDown={(e) => { saveSelection(); e.preventDefault(); }} onClick={() => setMarkdownModalOpen(o => !o)}><i className="fab fa-markdown" /></button>
+                      {markdownModalOpen && (
+                        <div className="awp-embed-pop" onMouseDown={(e) => e.stopPropagation()} style={{ width: 400, right: 0, top: "100%", zIndex: 100, position: "absolute", background: "var(--ab-surface)", border: "1px solid var(--ab-border)", padding: 12, borderRadius: 8, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
+                          <div className="awp-embed-head" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                            <span style={{ fontWeight: 600, fontSize: 13, color: "var(--ab-text-main)" }}>Insert Markdown</span>
+                            <button type="button" className="awp-link-close" onClick={() => setMarkdownModalOpen(false)} aria-label="Close" style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--ab-text-muted)" }}>
+                              <i className="fas fa-times" />
+                            </button>
+                          </div>
+                          <textarea
+                            className="ainput"
+                            style={{ minHeight: 150, resize: "vertical", width: "100%", boxSizing: "border-box" }}
+                            placeholder="# Heading 1&#10;**Bold Text**&#10;* List item"
+                            value={markdownInput}
+                            onChange={(e) => setMarkdownInput(e.target.value)}
+                          />
+                          <div className="awp-link-actions" style={{ display: "flex", gap: 8, marginTop: 12 }}>
+                            <button type="button" className="abtn abtn-sm" onClick={insertMarkdownText}>Insert</button>
+                            <button type="button" className="abtn abtn-ghost abtn-sm" onClick={() => setMarkdownModalOpen(false)}>Cancel</button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
 
                   <div className="awp-toolbar-sep" />
 
