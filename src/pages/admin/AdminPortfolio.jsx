@@ -1,3 +1,4 @@
+import MediaPickerModal from "./components/MediaPickerModal";
 import { Icon } from "@iconify/react";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { createPortal } from "react-dom";
