@@ -24765,3 +24765,26 @@ body:has(.adel-overlay, .amodal-overlay, .adb-modal-overlay, .acat-modal-overlay
     overflow: visible !important;
   }
 }
+
+/* Fix Stacking Context for Dropdowns */
+.ahome-widget, .atable-card {
+  z-index: auto !important;
+}
+
+/* Ensure the table wrap doesn't clip */
+.ahome-table-wrap, .atable-responsive {
+  overflow: visible !important;
+}
+
+/* Make sure the widget header and body don't clip */
+.ahome-widget-header, .ahome-widget-body {
+  overflow: visible !important;
+}
+
+/* Fix for widget stacking context clipping dropdowns */
+.ahome-widget:hover, 
+.ahome-widget:focus-within,
+.atable-card:hover,
+.atable-card:focus-within {
+  z-index: 50 !important;
+}
