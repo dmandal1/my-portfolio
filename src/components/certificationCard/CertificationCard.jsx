@@ -80,7 +80,7 @@ export default function CertificationCard({ certificate, theme }) {
     : isLightColor(color)
       ? "#1565C0"
       : color;
-  const imageUrl = imageMap[certificate.logo_path] || "";
+  const imageUrl = imageMap[certificate.logo_path] || (certificate.logo_path?.startsWith("http") || certificate.logo_path?.startsWith("/") ? certificate.logo_path : "");
   const headerBackground = isDarkTheme
     ? `linear-gradient(180deg, #17253a 0%, #111d30 100%)`
     : isLightColor(color)

@@ -284,7 +284,7 @@ export default function AdminExperience() {
                       }}>
                         <img
                           src={
-                            /^(https?:\/\/|\/\/|data:)/i.test(form.logo_path)
+                            form.logo_path.startsWith("http") || form.logo_path.startsWith("/")
                               ? form.logo_path
                               : ""
                           }
@@ -473,7 +473,7 @@ export default function AdminExperience() {
                           }}
                         >
                           {/* Logo or color dot */}
-                          {exp.logo_path && /^(https?:\/\/|\/\/|data:)/i.test(exp.logo_path) ? (
+                          {exp.logo_path && /^(https?:\/\/|\/|data:)/i.test(exp.logo_path) ? (
                             <div style={{
                               width: 36, height: 36, borderRadius: 8, flexShrink: 0,
                               border: "1px solid var(--ab-border)", background: "#fff",

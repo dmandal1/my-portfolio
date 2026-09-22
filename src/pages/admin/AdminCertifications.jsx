@@ -383,7 +383,7 @@ export default function AdminCertifications() {
                                   }}>
                                     {cert.logo_path ? (
                                       <img
-                                        src={`/images/logos/${cert.logo_path}`}
+                                        src={cert.logo_path.startsWith("http") || cert.logo_path.startsWith("/") ? cert.logo_path : `/images/logos/${cert.logo_path}`}
                                         alt={cert.alt_name}
                                         style={{ width: 22, height: 22, objectFit: "contain" }}
                                         onError={(e) => { e.target.style.display = "none"; }}

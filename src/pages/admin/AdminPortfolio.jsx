@@ -181,11 +181,12 @@ const ImageUploadField = forwardRef(function ImageUploadField(
 
   const savedPreview = value ? (value.startsWith("http") || value.startsWith("/") ? value : `/images/logos/${value}`) : null;
   const displayPreview = pendingPreview || savedPreview;
+  const [mediaModalOpen, setMediaModalOpen] = useState(false);
 
   return (
     <div className="acat-field">
       <label className="acat-label" htmlFor="portfolio-asset-upload">{label}</label>
-      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+      <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
         <input
           id="portfolio-asset-upload"
           name="portfolio-asset-upload"
@@ -193,7 +194,7 @@ const ImageUploadField = forwardRef(function ImageUploadField(
           value={value}
           onChange={(e) => { discardPending(); onChange(e.target.value); }}
           placeholder="filename.png or paste a URL"
-          style={{ flex: 1 }}
+          style={{ flex: 1, minWidth: 200 }}
         />
         <button
           type="button"
@@ -204,9 +205,23 @@ const ImageUploadField = forwardRef(function ImageUploadField(
         >
           {uploading
             ? <><span className="aspin" style={{ width: 12, height: 12, borderTopColor: "currentColor" }} /> {progress}%</>
-            : <><i className="fas fa-upload" /> {pendingFile ? "Change" : "Upload"}</>}
+            : <><i className="fas fa-upload" /> {pendingFile ? "Change" : "Upload New"}</>}
+        </button>
+        <button
+          type="button"
+          className="abtn abtn-ghost"
+          style={{ flexShrink: 0, height: 42, padding: "0 14px", fontSize: 13 }}
+          onClick={() => setMediaModalOpen(true)}
+          disabled={uploading}
+        >
+          <i className="fas fa-images" /> Library
         </button>
         <input ref={fileRef} type="file" accept={accept} style={{ display: "none" }} onChange={handleFile} />
+        <MediaPickerModal 
+          open={mediaModalOpen} 
+          onClose={() => setMediaModalOpen(false)} 
+          onSelect={(url) => { discardPending(); onChange(url); }} 
+        />
         {displayPreview && (
           <div style={{ position: "relative", flexShrink: 0 }}>
             <img
@@ -1245,7 +1260,7 @@ function CertificationsTab({ toast }) {
             {filtered.length === 0 ? <div className="acat-empty-state" style={{ padding: 40 }}><span className="acat-empty-icon">{search ? "🔍" : "🏅"}</span><p className="acat-empty-title">{search ? "No matches" : "No certifications yet"}</p></div> : filtered.map(cert => (
               <div key={cert.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 20px", borderBottom: "1px solid var(--ab-border)", background: editId === cert.id ? "var(--ab-hover)" : "transparent" }}>
                 <div style={{ width: 32, height: 32, borderRadius: 6, flexShrink: 0, background: cert.color_code || "#eee", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  {cert.logo_path ? <img src={`/images/logos/${cert.logo_path}`} alt={cert.alt_name} style={{ width: 22, height: 22, objectFit: "contain" }} onError={e => e.target.style.display = "none"} /> : <i className="fas fa-certificate" style={{ fontSize: 14, color: "#fff", opacity: 0.8 }} />}
+                  {cert.logo_path ? <img src={cert.logo_path.startsWith("http") || cert.logo_path.startsWith("/") ? cert.logo_path : `/images/logos/${cert.logo_path}`} alt={cert.alt_name} style={{ width: 22, height: 22, objectFit: "contain" }} onError={e => e.target.style.display = "none"} /> : <i className="fas fa-certificate" style={{ fontSize: 14, color: "#fff", opacity: 0.8 }} />}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 600, fontSize: 13 }}>{cert.title}</div>

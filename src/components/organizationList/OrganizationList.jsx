@@ -9,7 +9,7 @@ const imageModules = import.meta.glob(
 );
 function resolveLogoSrc(logoPath) {
   if (!logoPath) return "";
-  if (/^(https?:\/\/|\/\/|data:)/i.test(logoPath)) return logoPath;
+  if (logoPath.startsWith("http") || logoPath.startsWith("/") || logoPath.startsWith("data:")) return logoPath;
   const key = `../../assests/images/${logoPath}`;
   return imageModules[key]?.default ?? "";
 }
