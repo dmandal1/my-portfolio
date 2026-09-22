@@ -171,7 +171,7 @@ const ImageUploadField = forwardRef(function ImageUploadField(
     if (fileRef.current) fileRef.current.value = "";
   }
 
-  const savedPreview = value ? (value.startsWith("http") ? value : `/images/logos/${value}`) : null;
+  const savedPreview = value ? (value.startsWith("http") || value.startsWith("/") ? value : `/images/logos/${value}`) : null;
   const displayPreview = pendingPreview || savedPreview;
 
   return (

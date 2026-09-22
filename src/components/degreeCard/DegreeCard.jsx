@@ -2,8 +2,10 @@ import React, { Component } from "react";
 
 const imageModules = import.meta.glob("../../assests/images/**/*.{png,jpg,jpeg,svg,webp}", { eager: true });
 function getImage(filename) {
+  if (!filename) return "";
+  if (filename.startsWith("http") || filename.startsWith("/")) return filename;
   const key = `../../assests/images/${filename}`;
-  return imageModules[key]?.default ?? "";
+  return imageModules[key]?.default ?? filename;
 }
 import "./DegreeCard.css";
 import { Fade, Flip } from "../animations/Reveal";
