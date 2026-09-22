@@ -1,3 +1,4 @@
+import { Icon } from "@iconify/react";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
@@ -22,6 +23,13 @@ import {
   getOpenSourceConfig,  saveOpenSourceConfig,
   getBlogSectionConfig, saveBlogSectionConfig,
 } from "../../api/apiService";
+import {
+  settings as legSettings, seo as legSeo, greeting as legGreeting, socialMediaLinks as legSocial,
+  skills as legSkills, competitiveSites as legCompetitive, degrees as legDegrees,
+  certifications as legCertifications, experience as legExperience, projectsHeader as legProjectsHeader,
+  openSource as legOpenSource, bigProjects as legBigProjects, blogSection as legBlogSection,
+  podcastSection as legPodcastSection, contactInfo as legContactInfo, contactPageData as legContactPageData
+} from "../../portfolio.js";
 import { PhoneInput } from "./components/PhoneInput";
 import "./Admin.css";
 
@@ -1039,9 +1047,13 @@ function SkillsTab({ toast }) {
                       border: "1px solid var(--ab-border)",
                       boxShadow: "0 2px 6px rgba(0,0,0,.08)",
                     }}>
-                      <span style={{ fontSize: 11, fontWeight: 800, color: swForm.color, lineHeight: 1, textAlign: "center" }}>
-                        {swForm.skillName.slice(0, 2).toUpperCase()}
-                      </span>
+                      {swForm.fontAwesomeClassname ? (
+                        <Icon icon={swForm.fontAwesomeClassname} style={{ fontSize: 24, color: swForm.color }} />
+                      ) : (
+                        <span style={{ fontSize: 11, fontWeight: 800, color: swForm.color, lineHeight: 1, textAlign: "center" }}>
+                          {swForm.skillName.slice(0, 2).toUpperCase()}
+                        </span>
+                      )}
                     </div>
                   </div>
                 )}
