@@ -644,11 +644,23 @@ export default function AdminSidebar() {
 
                   {/* ── Header: avatar + name + email ── */}
                   <div className="abar-um-header">
-                    <div className="abar-av abar-av-lg">
-                      {profileImage ? (
+                    <div 
+                      className="abar-av abar-av-lg abar-av-upload"
+                      onClick={(e) => { e.stopPropagation(); navAvatarInputRef.current?.click(); }}
+                      title="Click to change profile picture"
+                      style={{ cursor: 'pointer', position: 'relative', overflow: 'hidden' }}
+                    >
+                      {navAvatarUploading ? (
+                        <i className="fas fa-spinner fa-spin" style={{ fontSize: 24 }} />
+                      ) : profileImage ? (
                         <img src={profileImage} alt="Profile" className="abar-av-img" />
                       ) : (
                         initials
+                      )}
+                      {!navAvatarUploading && (
+                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.5)', height: '35%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <i className="fas fa-camera" style={{ color: '#fff', fontSize: 12 }} />
+                        </div>
                       )}
                     </div>
                     <div className="abar-um-info">
