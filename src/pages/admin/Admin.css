@@ -24706,3 +24706,8 @@ body:has(.adel-overlay, .amodal-overlay, .adb-modal-overlay, .acat-modal-overlay
   transform: translateY(-1px);
   box-shadow: 0 6px 16px var(--ap-glow);
 }
+
+/* Force inherited text color in dark mode to prevent insertHTML from injecting inline black color spans */
+[data-admin-theme="dark"] .awp-editor-area * {
+  color: inherit;
+}

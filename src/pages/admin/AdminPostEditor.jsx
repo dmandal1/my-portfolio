@@ -4276,8 +4276,7 @@ export default function AdminPostEditor() {
     const html = marked.parse(markdownInput);
     restoreSelection();
     contentEditableRef.current?.focus();
-    pushEditorHistorySnapshot();
-    document.execCommand("insertHTML", false, html);
+    execInsertHtml(html);
     setForm(p => ({ ...p, content: contentEditableRef.current?.innerHTML || "" }));
     setMarkdownInput("");
     setMarkdownModalOpen(false);
