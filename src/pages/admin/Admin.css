@@ -24755,3 +24755,13 @@ body:has(.adel-overlay, .amodal-overlay, .adb-modal-overlay, .acat-modal-overlay
 .avatar-hover-container:hover .avatar-hover-overlay {
   opacity: 1;
 }
+
+/* Fix for Post Actions Dropdown getting clipped by table wrapper overflow */
+@media (min-width: 768px) {
+  .atable-card {
+    overflow: visible !important;
+  }
+  .atable-responsive {
+    overflow: visible !important;
+  }
+}
