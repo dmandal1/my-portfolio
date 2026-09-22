@@ -658,8 +658,8 @@ export default function AdminSidebar() {
                         initials
                       )}
                       {!navAvatarUploading && (
-                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.5)', height: '35%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <i className="fas fa-camera" style={{ color: '#fff', fontSize: 12 }} />
+                        <div className="abar-av-cam">
+                          <i className="fas fa-camera" style={{ fontSize: 16 }} />
                         </div>
                       )}
                     </div>

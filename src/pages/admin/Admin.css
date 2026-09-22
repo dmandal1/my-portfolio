@@ -24734,3 +24734,24 @@ body:has(.adel-overlay, .amodal-overlay, .adb-modal-overlay, .acat-modal-overlay
 [data-admin-theme="light"] .awp-editor-area li {
   color: #1d2327 !important;
 }
+
+/* Avatar Hover Overlay Utility */
+.avatar-hover-container {
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+}
+.avatar-hover-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.avatar-hover-container:hover .avatar-hover-overlay {
+  opacity: 1;
+}

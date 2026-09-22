@@ -682,7 +682,7 @@ export default function AdminSettings() {
               style={{ display: 'none' }} 
             />
             <div 
-              className="ast-banner-avatar" 
+              className="ast-banner-avatar abar-av-upload" 
               style={{ cursor: 'pointer', position: 'relative', overflow: 'hidden' }}
               onClick={() => avatarInputRef.current?.click()}
               title="Click to upload profile picture"
@@ -695,8 +695,8 @@ export default function AdminSettings() {
                 user.name.charAt(0).toUpperCase()
               )}
               {!avatarUploading && (
-                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.5)', height: '30%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <i className="fas fa-camera" style={{ color: '#fff', fontSize: 12 }} />
+                <div className="abar-av-cam">
+                  <i className="fas fa-camera" style={{ fontSize: 24 }} />
                 </div>
               )}
             </div>
