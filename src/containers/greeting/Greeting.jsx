@@ -134,6 +134,7 @@ export default function Greeting(props) {
                 height: "100%", 
                 objectFit: "cover",
                 pointerEvents: "none",
+                mixBlendMode: theme.name === "dark" || theme.body === "#08111f" ? "normal" : "multiply",
                 filter: "none"
               }}
             />
