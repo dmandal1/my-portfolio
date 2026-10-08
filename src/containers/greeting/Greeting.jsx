@@ -61,6 +61,14 @@ export default function Greeting(props) {
   const videoRef = useRef(null);
   const [isMuted, setIsMuted] = useState(true);
 
+  useEffect(() => {
+    if (videoRef.current) {
+      // Force mute initially to ensure autoplay works
+      videoRef.current.muted = true;
+      videoRef.current.play().catch(e => console.warn("Autoplay blocked", e));
+    }
+  }, []);
+
   const toggleMute = () => {
     if (videoRef.current) {
       videoRef.current.muted = !isMuted;
@@ -112,21 +120,22 @@ export default function Greeting(props) {
             width: "100%", 
             maxWidth: "500px", 
             aspectRatio: "768/960", 
-            margin: "0 auto",
-            mixBlendMode: theme.body === "#08111f" ? "normal" : "multiply"
+            margin: "0 auto"
           }}>
             <video 
               ref={videoRef}
               src="/intro.mp4" 
               autoPlay 
               loop 
-              muted={isMuted}
+              muted 
               playsInline
               style={{ 
                 width: "100%", 
                 height: "100%", 
                 objectFit: "cover",
-                pointerEvents: "none"
+                pointerEvents: "none",
+                mixBlendMode: theme.name === "dark" || theme.body === "#08111f" ? "normal" : "multiply",
+                filter: "none" // removes the drop-shadow from Greeting.css which blocks transparency
               }}
             />
             <button 
