@@ -102,9 +102,17 @@ export default function Greeting(props) {
               src="/intro.mp4" 
               autoPlay 
               loop 
-              muted 
+              controls
               playsInline
-              style={{ width: "100%", height: "auto", borderRadius: "16px" }}
+              style={{ 
+                width: "100%", 
+                height: "auto", 
+                maxHeight: "550px",
+                objectFit: "cover",
+                objectPosition: "center",
+                mixBlendMode: theme.body === "#08111f" ? "normal" : "multiply",
+                pointerEvents: "auto"
+              }}
             />
           </div>
         </div>
