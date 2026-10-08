@@ -5,7 +5,7 @@ import Button from "../../components/button/Button";
 import { greeting as defaultGreeting } from "../../portfolio";
 import { usePortfolioData } from "../../contexts/PortfolioDataContext";
 import { Fade } from "../../components/animations/Reveal";
-import FeelingProud from "./FeelingProud";
+// import FeelingProud from "./FeelingProud"; // Replaced by video
 
 const DEFAULT_ROLES = [
   "Full Stack Developer",
@@ -98,7 +98,14 @@ export default function Greeting(props) {
             </div>
           </div>
           <div className="greeting-image-div">
-            <FeelingProud theme={theme} />
+            <video 
+              src="/intro.mp4" 
+              autoPlay 
+              loop 
+              muted 
+              playsInline
+              style={{ width: "100%", height: "auto", borderRadius: "16px" }}
+            />
           </div>
         </div>
       </div>
