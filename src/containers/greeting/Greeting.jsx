@@ -120,7 +120,8 @@ export default function Greeting(props) {
             width: "100%", 
             maxWidth: "500px", 
             aspectRatio: "768/960", 
-            margin: "0 auto"
+            margin: "0 auto",
+            mixBlendMode: "multiply"
           }}>
             <video 
               ref={videoRef}
@@ -134,7 +135,6 @@ export default function Greeting(props) {
                 height: "100%", 
                 objectFit: "cover",
                 pointerEvents: "none",
-                mixBlendMode: theme.name === "dark" || theme.body === "#08111f" ? "normal" : "multiply",
                 filter: "none"
               }}
             />
