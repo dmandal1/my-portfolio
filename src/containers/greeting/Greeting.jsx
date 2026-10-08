@@ -124,7 +124,7 @@ export default function Greeting(props) {
           }}>
             <video 
               ref={videoRef}
-              src="/intro.mp4" 
+              src="/intro.webm" 
               autoPlay 
               loop 
               muted 
