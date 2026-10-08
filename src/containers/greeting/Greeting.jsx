@@ -134,7 +134,7 @@ export default function Greeting(props) {
                 height: "100%", 
                 objectFit: "cover",
                 pointerEvents: "none",
-                filter: "none" // removes the drop-shadow from Greeting.css which blocks transparency
+                filter: "none"
               }}
             />
             <button 
