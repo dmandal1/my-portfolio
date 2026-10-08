@@ -58,15 +58,27 @@ export default function Greeting(props) {
 
   const typedRole = useTypingEffect(roles);
 
-  const videoRef = useRef(null);
+const videoRef = useRef(null);
+  const [showPlayBtn, setShowPlayBtn] = useState(false);
 
   useEffect(() => {
     if (videoRef.current) {
-      // Must be muted for browsers to allow autoplay
-      videoRef.current.muted = true;
-      videoRef.current.play().catch(e => console.warn("Autoplay blocked", e));
+      videoRef.current.muted = false; // We want audio
+      videoRef.current.play().catch(e => {
+        console.warn("Browser blocked autoplay with sound.");
+        // If blocked, show a play button so user can start it
+        setShowPlayBtn(true);
+      });
     }
   }, []);
+
+  const handlePlayClick = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = false;
+      videoRef.current.play();
+      setShowPlayBtn(false);
+    }
+  };
 
   return (
     <Fade direction="up" duration={2000}>
@@ -117,18 +129,45 @@ export default function Greeting(props) {
             <video 
               ref={videoRef}
               src="/intro.webm" 
-              autoPlay 
               loop 
-              muted 
               playsInline
               style={{ 
                 width: "100%", 
                 height: "100%", 
                 objectFit: "cover",
-                pointerEvents: "none",
+                pointerEvents: showPlayBtn ? "none" : "auto",
                 filter: "none"
               }}
             />
+            {showPlayBtn && (
+              <button 
+                onClick={handlePlayClick}
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  background: theme.text,
+                  color: theme.body,
+                  border: "none",
+                  borderRadius: "50px",
+                  padding: "16px 32px",
+                  fontSize: "18px",
+                  fontWeight: "bold",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  cursor: "pointer",
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+                  zIndex: 20,
+                  transition: "transform 0.2s"
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = "translate(-50%, -50%) scale(1.05)"}
+                onMouseLeave={(e) => e.currentTarget.style.transform = "translate(-50%, -50%) scale(1)"}
+              >
+                <i className="fas fa-play" /> Play Video
+              </button>
+            )}
           </div>
         </div>
       </div>
