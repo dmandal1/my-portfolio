@@ -120,8 +120,7 @@ export default function Greeting(props) {
             width: "100%", 
             maxWidth: "500px", 
             aspectRatio: "768/960", 
-            margin: "0 auto",
-            mixBlendMode: "multiply"
+            margin: "0 auto"
           }}>
             <video 
               ref={videoRef}
