@@ -59,22 +59,14 @@ export default function Greeting(props) {
   const typedRole = useTypingEffect(roles);
 
   const videoRef = useRef(null);
-  const [isMuted, setIsMuted] = useState(true);
 
   useEffect(() => {
     if (videoRef.current) {
-      // Force mute initially to ensure autoplay works
-      videoRef.current.muted = true;
-      videoRef.current.play().catch(e => console.warn("Autoplay blocked", e));
+      // Try to autoplay with sound
+      videoRef.current.muted = false;
+      videoRef.current.play().catch(e => console.warn("Autoplay with sound blocked by browser policy", e));
     }
   }, []);
-
-  const toggleMute = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
-  };
 
   return (
     <Fade direction="up" duration={2000}>
@@ -127,7 +119,6 @@ export default function Greeting(props) {
               src="/intro.webm" 
               autoPlay 
               loop 
-              muted 
               playsInline
               style={{ 
                 width: "100%", 
@@ -137,32 +128,6 @@ export default function Greeting(props) {
                 filter: "none"
               }}
             />
-            <button 
-              onClick={toggleMute}
-              style={{
-                position: "absolute",
-                bottom: "24px",
-                right: "24px",
-                background: theme.text,
-                color: theme.body,
-                border: "none",
-                borderRadius: "50%",
-                width: "48px",
-                height: "48px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-                zIndex: 20,
-                transition: "transform 0.2s"
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.1)"}
-              onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
-              title={isMuted ? "Unmute Video" : "Mute Video"}
-            >
-              <i className={isMuted ? "fas fa-volume-mute" : "fas fa-volume-up"} style={{ fontSize: "20px" }} />
-            </button>
           </div>
         </div>
       </div>
