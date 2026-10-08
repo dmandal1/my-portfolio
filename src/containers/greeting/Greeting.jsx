@@ -107,7 +107,14 @@ export default function Greeting(props) {
               </div>
             </div>
           </div>
-          <div className="greeting-image-div" style={{ position: "relative", display: "flex", justifyContent: "center", alignItems: "flex-end", height: "600px" }}>
+          <div className="greeting-image-div" style={{ 
+            position: "relative", 
+            width: "100%", 
+            maxWidth: "500px", 
+            aspectRatio: "768/960", 
+            margin: "0 auto",
+            mixBlendMode: theme.body === "#08111f" ? "normal" : "multiply"
+          }}>
             <video 
               ref={videoRef}
               src="/intro.mp4" 
@@ -116,20 +123,18 @@ export default function Greeting(props) {
               muted={isMuted}
               playsInline
               style={{ 
-                height: "120%", 
-                width: "auto", 
-                objectFit: "contain",
-                mixBlendMode: theme.body === "#08111f" ? "normal" : "multiply",
-                pointerEvents: "none",
-                transform: "scale(1.1) translateY(5%)"
+                width: "100%", 
+                height: "100%", 
+                objectFit: "cover",
+                pointerEvents: "none"
               }}
             />
             <button 
               onClick={toggleMute}
               style={{
                 position: "absolute",
-                bottom: "20px",
-                right: "20px",
+                bottom: "24px",
+                right: "24px",
                 background: theme.text,
                 color: theme.body,
                 border: "none",
@@ -141,7 +146,7 @@ export default function Greeting(props) {
                 justifyContent: "center",
                 cursor: "pointer",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-                zIndex: 10,
+                zIndex: 20,
                 transition: "transform 0.2s"
               }}
               onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.1)"}
