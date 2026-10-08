@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./Greeting.css";
 import SocialMedia from "../../components/socialMedia/SocialMedia";
 import Button from "../../components/button/Button";
@@ -58,6 +58,16 @@ export default function Greeting(props) {
 
   const typedRole = useTypingEffect(roles);
 
+  const videoRef = useRef(null);
+  const [isMuted, setIsMuted] = useState(true);
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
+
   return (
     <Fade direction="up" duration={2000}>
       <div className="greet-main" id="greeting">
@@ -97,23 +107,49 @@ export default function Greeting(props) {
               </div>
             </div>
           </div>
-          <div className="greeting-image-div">
+          <div className="greeting-image-div" style={{ position: "relative", display: "flex", justifyContent: "center", alignItems: "flex-end", height: "600px" }}>
             <video 
+              ref={videoRef}
               src="/intro.mp4" 
               autoPlay 
               loop 
-              controls
+              muted={isMuted}
               playsInline
               style={{ 
-                width: "100%", 
-                height: "auto", 
-                maxHeight: "550px",
-                objectFit: "cover",
-                objectPosition: "center",
+                height: "120%", 
+                width: "auto", 
+                objectFit: "contain",
                 mixBlendMode: theme.body === "#08111f" ? "normal" : "multiply",
-                pointerEvents: "auto"
+                pointerEvents: "none",
+                transform: "scale(1.1) translateY(5%)"
               }}
             />
+            <button 
+              onClick={toggleMute}
+              style={{
+                position: "absolute",
+                bottom: "20px",
+                right: "20px",
+                background: theme.text,
+                color: theme.body,
+                border: "none",
+                borderRadius: "50%",
+                width: "48px",
+                height: "48px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+                zIndex: 10,
+                transition: "transform 0.2s"
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.1)"}
+              onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+              title={isMuted ? "Unmute Video" : "Mute Video"}
+            >
+              <i className={isMuted ? "fas fa-volume-mute" : "fas fa-volume-up"} style={{ fontSize: "20px" }} />
+            </button>
           </div>
         </div>
       </div>
