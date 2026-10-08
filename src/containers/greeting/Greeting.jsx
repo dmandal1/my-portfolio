@@ -62,9 +62,9 @@ export default function Greeting(props) {
 
   useEffect(() => {
     if (videoRef.current) {
-      // Try to autoplay with sound
-      videoRef.current.muted = false;
-      videoRef.current.play().catch(e => console.warn("Autoplay with sound blocked by browser policy", e));
+      // Must be muted for browsers to allow autoplay
+      videoRef.current.muted = true;
+      videoRef.current.play().catch(e => console.warn("Autoplay blocked", e));
     }
   }, []);
 
@@ -119,6 +119,7 @@ export default function Greeting(props) {
               src="/intro.webm" 
               autoPlay 
               loop 
+              muted 
               playsInline
               style={{ 
                 width: "100%", 
