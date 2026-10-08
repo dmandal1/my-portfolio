@@ -129,8 +129,8 @@ const videoRef = useRef(null);
             <video 
               ref={videoRef}
               src="/intro.webm" 
-              loop 
               playsInline
+              onEnded={() => setShowPlayBtn(true)}
               style={{ 
                 width: "100%", 
                 height: "100%", 
