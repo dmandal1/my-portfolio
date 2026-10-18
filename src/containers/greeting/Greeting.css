@@ -94,16 +94,15 @@
   border-radius: 3px;
 }
 
+.greeting-image-div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .greeting-image-div > * {
   max-width: 100%;
   height: auto;
-  filter: drop-shadow(0 12px 32px rgba(21, 101, 192, 0.18));
-  animation: floatImg 5s ease-in-out infinite;
-}
-
-@keyframes floatImg {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-12px); }
 }
 
 .portfolio-resume {

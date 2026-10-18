@@ -12,7 +12,6 @@ export default function AiAvatarVideo({ theme }) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(8);
   const [isEnded, setIsEnded] = useState(false);
-  const [activeTopic, setActiveTopic] = useState("intro");
   const [isHovered, setIsHovered] = useState(false);
 
   // Start with audio enabled (triggered by user click)
@@ -120,27 +119,6 @@ export default function AiAvatarVideo({ theme }) {
     const s = Math.floor(secs || 0);
     return `0:0${s}`.slice(-4);
   };
-
-  const topics = [
-    {
-      id: "intro",
-      icon: "👋",
-      label: "Intro Tour",
-      text: "Hi, I'm Deepak Mandal! Full Stack Software Developer & Cloud Architect with 5+ years of experience building resilient web applications and microservices."
-    },
-    {
-      id: "stack",
-      icon: "⚡",
-      label: "Tech Stack",
-      text: "Expertise in React, Node.js, TypeScript, Next.js, PostgreSQL, Docker, Redis, and Cloud Native Architectures."
-    },
-    {
-      id: "work",
-      icon: "🚀",
-      label: "Open to Work",
-      text: "Actively available for high-impact full-time engineering roles, technical leadership, and contract collaborations."
-    }
-  ];
 
   return (
     <div
@@ -280,35 +258,6 @@ export default function AiAvatarVideo({ theme }) {
                 </span>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Bottom Interactive Highlights Dossier */}
-        <div className="ai-dossier-card">
-          <div className="ai-dossier-header">
-            <span className="ai-dossier-tag">⚡ QUICK OVERVIEW</span>
-            <span className="ai-dossier-badge">Interactive Highlights</span>
-          </div>
-
-          <div className="ai-topics-row">
-            {topics.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                className={`ai-topic-chip ${activeTopic === t.id ? "ai-topic-chip--active" : ""}`}
-                onClick={() => setActiveTopic(t.id)}
-                title={`View ${t.label} details`}
-              >
-                <span>{t.icon}</span>
-                <span>{t.label}</span>
-              </button>
-            ))}
-          </div>
-
-          <div className="ai-topic-preview">
-            <p className="ai-topic-text">
-              {topics.find((t) => t.id === activeTopic)?.text}
-            </p>
           </div>
         </div>
       </div>
