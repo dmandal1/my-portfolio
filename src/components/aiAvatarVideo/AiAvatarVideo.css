@@ -3,7 +3,7 @@
 .ai-avatar-card-wrapper {
   position: relative;
   width: 100%;
-  max-width: 440px;
+  max-width: clamp(280px, 26vw, 350px);
   margin: 0 auto;
   perspective: 1200px;
 }
@@ -37,8 +37,8 @@
 .ai-hologram-frame {
   position: relative;
   z-index: 1;
-  border-radius: 24px;
-  padding: 12px;
+  border-radius: 20px;
+  padding: 8px 8px 10px;
   background: rgba(15, 27, 45, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -71,9 +71,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 8px 10px;
+  padding: 4px 6px 8px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 [data-portfolio-theme="light"] .ai-hud-header {
@@ -134,12 +134,12 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 5px 12px;
+  padding: 4px 10px;
   border-radius: 20px;
   background: rgba(37, 99, 235, 0.14);
   border: 1px solid rgba(96, 165, 250, 0.3);
   color: #93C5FD;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -162,12 +162,12 @@
 .ai-video-viewport {
   position: relative;
   width: 100%;
-  aspect-ratio: 404 / 640;
-  border-radius: 18px;
+  aspect-ratio: 404 / 600;
+  max-height: min(60vh, 500px);
+  border-radius: 14px;
   overflow: hidden;
   background: radial-gradient(circle at 50% 32%, #FFFFFF 0%, #F1F5F9 42%, #E2E8F0 75%, #CBD5E1 100%);
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) inset;
 }
 
 [data-portfolio-theme="dark"] .ai-video-viewport {
@@ -382,116 +382,12 @@
   gap: 8px;
 }
 
-/* Bottom Dossier Card */
-.ai-dossier-card {
-  margin-top: 10px;
-  padding: 10px 12px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-}
-
-[data-portfolio-theme="light"] .ai-dossier-card {
-  background: rgba(21, 101, 192, 0.04);
-  border: 1px solid rgba(21, 101, 192, 0.1);
-}
-
-.ai-dossier-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-
-.ai-dossier-tag {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  color: #60A5FA;
-  text-transform: uppercase;
-}
-
-[data-portfolio-theme="light"] .ai-dossier-tag {
-  color: #1565C0;
-}
-
-.ai-dossier-badge {
-  font-size: 10px;
-  font-weight: 600;
-  color: #10B981;
-  background: rgba(16, 185, 129, 0.12);
-  padding: 2px 7px;
-  border-radius: 12px;
-}
-
-.ai-topics-row {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 8px;
-  flex-wrap: wrap;
-}
-
-.ai-topic-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: 8px;
-  font-size: 11px;
-  font-weight: 600;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #E2E8F0;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-[data-portfolio-theme="light"] .ai-topic-chip {
-  background: rgba(0, 0, 0, 0.04);
-  border-color: rgba(0, 0, 0, 0.08);
-  color: #1E293B;
-}
-
-.ai-topic-chip:hover {
-  background: rgba(59, 130, 246, 0.2);
-  border-color: #3B82F6;
-  color: #FFFFFF;
-}
-
-.ai-topic-chip--active {
-  background: #2563EB !important;
-  border-color: #60A5FA !important;
-  color: #FFFFFF !important;
-  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.35);
-}
-
-.ai-topic-preview {
-  padding: 6px 8px;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.2);
-  border-left: 3px solid #3B82F6;
-}
-
-[data-portfolio-theme="light"] .ai-topic-preview {
-  background: rgba(21, 101, 192, 0.06);
-}
-
-.ai-topic-text {
-  font-size: 12px;
-  line-height: 1.45;
-  margin: 0;
-  color: #CBD5E1;
-}
-
-[data-portfolio-theme="light"] .ai-topic-text {
-  color: #334155;
-}
-
 /* ── Responsive Queries ─────────────────────────────────────────── */
 
 @media (max-width: 768px) {
   .ai-avatar-card-wrapper {
-    max-width: 360px;
-    margin: 20px auto 0;
+    max-width: 320px;
+    margin: 10px auto 0;
   }
 }
+

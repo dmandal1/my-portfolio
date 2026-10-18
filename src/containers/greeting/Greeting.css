@@ -7,9 +7,14 @@
 
 .greet-main {
   width: 90%;
-  padding: 40px 10px 60px;
+  max-width: 1240px;
+  min-height: calc(100vh - 80px);
+  padding: 10px 10px 24px;
   margin: 0px auto;
-  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .gretting-main {
@@ -21,25 +26,32 @@
 .greeting-main {
   display: flex;
   align-items: center;
-  gap: clamp(20px, 4vw, 40px);
+  justify-content: space-between;
+  width: 100%;
+  gap: clamp(24px, 4vw, 56px);
 }
 
 .greeting-main > * {
   flex: 1;
-  margin-bottom: 30px;
+}
+
+.greeting-text-div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .button-greeting-div {
   display: flex;
-  margin-top: 20px;
+  margin-top: 18px;
   gap: 16px;
   flex-wrap: wrap;
 }
 
 /* Gradient animated name */
 .greeting-text {
-  margin-top: clamp(20px, 4vw, 60px);
-  font-size: clamp(32px, 5vw, 70px);
+  margin: 0;
+  font-size: clamp(32px, 4.4vw, 64px);
   line-height: 1.1;
   font-family: "Google Sans Bold";
   background: linear-gradient(135deg, #0A1628 0%, #1565C0 50%, #42A5F5 100%);
@@ -64,22 +76,24 @@
 }
 
 .greeting-job_profile {
-  font-size: clamp(13px, 1.2vw, 15px);
+  font-size: clamp(14px, 1.25vw, 17px);
   line-height: 1.4;
   font-family: "Google Sans Bold Italic";
-  margin-top: 10px;
+  margin-top: 8px;
+  margin-bottom: 0;
   opacity: 0.75;
   letter-spacing: 0.5px;
 }
 
 .greeting-text-p {
-  font-size: clamp(15px, 1.6vw, 22px);
-  line-height: 1.65;
-  margin-right: clamp(0px, 3vw, 40px);
-  margin-top: 18px;
+  font-size: clamp(14px, 1.35vw, 18px);
+  line-height: 1.6;
+  margin-right: clamp(0px, 2vw, 30px);
+  margin-top: 14px;
+  margin-bottom: 14px;
   font-family: "Google Sans Medium";
   position: relative;
-  padding-left: 16px;
+  padding-left: 14px;
 }
 
 /* Accent bar left of subtitle */
@@ -106,7 +120,11 @@
 }
 
 .portfolio-resume {
-  margin-top: 8px;
+  margin-top: 14px;
+}
+
+.portfolio-resume .main-button {
+  margin-top: 0;
 }
 
 /* Typing effect */
@@ -127,16 +145,25 @@
 
 /* Tablet */
 @media (max-width: 1024px) {
+  .greet-main {
+    min-height: auto;
+    padding: 30px 10px 40px;
+  }
   .greeting-main {
-    gap: clamp(16px, 3vw, 28px);
+    gap: clamp(16px, 3vw, 32px);
   }
   .greeting-text {
-    font-size: clamp(32px, 4.5vw, 52px);
+    font-size: clamp(30px, 4.2vw, 48px);
   }
 }
 
 /* Mobile */
 @media (max-width: 768px) {
+  .greet-main {
+    min-height: auto;
+    padding: 20px 10px 40px;
+    display: block;
+  }
   .button-greeting-div {
     justify-content: center;
     flex-direction: column;
@@ -162,9 +189,12 @@
     display: none;
   }
   .greeting-main {
-    display: block;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 24px;
   }
-  .portfolio-repo-btn-div {
+  .portfolio-repo-btn-div,
+  .portfolio-resume {
     width: 100%;
     display: flex;
     justify-content: center;
@@ -177,7 +207,7 @@
 /* Small phones */
 @media (max-width: 480px) {
   .greet-main {
-    padding: 20px 10px 40px;
+    padding: 16px 10px 32px;
   }
   .greeting-text {
     font-size: clamp(24px, 8vw, 32px);
