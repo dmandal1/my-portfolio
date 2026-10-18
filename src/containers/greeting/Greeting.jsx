@@ -75,16 +75,17 @@ export default function Greeting(props) {
         <div className="greeting-main">
           {/* Left Column: Bio & Hero Content */}
           <div className="greeting-text-div">
-            {/* Top Status & Welcome Badge */}
+            {/* Top Live Status Indicator */}
             <div className="hero-status-row">
-              <span className="hero-badge">
-                <span className="hero-badge-sparkle">✨</span>
-                <span>Welcome to my digital space</span>
-              </span>
-              <span className="hero-available-badge">
-                <span className="hero-available-dot" />
-                <span>Available for work</span>
-              </span>
+              <div className="hero-status-pill">
+                <span className="hero-status-ping-wrap">
+                  <span className="hero-status-ping" />
+                  <span className="hero-status-dot" />
+                </span>
+                <span className="hero-status-text">Available for work</span>
+                <span className="hero-status-dot-divider">•</span>
+                <span className="hero-status-subtext">Open to opportunities</span>
+              </div>
             </div>
 
             {/* Name Heading with animated gradient shimmer */}
