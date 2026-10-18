@@ -35,9 +35,11 @@ async function deploy() {
   const mode = args[0] || "all"; // all, frontend, backend
   const target = args[1] || process.env.DEPLOY_TARGET || "";
 
-  if (target === "pro" || args.includes("pro") || mode === "pro") {
-    config.remoteRoot = path.posix.join(process.env.FTP_REMOTE_PATH || "/public_html", "pro");
+  let baseRemote = process.env.FTP_REMOTE_PATH || "/domains/deepakmandal.com/public_html";
+  if ((target === "pro" || args.includes("pro") || mode === "pro") && !baseRemote.endsWith("/pro")) {
+    baseRemote = path.posix.join(baseRemote, "pro");
   }
+  config.remoteRoot = baseRemote;
 
   console.log(`🚀 Starting Deployment [Mode: ${mode.toUpperCase()}] to Hostinger [Target: ${config.remoteRoot}]...`);
 
