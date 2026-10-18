@@ -97,6 +97,22 @@ async function deploy() {
 
     await ftpDeploy.deploy(config);
     
+    // Remove remote default.php if Hostinger generated one (prevents overriding index.html)
+    try {
+      const PromiseFtpModule = await import("promise-ftp");
+      const PromiseFtp = PromiseFtpModule.default || PromiseFtpModule;
+      const cleanFtp = new PromiseFtp();
+      await cleanFtp.connect({
+        host: config.host,
+        user: config.user,
+        password: config.password,
+        port: config.port,
+      });
+      const remoteDefaultPhp = path.posix.join(config.remoteRoot, "default.php");
+      await cleanFtp.delete(remoteDefaultPhp).catch(() => {});
+      await cleanFtp.end();
+    } catch (_) {}
+    
     // Move to a new line for the final summary to preserve the last progress count
     process.stdout.write("\n");
     console.log(`✨ All ${config.include.length > 0 ? "requested" : ""} files synchronized successfully.`);

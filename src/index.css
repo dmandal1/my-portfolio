@@ -90,23 +90,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Modern subtle ambient dot-grid matrix */
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: radial-gradient(rgba(21, 101, 192, 0.09) 1px, transparent 1px);
-  background-size: 28px 28px;
-  pointer-events: none;
-  z-index: 0;
-}
 
-[data-portfolio-theme="dark"] body::before {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-}
 
 @media (max-width: 1380px) {
   html,
