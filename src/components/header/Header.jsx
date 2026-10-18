@@ -17,6 +17,17 @@ class HeaderInner extends Component {
     window.dispatchEvent(new CustomEvent(PORTFOLIO_THEME_PREVIEW_EVENT, { detail: { theme: nextTheme } }));
   };
 
+  closeMenu = () => {
+    const el = document.getElementById("menu-btn");
+    if (el) el.checked = false;
+  };
+
+  handleHireMeClick = (e) => {
+    this.closeMenu();
+    window.location.hash = "#/contact";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   render() {
     const { theme, logoName, t } = this.props;
     const isDarkMode = theme === darkTheme;
@@ -27,7 +38,7 @@ class HeaderInner extends Component {
         <SeoHeader />
         <div className="header-outer">
           <header className="header">
-            <NavLink to={link} className="logo" aria-label="Home">
+            <NavLink to={link} className="logo" aria-label="Home" onClick={this.closeMenu}>
               <span className="logo-bracket">&lt;</span>
               <span className="logo-name">{logoName}</span>
               <span className="logo-bracket">/&gt;</span>
@@ -54,6 +65,7 @@ class HeaderInner extends Component {
                   <li key={to}>
                     <NavLink
                       to={to}
+                      onClick={this.closeMenu}
                       className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
                       style={({ isActive }) => ({
                         color: theme.text,
@@ -87,7 +99,12 @@ class HeaderInner extends Component {
 
               {/* Quick Contact Header CTA */}
               <li className="header-cta-item">
-                <NavLink to="/contact" className="header-contact-cta">
+                <NavLink
+                  to="/contact"
+                  className="header-contact-cta"
+                  onClick={this.handleHireMeClick}
+                  aria-label="Hire Deepak Mandal"
+                >
                   <span>Hire Me</span>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="7" y1="17" x2="17" y2="7" />

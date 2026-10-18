@@ -324,7 +324,7 @@
 }
 
 .header .menu-btn:checked ~ .menu {
-  max-height: 420px;
+  max-height: 640px;
 }
 
 .header .menu-btn:checked ~ .menu-icon .navicon {
@@ -481,21 +481,43 @@
     border-left: 3px solid #1565c0;
     padding-left: 11px;
   }
+
+  .header-cta-item {
+    padding: 10px 14px 14px;
+    width: 100%;
+  }
+
+  .header-contact-cta {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 18px !important;
+    text-align: center;
+  }
 }
 
 /* Desktop */
 
 @media (min-width: 48em) {
-  .header li {
-    float: left;
-  }
   .header {
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
   .header .menu {
+    display: flex;
+    align-items: center;
     max-height: none;
+    overflow: visible;
+    gap: 2px;
+  }
+  .header li {
+    float: none;
+    display: flex;
+    align-items: center;
+  }
+  .header-cta-item {
+    margin-left: 10px;
+    padding: 0;
   }
   .header .menu-icon {
     display: none;

@@ -132,38 +132,38 @@ export default function Greeting(props) {
               </div>
             </div>
 
-            {/* Action CTA Buttons */}
+            {/* Unified Action CTA Buttons */}
             <div className="hero-actions-group">
               <button
                 type="button"
-                className="hero-ai-intro-cta"
-                onClick={scrollToAiVideo}
+                className="hero-btn hero-btn--primary"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent("playAiAvatarVoice"));
+                }}
+                aria-label="Play AI Introduction with Voice"
               >
-                <span className="hero-ai-cta-icon">▶</span>
+                <span className="hero-btn-icon-play">▶</span>
                 <span>Watch AI Intro</span>
-                <span className="hero-ai-cta-spark">AI</span>
+                <span className="hero-btn-badge">AI</span>
               </button>
 
-              <div className="portfolio-resume">
-                <Button
-                  text="See my resume"
-                  newTab={true}
-                  href={greeting.resumeLink}
-                  theme={theme}
-                  className="portfolio-repo-btn"
-                  icon={
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                      <polyline points="14 2 14 8 20 8" />
-                      <line x1="16" y1="13" x2="8" y2="13" />
-                      <line x1="16" y1="17" x2="8" y2="17" />
-                      <polyline points="10 9 9 9 8 9" />
-                    </svg>
-                  }
-                />
-              </div>
+              <a
+                href={greeting.resumeLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hero-btn hero-btn--resume"
+                aria-label="See my resume in a new tab"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                </svg>
+                <span>See my resume</span>
+              </a>
 
-              <a href="#/contact" className="hero-contact-btn">
+              <a href="#/contact" className="hero-btn hero-btn--outline" aria-label="Navigate to contact page">
                 <span>Let's Talk</span>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="5" y1="12" x2="19" y2="12" />
