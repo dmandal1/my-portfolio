@@ -1,20 +1,86 @@
-.skills-main-div {
+.skills-header-div {
   display: flex;
-  overflow: hidden;
-  gap: clamp(20px, 4vw, 40px);
+  flex-direction: column;
   align-items: center;
+  text-align: center;
+  margin-bottom: clamp(30px, 4vw, 50px);
+}
+
+.skills-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 50px;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  color: #3B82F6;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+[data-portfolio-theme="dark"] .skills-pill-badge {
+  background: rgba(96, 165, 250, 0.12);
+  border-color: rgba(96, 165, 250, 0.3);
+  color: #93C5FD;
 }
 
 .skills-header {
-  font-size: clamp(28px, 4vw, 56px);
-  line-height: normal;
-  font-family: "Google Sans Regular";
+  font-size: clamp(30px, 4.5vw, 54px);
+  line-height: 1.15;
+  font-family: "Google Sans Bold", sans-serif;
   text-align: center;
-  background: linear-gradient(135deg, #0A1628, #1565C0);
+  background: linear-gradient(135deg, #0A1628 0%, #1565C0 60%, #06B6D4 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 8px;
+  margin: 0 0 10px;
+}
+
+[data-portfolio-theme="dark"] .skills-header {
+  background: linear-gradient(135deg, #FFFFFF 0%, #60A5FA 60%, #22D3EE 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.skills-header-sub {
+  font-size: clamp(14px, 1.2vw, 17px);
+  max-width: 600px;
+  line-height: 1.6;
+  margin: 0 auto;
+}
+
+.skills-main-div {
+  display: flex;
+  overflow: hidden;
+  gap: clamp(24px, 4vw, 48px);
+  align-items: center;
+  padding: 24px 20px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(21, 101, 192, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+[data-portfolio-theme="dark"] .skills-main-div {
+  background: rgba(15, 27, 45, 0.45);
+  border-color: rgba(96, 165, 250, 0.12);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+}
+
+.skills-main-div:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.06);
+}
+
+[data-portfolio-theme="dark"] .skills-main-div:hover {
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.4);
 }
 
 .skills-text {

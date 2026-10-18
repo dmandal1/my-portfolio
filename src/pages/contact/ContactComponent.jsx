@@ -16,6 +16,7 @@ import QuickContact from "../../containers/contactForm/QuickContact";
 import ContactFAQ from "../../containers/contactForm/ContactFAQ";
 import { usePortfolioData } from "../../contexts/PortfolioDataContext";
 import Newsletter from "../../components/newsletter/Newsletter";
+import ParticlesBackground from "../../components/animations/ParticlesBackground";
 
 export default function Contact({ theme, onToggle }) {
   const data = usePortfolioData();
@@ -28,7 +29,8 @@ export default function Contact({ theme, onToggle }) {
   const phoneSection   = cpd.phoneSection   ?? defaultContactPageData.phoneSection;
 
   return (
-    <div className="contact-main">
+    <div className="contact-main" style={{ position: "relative", minHeight: "100vh" }}>
+      <ParticlesBackground theme={theme} />
       <Header theme={theme} />
 
 

@@ -8,6 +8,7 @@ import { experience as defaultExperience } from "../../portfolio.js";
 import { Fade } from "../../components/animations/Reveal";
 import ExperienceImg from "./ExperienceImg";
 import { usePortfolioData } from "../../contexts/PortfolioDataContext";
+import ParticlesBackground from "../../components/animations/ParticlesBackground";
 
 export default function Experience({ theme, onToggle }) {
   const data = usePortfolioData();
@@ -20,7 +21,8 @@ export default function Experience({ theme, onToggle }) {
   const sections = data?.experiences ?? defaultExperience.sections;
 
   return (
-    <div className="experience-main">
+    <div className="experience-main" style={{ position: "relative", minHeight: "100vh" }}>
+      <ParticlesBackground theme={theme} />
       <Header theme={theme} />
 
       <div className="exp-hero">

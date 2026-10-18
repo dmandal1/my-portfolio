@@ -11,6 +11,7 @@ import ProjectsData from "../../shared/opensource/projects.json";
 import "./Projects.css";
 import ProjectsImg from "./ProjectsImg";
 import { usePortfolioData } from "../../contexts/PortfolioDataContext";
+import ParticlesBackground from "../../components/animations/ParticlesBackground";
 
 export default function Projects({ theme, onToggle }) {
   const data = usePortfolioData();
@@ -18,7 +19,8 @@ export default function Projects({ theme, onToggle }) {
   const githubProfile  = data?.profile?.githubProfile ?? defaultGreeting.githubProfile;
 
   return (
-    <div className="projects-main">
+    <div className="projects-main" style={{ position: "relative", minHeight: "100vh" }}>
+      <ParticlesBackground theme={theme} />
       <Header theme={theme} />
 
 

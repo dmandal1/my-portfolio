@@ -24,15 +24,12 @@ function App() {
     fetch(`${API}/status.php`)
       .then((r) => r.json())
       .then((d) => {
-        if (!d.installed && !window.location.hash.startsWith("#/install")) {
+        if (d && d.installed === false && !window.location.hash.startsWith("#/install")) {
           window.location.replace("#/install");
         }
       })
       .catch(() => {
-        // API unreachable — backend not yet uploaded; show installer anyway
-        if (!window.location.hash.startsWith("#/install")) {
-          window.location.replace("#/install");
-        }
+        // API unreachable (e.g. static host, gh-pages, local preview) — keep portfolio accessible
       })
       .finally(() => setChecked(true));
   }, []);

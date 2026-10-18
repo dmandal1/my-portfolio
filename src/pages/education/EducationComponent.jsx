@@ -10,12 +10,14 @@ import { competitiveSites as defaultCompetitiveSites } from "../../portfolio";
 import "./EducationComponent.css";
 import { Fade } from "../../components/animations/Reveal";
 import { usePortfolioData } from "../../contexts/PortfolioDataContext";
+import ParticlesBackground from "../../components/animations/ParticlesBackground";
 
 class EducationInner extends Component {
   render() {
     const { theme, competitiveSites } = this.props;
     return (
-      <div className="education-main">
+      <div className="education-main" style={{ position: "relative", minHeight: "100vh" }}>
+        <ParticlesBackground theme={theme} />
         <Header theme={theme} />
         <div className="basic-education">
           <Fade direction="up" duration={2000}>

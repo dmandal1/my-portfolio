@@ -4,16 +4,21 @@ import Greeting from "../../containers/greeting/Greeting";
 import Skills from "../../containers/skills/Skills";
 import Footer from "../../components/footer/Footer";
 import TopButton from "../../components/topButton/TopButton";
+import ParticlesBackground from "../../components/animations/ParticlesBackground";
 
 class Home extends Component {
   render() {
+    const { theme } = this.props;
     return (
-      <div>
-        <Header theme={this.props.theme} />
-        <Greeting theme={this.props.theme} />
-        <Skills theme={this.props.theme} />
-        <Footer theme={this.props.theme} />
-        <TopButton theme={this.props.theme} />
+      <div style={{ position: "relative", minHeight: "100vh" }}>
+        <ParticlesBackground theme={theme} />
+        <Header theme={theme} />
+        <main>
+          <Greeting theme={theme} />
+          <Skills theme={theme} />
+        </main>
+        <Footer theme={theme} />
+        <TopButton theme={theme} />
       </div>
     );
   }

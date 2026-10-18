@@ -1,21 +1,21 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import "./Greeting.css";
 import SocialMedia from "../../components/socialMedia/SocialMedia";
 import Button from "../../components/button/Button";
 import { greeting as defaultGreeting } from "../../portfolio";
 import { usePortfolioData } from "../../contexts/PortfolioDataContext";
 import { Fade } from "../../components/animations/Reveal";
-// import FeelingProud from "./FeelingProud"; // Replaced by video
+import AiAvatarVideo from "../../components/aiAvatarVideo/AiAvatarVideo";
 
 const DEFAULT_ROLES = [
   "Full Stack Developer",
-  "React.js Engineer",
-  "Node.js Developer",
-  "JavaScript Enthusiast",
-  "Programmer",
+  "React & Node.js Engineer",
+  "Cloud & DevOps Architect",
+  "API & Systems Specialist",
+  "JavaScript & TypeScript Dev",
 ];
 
-function useTypingEffect(words, typingSpeed = 100, deletingSpeed = 60, pauseMs = 1500) {
+function useTypingEffect(words, typingSpeed = 90, deletingSpeed = 50, pauseMs = 1800) {
   const [displayed, setDisplayed] = useState("");
   const [wordIndex, setWordIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -58,47 +58,92 @@ export default function Greeting(props) {
 
   const typedRole = useTypingEffect(roles);
 
-const videoRef = useRef(null);
-  const [showPlayBtn, setShowPlayBtn] = useState(false);
-
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.muted = false; // We want audio
-      videoRef.current.play().catch(e => {
-        console.warn("Browser blocked autoplay with sound.");
-        // If blocked, show a play button so user can start it
-        setShowPlayBtn(true);
-      });
-    }
-  }, []);
-
-  const handlePlayClick = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = false;
-      videoRef.current.play();
-      setShowPlayBtn(false);
+  const scrollToAiVideo = () => {
+    const el = document.getElementById("ai-avatar-section");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
     }
   };
 
   return (
-    <Fade direction="up" duration={2000}>
+    <Fade direction="up" duration={1200}>
       <div className="greet-main" id="greeting">
+        {/* Background ambient light blobs */}
+        <div className="greet-bg-blob greet-bg-blob--1" />
+        <div className="greet-bg-blob greet-bg-blob--2" />
+
         <div className="greeting-main">
+          {/* Left Column: Bio & Hero Content */}
           <div className="greeting-text-div">
-            <div>
-              <h1 className="greeting-text" style={{ color: theme.text }}>
-                {greeting.title}
-              </h1>
-              <h2 className="greeting-job_profile" style={{ color: theme.text }}>
-                ( <span className="typing-text">{typedRole}</span><span className="typing-cursor">|</span> )
-              </h2>
-              <p
-                className="greeting-text-p subTitle"
-                style={{ color: theme.secondaryText }}
+            {/* Top Status & Welcome Badge */}
+            <div className="hero-status-row">
+              <span className="hero-badge">
+                <span className="hero-badge-sparkle">✨</span>
+                <span>Welcome to my digital space</span>
+              </span>
+              <span className="hero-available-badge">
+                <span className="hero-available-dot" />
+                <span>Available for work</span>
+              </span>
+            </div>
+
+            {/* Name Heading with animated gradient shimmer */}
+            <h1 className="greeting-text">
+              {greeting.title}
+            </h1>
+
+            {/* Modern Interactive Role Pill */}
+            <div className="hero-role-pill-wrapper">
+              <div className="hero-role-pill">
+                <span className="hero-role-symbol">&lt;/&gt;</span>
+                <span className="typing-text">{typedRole}</span>
+                <span className="typing-cursor">|</span>
+              </div>
+            </div>
+
+            {/* Subtitle */}
+            <p
+              className="greeting-text-p subTitle"
+              style={{ color: theme.secondaryText }}
+            >
+              {greeting.subTitle}
+            </p>
+
+            {/* Impact Metrics Bar */}
+            <div className="hero-metrics-bar">
+              <div className="hero-metric-item">
+                <span className="hero-metric-num">5+</span>
+                <span className="hero-metric-label">Years Exp</span>
+              </div>
+              <div className="hero-metric-divider" />
+              <div className="hero-metric-item">
+                <span className="hero-metric-num">25+</span>
+                <span className="hero-metric-label">Projects</span>
+              </div>
+              <div className="hero-metric-divider" />
+              <div className="hero-metric-item">
+                <span className="hero-metric-num">15+</span>
+                <span className="hero-metric-label">Production Apps</span>
+              </div>
+              <div className="hero-metric-divider" />
+              <div className="hero-metric-item">
+                <span className="hero-metric-num">100%</span>
+                <span className="hero-metric-label">Commitment</span>
+              </div>
+            </div>
+
+            {/* Action CTA Buttons */}
+            <div className="hero-actions-group">
+              <button
+                type="button"
+                className="hero-ai-intro-cta"
+                onClick={scrollToAiVideo}
               >
-                {greeting.subTitle}
-              </p>
-              <SocialMedia theme={theme} />
+                <span className="hero-ai-cta-icon">▶</span>
+                <span>Watch AI Intro</span>
+                <span className="hero-ai-cta-spark">AI</span>
+              </button>
+
               <div className="portfolio-resume">
                 <Button
                   text="See my resume"
@@ -117,57 +162,25 @@ const videoRef = useRef(null);
                   }
                 />
               </div>
+
+              <a href="#/contact" className="hero-contact-btn">
+                <span>Let's Talk</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              </a>
+            </div>
+
+            {/* Social Media Links */}
+            <div className="hero-social-wrap">
+              <SocialMedia theme={theme} />
             </div>
           </div>
-          <div className="greeting-image-div" style={{ 
-            position: "relative", 
-            width: "100%", 
-            maxWidth: "500px", 
-            aspectRatio: "768/960", 
-            margin: "0 auto"
-          }}>
-            <video 
-              ref={videoRef}
-              src="/intro.webm" 
-              playsInline
-              onEnded={() => setShowPlayBtn(true)}
-              style={{ 
-                width: "100%", 
-                height: "100%", 
-                objectFit: "cover",
-                pointerEvents: showPlayBtn ? "none" : "auto",
-                filter: "none"
-              }}
-            />
-            {showPlayBtn && (
-              <button 
-                onClick={handlePlayClick}
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  background: theme.text,
-                  color: theme.body,
-                  border: "none",
-                  borderRadius: "50px",
-                  padding: "16px 32px",
-                  fontSize: "18px",
-                  fontWeight: "bold",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  cursor: "pointer",
-                  boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
-                  zIndex: 20,
-                  transition: "transform 0.2s"
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = "translate(-50%, -50%) scale(1.05)"}
-                onMouseLeave={(e) => e.currentTarget.style.transform = "translate(-50%, -50%) scale(1)"}
-              >
-                <i className="fas fa-play" /> Play Video
-              </button>
-            )}
+
+          {/* Right Column: AI Avatar Hologram Video */}
+          <div className="greeting-image-div" id="ai-avatar-section">
+            <AiAvatarVideo theme={theme} />
           </div>
         </div>
       </div>
