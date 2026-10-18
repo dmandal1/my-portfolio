@@ -296,8 +296,8 @@ export default function AiAvatarVideo({ theme }) {
             className="ai-video-element"
             poster={`${import.meta.env.BASE_URL || "./"}icons/android-icon-192x192.png`}
           >
-            <source src={`${import.meta.env.BASE_URL || "./"}intro.mp4`} type="video/mp4" />
             <source src={`${import.meta.env.BASE_URL || "./"}intro.webm`} type="video/webm" />
+            <source src={`${import.meta.env.BASE_URL || "./"}intro.mp4`} type="video/mp4" />
             Your browser does not support video playback.
           </video>
 
