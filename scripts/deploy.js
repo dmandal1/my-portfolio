@@ -23,7 +23,7 @@ const config = {
   port: 21,
   localRoot: path.join(rootDir, "dist"),
   remoteRoot: process.env.FTP_REMOTE_PATH || "/",
-  include: ["*", "**/*"],
+  include: ["*", "**/*", ".htaccess"],
   exclude: [".git*", ".DS_Store", "node_modules/**", "config.php", "installed.lock"],
   deleteRemote: false,
   forcePasv: true,
