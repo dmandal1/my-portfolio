@@ -7,23 +7,13 @@
   margin: 0px auto;
 }
 
-/* Sticky header with glass effect */
+/* Sticky header with glass effect — background/border/shadow set via inline style in Header.js */
 .header-outer {
   position: sticky;
   top: 0;
   z-index: 999;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  background: rgba(240, 248, 255, 0.82);
-  border-bottom: 1px solid rgba(21, 101, 192, 0.1);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-  transition: background-color 0.3s ease, border-color 0.3s ease;
-}
-
-[data-portfolio-theme="dark"] .header-outer {
-  background: rgba(8, 17, 31, 0.84);
-  border-bottom: 1px solid rgba(96, 165, 250, 0.12);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .header ul {
@@ -216,53 +206,6 @@
   background-position: right center;
 }
 
-.logo-status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #10B981;
-  box-shadow: 0 0 8px #10B981;
-  margin-left: 6px;
-  display: inline-block;
-  animation: pulseLogoDot 2s infinite ease-in-out;
-}
-
-@keyframes pulseLogoDot {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(0.75); opacity: 0.5; }
-}
-
-.header-cta-item {
-  display: flex;
-  align-items: center;
-  padding: 10px 0 10px 12px;
-}
-
-.header-contact-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px !important;
-  border-radius: 50px !important;
-  background: linear-gradient(135deg, #2563EB, #06B6D4) !important;
-  color: #FFFFFF !important;
-  font-size: 0.88rem !important;
-  font-weight: 700 !important;
-  text-decoration: none !important;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
-  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-}
-
-.header-contact-cta:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.5);
-  background-color: transparent !important;
-}
-
-.header-contact-cta::after {
-  display: none !important;
-}
-
 /* menu */
 
 .menu {
@@ -324,7 +267,7 @@
 }
 
 .header .menu-btn:checked ~ .menu {
-  max-height: 640px;
+  max-height: 420px;
 }
 
 .header .menu-btn:checked ~ .menu-icon .navicon {
@@ -481,43 +424,21 @@
     border-left: 3px solid #1565c0;
     padding-left: 11px;
   }
-
-  .header-cta-item {
-    padding: 10px 14px 14px;
-    width: 100%;
-  }
-
-  .header-contact-cta {
-    width: 100%;
-    justify-content: center;
-    padding: 12px 18px !important;
-    text-align: center;
-  }
 }
 
 /* Desktop */
 
 @media (min-width: 48em) {
+  .header li {
+    float: left;
+  }
   .header {
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
   .header .menu {
-    display: flex;
-    align-items: center;
     max-height: none;
-    overflow: visible;
-    gap: 2px;
-  }
-  .header li {
-    float: none;
-    display: flex;
-    align-items: center;
-  }
-  .header-cta-item {
-    margin-left: 10px;
-    padding: 0;
   }
   .header .menu-icon {
     display: none;
