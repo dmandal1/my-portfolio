@@ -3,6 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      (function() {
+        var p = window.location.pathname;
+        var b = p.indexOf('/pro') === 0 ? '/pro/' : '/';
+        document.write('<base href="' + b + '">');
+      })();
+    </script>
     <meta
       name="Deepak Kumar Mandal's Portfolio"
       content="Portfolio content"

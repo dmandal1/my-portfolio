@@ -1,6 +1,5 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
-  RewriteBase /
   
   # 1. Allow access to the api folder (PHP API)
   RewriteCond %{REQUEST_URI} ^/api/ [NC]
@@ -9,15 +8,15 @@
   # 2. If assets are requested with a subpath prefix (e.g. /home/assets/*), rewrite to assets/*
   RewriteRule ^.*?assets/(.+)$ assets/$1 [L,NC]
 
-  # 3. Never serve HTML for missing static files (prevents stylesheet MIME type errors)
+  # 3. Never serve HTML for missing static files (prevents stylesheet & script MIME type errors)
   RewriteCond %{REQUEST_URI} \.(css|js|mjs|png|jpe?g|gif|svg|woff2?|ttf|eot|mp4|webm|ico|json)$ [NC]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteRule . - [R=404,L]
 
-  # 4. Redirect all other SPA routes to index.html
+  # 4. Redirect all other SPA routes to index.html relative to current directory
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_FILENAME} !-l
-  RewriteRule . /index.html [L]
+  RewriteRule . index.html [L]
 </IfModule>
