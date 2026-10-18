@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import "./Greeting.css";
 import SocialMedia from "../../components/socialMedia/SocialMedia";
 import Button from "../../components/button/Button";
 import { greeting as defaultGreeting } from "../../portfolio";
 import { usePortfolioData } from "../../contexts/PortfolioDataContext";
 import { Fade } from "../../components/animations/Reveal";
+import AiAvatarVideo from "../../components/aiAvatarVideo/AiAvatarVideo";
 
 const DEFAULT_ROLES = [
   "Full Stack Developer",
@@ -56,38 +57,6 @@ export default function Greeting(props) {
 
   const typedRole = useTypingEffect(roles);
 
-  const videoRef = useRef(null);
-  const [showPlayBtn, setShowPlayBtn] = useState(false);
-
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.muted = false;
-      videoRef.current.play().catch(() => {
-        // Autoplay with sound was blocked by browser policy
-        setShowPlayBtn(true);
-      });
-    }
-  }, []);
-
-  const handlePlayClick = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = false;
-      videoRef.current.play();
-      setShowPlayBtn(false);
-    }
-  };
-
-  const handleVideoClick = () => {
-    if (!videoRef.current) return;
-    if (videoRef.current.paused) {
-      videoRef.current.play();
-      setShowPlayBtn(false);
-    } else {
-      videoRef.current.pause();
-      setShowPlayBtn(true);
-    }
-  };
-
   return (
     <Fade direction="up" duration={1200}>
       <div className="greet-main" id="greeting">
@@ -132,71 +101,8 @@ export default function Greeting(props) {
             </div>
           </div>
 
-          <div
-            className="greeting-image-div"
-            style={{
-              position: "relative",
-              width: "100%",
-              maxWidth: "500px",
-              aspectRatio: "768/960",
-              margin: "0 auto",
-            }}
-          >
-            <video
-              ref={videoRef}
-              playsInline
-              onClick={handleVideoClick}
-              onEnded={() => setShowPlayBtn(true)}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "contain",
-                pointerEvents: "auto",
-                cursor: "pointer",
-                filter: "none",
-              }}
-            >
-              <source src="./intro.webm" type="video/webm" />
-              <source src="./intro.mp4" type="video/mp4" />
-            </video>
-
-            {showPlayBtn && (
-              <button
-                type="button"
-                onClick={handlePlayClick}
-                style={{
-                  position: "absolute",
-                  top: "64%",
-                  right: "6%",
-                  background: "#0c1829",
-                  color: "#ffffff",
-                  border: "1px solid rgba(255, 255, 255, 0.15)",
-                  borderRadius: "50px",
-                  padding: "13px 26px",
-                  fontSize: "16px",
-                  fontWeight: "bold",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  cursor: "pointer",
-                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.4)",
-                  zIndex: 20,
-                  transition: "transform 0.2s, box-shadow 0.2s",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "scale(1.05)";
-                  e.currentTarget.style.boxShadow = "0 12px 30px rgba(0, 0, 0, 0.5)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "scale(1)";
-                  e.currentTarget.style.boxShadow = "0 8px 24px rgba(0, 0, 0, 0.4)";
-                }}
-                aria-label="Play Introduction Video"
-              >
-                <i className="fas fa-play" style={{ fontSize: "14px" }} />
-                <span>Play Video</span>
-              </button>
-            )}
+          <div className="greeting-image-div" id="ai-avatar-section">
+            <AiAvatarVideo theme={theme} />
           </div>
         </div>
       </div>
