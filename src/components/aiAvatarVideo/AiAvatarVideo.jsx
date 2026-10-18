@@ -14,7 +14,6 @@ export default function AiAvatarVideo({ theme }) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(8);
   const [isEnded, setIsEnded] = useState(false);
-  const [isTheaterOpen, setIsTheaterOpen] = useState(false);
   const [activeTopic, setActiveTopic] = useState("intro");
   const [isHovered, setIsHovered] = useState(false);
   const [isNarrating, setIsNarrating] = useState(false);
@@ -182,15 +181,6 @@ export default function AiAvatarVideo({ theme }) {
     return `0:0${s}`.slice(-4);
   };
 
-  // Close theater on Escape
-  useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === "Escape") setIsTheaterOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-
   const topics = [
     {
       id: "intro",
@@ -265,22 +255,6 @@ export default function AiAvatarVideo({ theme }) {
             >
               <span className="ai-narrate-icon">🎙️</span>
               <span className="ai-narrate-text">{isNarrating ? "Stop" : "AI Voice"}</span>
-            </button>
-
-            {/* Theater Mode Button */}
-            <button
-              type="button"
-              className="ai-theater-btn"
-              onClick={() => setIsTheaterOpen(true)}
-              title="Expand in AI Theater Mode"
-              aria-label="Expand in AI Theater Mode"
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="15 3 21 3 21 9" />
-                <polyline points="9 21 3 21 3 15" />
-                <line x1="21" y1="3" x2="14" y2="10" />
-                <line x1="3" y1="21" x2="10" y2="14" />
-              </svg>
             </button>
           </div>
         </div>
@@ -400,23 +374,6 @@ export default function AiAvatarVideo({ theme }) {
                   {formatTime(currentTime)} / {formatTime(duration)}
                 </span>
               </div>
-
-              <div className="ai-right-controls">
-                <button
-                  type="button"
-                  className="ai-ctrl-icon-btn"
-                  onClick={() => setIsTheaterOpen(true)}
-                  title="Expand Theater View"
-                  aria-label="Expand Theater View"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="15 3 21 3 21 9" />
-                    <polyline points="9 21 3 21 3 15" />
-                    <line x1="21" y1="3" x2="14" y2="10" />
-                    <line x1="3" y1="21" x2="10" y2="14" />
-                  </svg>
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -450,85 +407,6 @@ export default function AiAvatarVideo({ theme }) {
           </div>
         </div>
       </div>
-
-      {/* Expanded AI Theater Modal */}
-      {isTheaterOpen && (
-        <div className="ai-theater-backdrop" onClick={() => setIsTheaterOpen(false)}>
-          <div className="ai-theater-modal" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              className="ai-theater-close-btn"
-              onClick={() => setIsTheaterOpen(false)}
-              aria-label="Close Theater"
-            >
-              ✕
-            </button>
-
-            <div className="ai-theater-grid">
-              {/* Theater Video Column */}
-              <div className="ai-theater-video-box">
-                <video
-                  autoPlay
-                  controls
-                  playsInline
-                  className="ai-theater-video"
-                  src={`${import.meta.env.BASE_URL || "./"}intro.mp4`}
-                >
-                  <source src={`${import.meta.env.BASE_URL || "./"}intro.mp4`} type="video/mp4" />
-                  <source src={`${import.meta.env.BASE_URL || "./"}intro.webm`} type="video/webm" />
-                </video>
-              </div>
-
-              {/* Theater Dossier Column */}
-              <div className="ai-theater-info-box">
-                <div className="ai-theater-badge-row">
-                  <span className="ai-theater-live-pill">● AI INTRO EXPERIENCE</span>
-                  <span className="ai-theater-verified">Verified Voice</span>
-                </div>
-
-                <h3 className="ai-theater-title">Deepak Mandal</h3>
-                <p className="ai-theater-role">Full Stack Software Developer & Architect</p>
-
-                <p className="ai-theater-bio">
-                  Welcome to my portfolio! I build resilient, high-speed web apps, microservices, and modern user experiences using React, Node.js, and cloud platforms.
-                </p>
-
-                <div className="ai-theater-stats">
-                  <div className="ai-th-stat">
-                    <strong>5+</strong>
-                    <span>Years Exp</span>
-                  </div>
-                  <div className="ai-th-stat">
-                    <strong>25+</strong>
-                    <span>Projects</span>
-                  </div>
-                  <div className="ai-th-stat">
-                    <strong>100%</strong>
-                    <span>Impact</span>
-                  </div>
-                </div>
-
-                <div className="ai-theater-actions">
-                  <button
-                    type="button"
-                    className="ai-theater-cta-primary"
-                    onClick={() => speakAiVoice()}
-                  >
-                    🔊 Play Voice Narration
-                  </button>
-                  <a
-                    href="#/contact"
-                    onClick={() => setIsTheaterOpen(false)}
-                    className="ai-theater-cta-secondary"
-                  >
-                    💬 Get in Touch
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
