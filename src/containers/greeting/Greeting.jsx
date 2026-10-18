@@ -139,13 +139,12 @@ export default function Greeting(props) {
                 type="button"
                 className="hero-btn hero-btn--primary"
                 onClick={() => {
-                  window.dispatchEvent(new CustomEvent("playAiAvatarVoice"));
+                  window.dispatchEvent(new CustomEvent("playIntroVideo"));
                 }}
-                aria-label="Play AI Introduction with Voice"
+                aria-label="Watch Introduction Video"
               >
                 <span className="hero-btn-icon-play">▶</span>
-                <span>Watch AI Intro</span>
-                <span className="hero-btn-badge">AI</span>
+                <span>Watch Intro</span>
               </button>
 
               <a

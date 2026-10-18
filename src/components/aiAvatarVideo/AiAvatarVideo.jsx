@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./AiAvatarVideo.css";
 
-const INTRO_TRANSCRIPT = "Hi! I'm Deepak Mandal. Full Stack Developer & Cloud Architect. Welcome to my portfolio — explore my projects, skills, and let's build something amazing together!";
-
 export default function AiAvatarVideo({ theme }) {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
@@ -16,46 +14,6 @@ export default function AiAvatarVideo({ theme }) {
   const [isEnded, setIsEnded] = useState(false);
   const [activeTopic, setActiveTopic] = useState("intro");
   const [isHovered, setIsHovered] = useState(false);
-  const [isNarrating, setIsNarrating] = useState(false);
-
-  // Fallback AI Speech Synthesizer for 100% audio guarantee across all browsers/phones
-  const speakAiVoice = (customText) => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-    try {
-      window.speechSynthesis.cancel();
-      const textToSpeak = customText || INTRO_TRANSCRIPT;
-      const utterance = new SpeechSynthesisUtterance(textToSpeak);
-      utterance.rate = 1.0;
-      utterance.pitch = 1.0;
-
-      const voices = window.speechSynthesis.getVoices();
-      const naturalVoice = voices.find(
-        (v) =>
-          v.lang.startsWith("en") &&
-          (v.name.includes("Natural") ||
-            v.name.includes("Google") ||
-            v.name.includes("Daniel") ||
-            v.name.includes("Alex") ||
-            v.name.includes("Samantha"))
-      );
-      if (naturalVoice) utterance.voice = naturalVoice;
-
-      utterance.onstart = () => setIsNarrating(true);
-      utterance.onend = () => setIsNarrating(false);
-      utterance.onerror = () => setIsNarrating(false);
-
-      window.speechSynthesis.speak(utterance);
-    } catch (e) {
-      console.warn("Speech synthesis error:", e);
-    }
-  };
-
-  const stopAiVoice = () => {
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-    }
-    setIsNarrating(false);
-  };
 
   // Start with audio enabled (triggered by user click)
   const playWithSound = (e) => {
@@ -63,27 +21,13 @@ export default function AiAvatarVideo({ theme }) {
     const video = videoRef.current;
     if (!video) return;
 
-    // Reset and enable sound
     video.currentTime = 0;
     video.muted = false;
     video.volume = 1.0;
     setIsMuted(false);
     setHasSoundStarted(true);
     setIsEnded(false);
-
-    const playPromise = video.play();
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          setIsPlaying(true);
-        })
-        .catch((err) => {
-          console.warn("Browser blocked audio play; activating AI speech narration fallback:", err);
-          // If browser policy blocked video audio track, narrate seamlessly!
-          speakAiVoice();
-          video.play().then(() => setIsPlaying(true)).catch(() => {});
-        });
-    }
+    video.play().then(() => setIsPlaying(true)).catch(() => {});
   };
 
   // Muted background loop on initial load
@@ -99,18 +43,17 @@ export default function AiAvatarVideo({ theme }) {
       playPromise.then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
     }
 
-    // Listen for custom event from hero "Watch AI Intro" button
-    const onHeroVoiceTrigger = () => {
+    // Listen for custom event from hero "Watch Intro" button
+    const onHeroPlayTrigger = () => {
       if (containerRef.current) {
         containerRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
       }
       playWithSound();
     };
 
-    window.addEventListener("playAiAvatarVoice", onHeroVoiceTrigger);
+    window.addEventListener("playIntroVideo", onHeroPlayTrigger);
     return () => {
-      window.removeEventListener("playAiAvatarVoice", onHeroVoiceTrigger);
-      stopAiVoice();
+      window.removeEventListener("playIntroVideo", onHeroPlayTrigger);
     };
   }, []);
 
@@ -136,7 +79,6 @@ export default function AiAvatarVideo({ theme }) {
 
     if (isPlaying) {
       video.pause();
-      stopAiVoice();
       setIsPlaying(false);
     } else {
       if (isEnded) {
@@ -162,8 +104,6 @@ export default function AiAvatarVideo({ theme }) {
       if (video.paused) {
         video.play().then(() => setIsPlaying(true)).catch(() => {});
       }
-    } else {
-      stopAiVoice();
     }
   };
 
@@ -186,31 +126,21 @@ export default function AiAvatarVideo({ theme }) {
       id: "intro",
       icon: "👋",
       label: "Intro Tour",
-      text: "Hi, I'm Deepak Mandal! Full Stack Software Developer & Cloud Architect with 5+ years of experience.",
-      speech: "Hello! I am Deepak Mandal, a Full Stack Developer and Cloud Engineer. Welcome to my portfolio!"
+      text: "Hi, I'm Deepak Mandal! Full Stack Software Developer & Cloud Architect with 5+ years of experience building resilient web applications and microservices."
     },
     {
       id: "stack",
       icon: "⚡",
       label: "Tech Stack",
-      text: "Expert in React, Node.js, TypeScript, Next.js, PostgreSQL, Docker, and Cloud Native Architectures.",
-      speech: "My core stack includes React, Node.js, TypeScript, Next.js, and modern cloud architectures."
+      text: "Expertise in React, Node.js, TypeScript, Next.js, PostgreSQL, Docker, Redis, and Cloud Native Architectures."
     },
     {
       id: "work",
       icon: "🚀",
       label: "Open to Work",
-      text: "Actively available for high-impact full-time engineering roles, technical leadership, and contract collaborations.",
-      speech: "I am actively available for high-impact engineering roles, contract collaborations, and technical leadership."
+      text: "Actively available for high-impact full-time engineering roles, technical leadership, and contract collaborations."
     }
   ];
-
-  const handleTopicClick = (t) => {
-    setActiveTopic(t.id);
-    speakAiVoice(t.speech);
-  };
-
-  const isAudioActive = (!isMuted && isPlaying) || isNarrating;
 
   return (
     <div
@@ -220,41 +150,26 @@ export default function AiAvatarVideo({ theme }) {
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Outer ambient glow */}
-      <div className={`ai-ambient-glow ${isAudioActive ? "ai-ambient-glow--active" : ""}`} />
+      <div className={`ai-ambient-glow ${!isMuted && isPlaying ? "ai-ambient-glow--active" : ""}`} />
 
       {/* Main Hologram Frame */}
       <div className="ai-hologram-frame">
-        {/* Futuristic Top Status Bar */}
+        {/* Top Status Bar */}
         <div className="ai-hud-header">
           <div className="ai-hud-status">
             <span className="ai-live-dot" />
-            <span className="ai-hud-label">AI AVATAR LIVE</span>
-            <span className="ai-version-pill">v2.6</span>
+            <span className="ai-hud-label">INTRO VIDEO</span>
           </div>
 
           <div className="ai-hud-actions">
-            {/* Live Audio Spectrum Visualizer */}
-            <div
-              className={`ai-audio-wave ${isAudioActive ? "ai-audio-wave--active" : ""}`}
-              title={isAudioActive ? "Voice Audio is Playing" : "Audio Muted"}
-            >
-              <span className="wave-bar b1" />
-              <span className="wave-bar b2" />
-              <span className="wave-bar b3" />
-              <span className="wave-bar b4" />
-              <span className="wave-bar b5" />
-            </div>
-
-            {/* AI Speech Narrator Button */}
             <button
               type="button"
-              className={`ai-narrate-btn ${isNarrating ? "ai-narrate-btn--active" : ""}`}
-              onClick={() => (isNarrating ? stopAiVoice() : speakAiVoice())}
-              title={isNarrating ? "Stop Voice Narration" : "Listen to AI Voice Narration"}
-              aria-label="Listen to AI Voice Narration"
+              className="ai-sound-btn"
+              onClick={toggleMute}
+              title={isMuted ? "Unmute Audio" : "Mute Audio"}
+              aria-label={isMuted ? "Unmute Audio" : "Mute Audio"}
             >
-              <span className="ai-narrate-icon">🎙️</span>
-              <span className="ai-narrate-text">{isNarrating ? "Stop" : "AI Voice"}</span>
+              <span>{isMuted ? "🔇 Unmute" : "🔊 Sound On"}</span>
             </button>
           </div>
         </div>
@@ -278,14 +193,14 @@ export default function AiAvatarVideo({ theme }) {
           {/* Hologram scan line */}
           <div className="ai-scanline" />
 
-          {/* Prominent Center Play Button when Muted or Paused */}
+          {/* Center Play Button when Muted or Paused */}
           {(!hasSoundStarted || isMuted || !isPlaying || isEnded) && (
             <div className="ai-center-overlay" onClick={playWithSound}>
               <div className="ai-play-pulse-ring" />
               <button
                 type="button"
                 className="ai-play-center-btn"
-                aria-label={isEnded ? "Replay AI Introduction" : "Play AI Introduction with Sound"}
+                aria-label={isEnded ? "Replay Video" : "Play Video with Sound"}
               >
                 {isEnded ? (
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -300,23 +215,13 @@ export default function AiAvatarVideo({ theme }) {
               </button>
 
               <div className="ai-sound-cta-badge">
-                <span className="sound-pulse-icon">🔊</span>
-                <span>{isEnded ? "Replay with Sound" : "Click to Play with AI Voice"}</span>
+                <span className="sound-pulse-icon">▶</span>
+                <span>{isEnded ? "Replay Video" : "Click to Play Video"}</span>
               </div>
             </div>
           )}
 
-          {/* Live Captions / Subtitles Overlay */}
-          {isPlaying && (
-            <div className="ai-captions-overlay">
-              <span className="ai-caption-tag">● AI VOICE</span>
-              <p className="ai-caption-text">
-                "Hi! I'm Deepak Mandal — Full Stack Developer & Cloud Architect. Welcome to my portfolio!"
-              </p>
-            </div>
-          )}
-
-          {/* Bottom Floating Glass HUD Controls */}
+          {/* Bottom Floating Glass Controls */}
           <div
             className={`ai-hud-controls ${isHovered || !isPlaying ? "ai-hud-controls--visible" : ""}`}
             onClick={(e) => e.stopPropagation()}
@@ -351,8 +256,8 @@ export default function AiAvatarVideo({ theme }) {
                   type="button"
                   className={`ai-ctrl-icon-btn ${!isMuted ? "ai-ctrl-icon-btn--sound-on" : ""}`}
                   onClick={toggleMute}
-                  aria-label={isMuted ? "Unmute Voice" : "Mute Voice"}
-                  title={isMuted ? "Unmute Voice" : "Mute Voice"}
+                  aria-label={isMuted ? "Unmute Audio" : "Mute Audio"}
+                  title={isMuted ? "Unmute Audio" : "Mute Audio"}
                 >
                   {isMuted ? (
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -378,11 +283,11 @@ export default function AiAvatarVideo({ theme }) {
           </div>
         </div>
 
-        {/* Bottom Interactive Intel Dossier */}
+        {/* Bottom Interactive Highlights Dossier */}
         <div className="ai-dossier-card">
           <div className="ai-dossier-header">
-            <span className="ai-dossier-tag">✨ AI DIGITAL TWIN</span>
-            <span className="ai-dossier-badge">Interactive Audio</span>
+            <span className="ai-dossier-tag">⚡ QUICK OVERVIEW</span>
+            <span className="ai-dossier-badge">Interactive Highlights</span>
           </div>
 
           <div className="ai-topics-row">
@@ -391,8 +296,8 @@ export default function AiAvatarVideo({ theme }) {
                 key={t.id}
                 type="button"
                 className={`ai-topic-chip ${activeTopic === t.id ? "ai-topic-chip--active" : ""}`}
-                onClick={() => handleTopicClick(t)}
-                title={`Listen to ${t.label} Voice Brief`}
+                onClick={() => setActiveTopic(t.id)}
+                title={`View ${t.label} details`}
               >
                 <span>{t.icon}</span>
                 <span>{t.label}</span>
