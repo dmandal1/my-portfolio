@@ -33,8 +33,13 @@ const config = {
 async function deploy() {
   const args = process.argv.slice(2);
   const mode = args[0] || "all"; // all, frontend, backend
+  const target = args[1] || process.env.DEPLOY_TARGET || "";
 
-  console.log(`🚀 Starting Deployment [Mode: ${mode.toUpperCase()}] to Hostinger...`);
+  if (target === "pro" || args.includes("pro") || mode === "pro") {
+    config.remoteRoot = path.posix.join(process.env.FTP_REMOTE_PATH || "/public_html", "pro");
+  }
+
+  console.log(`🚀 Starting Deployment [Mode: ${mode.toUpperCase()}] to Hostinger [Target: ${config.remoteRoot}]...`);
 
   try {
     const ftpDeploy = new FtpDeploy();

@@ -184,10 +184,10 @@ export default function AiAvatarVideo({ theme }) {
             onTimeUpdate={handleTimeUpdate}
             onEnded={handleEnded}
             className="ai-video-element"
-            poster="/icons/android-icon-192x192.png"
+            poster={`${import.meta.env.BASE_URL || "./"}icons/android-icon-192x192.png`}
           >
-            <source src="/intro.mp4" type="video/mp4" />
-            <source src="/intro.webm" type="video/webm" />
+            <source src={`${import.meta.env.BASE_URL || "./"}intro.mp4`} type="video/mp4" />
+            <source src={`${import.meta.env.BASE_URL || "./"}intro.webm`} type="video/webm" />
             Your browser does not support video playback.
           </video>
 
@@ -359,10 +359,10 @@ export default function AiAvatarVideo({ theme }) {
                   controls
                   playsInline
                   className="ai-theater-video"
-                  src="/intro.mp4"
+                  src={`${import.meta.env.BASE_URL || "./"}intro.mp4`}
                 >
-                  <source src="/intro.mp4" type="video/mp4" />
-                  <source src="/intro.webm" type="video/webm" />
+                  <source src={`${import.meta.env.BASE_URL || "./"}intro.mp4`} type="video/mp4" />
+                  <source src={`${import.meta.env.BASE_URL || "./"}intro.webm`} type="video/webm" />
                 </video>
               </div>
 

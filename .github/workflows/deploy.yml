@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - deepak-pro
   workflow_dispatch:
 
 jobs:
@@ -57,7 +58,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./deploy_folder/
           # The path on your Hostinger server where the live website files live
-          server-dir: /domains/deepakmandal.com/public_html/
+          server-dir: /domains/deepakmandal.com/public_html/pro/
           timeout: 300000 # Increased timeout (5 mins) for Hostinger's data socket limits
           # Exclude git files and production config from being overwritten
           exclude: |
